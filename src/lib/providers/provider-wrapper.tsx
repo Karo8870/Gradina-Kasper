@@ -6,7 +6,7 @@ import { HeroUIProvider } from '@heroui/react';
 
 export default function ProviderWrapper({ children }: { children: ReactNode }) {
   return (
-    <HeroUIProvider className='flex h-screen w-screen flex-col items-center'>
+    <HeroUIProvider className='flex h-full w-screen flex-col items-center'>
       <BasketContextProvider>{children}</BasketContextProvider>
     </HeroUIProvider>
   );
