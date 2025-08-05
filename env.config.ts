@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 import process from 'node:process';
-import { atob } from 'node:buffer';
 
 config();
 
