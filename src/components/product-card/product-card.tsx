@@ -51,17 +51,17 @@ export default function ProductCard({
         <div className='flex grow flex-col justify-between gap-3 px-4 pb-4 max-sm:px-3 max-sm:pb-3'>
           <div className='flex flex-col gap-3'>
             <div className='flex flex-col'>
-              <h1 className='text-lg font-bold leading-tight text-black max-sm:text-base'>
+              <h1 className='text-lg leading-tight font-bold text-black max-sm:text-base'>
                 {title}
               </h1>
-              <label className='text-base font-bold leading-tight text-black/70 max-sm:text-sm'>
+              <label className='text-base leading-tight font-bold text-black/70 max-sm:text-sm'>
                 {price} lei/{unit}
               </label>
             </div>
             <div
               className={cn(
                 'overflow-hidden rounded-2xl bg-zinc-100 max-sm:hidden',
-                (inStock === 0 || disabled) && 'opacity-30'
+                (inStock <= 0 || disabled) && 'opacity-30'
               )}
             >
               <div className='flex h-10 items-center justify-between border-b border-b-black/5 bg-zinc-100 pl-4'>

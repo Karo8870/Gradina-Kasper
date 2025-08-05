@@ -32,7 +32,7 @@ export default function ProductCardButton({
         !disabled &&
         'bg-zinc-100 text-black/80',
       disabled && 'bg-black/10 text-black/50',
-      inStock === 0 && 'bg-red-50 text-red-400'
+      inStock <= 0 && 'bg-red-50 text-red-400'
     ),
     startContent: (
       <i
@@ -47,7 +47,7 @@ export default function ProductCardButton({
             !disabled &&
             'fa-circle-check bg-zinc-100 text-primary-600',
           disabled && 'fa-shopping-basket text-black/50',
-          inStock === 0 && 'fa-exclamation-circle text-red-400'
+          inStock <= 0 && 'fa-exclamation-circle text-red-400'
         )}
       />
     )
@@ -76,7 +76,7 @@ export default function ProductCardButton({
       !disabled &&
       `${quantityInCart}${unit} în coș`) ||
     (disabled && 'Indisponibil') ||
-    (inStock === 0 && 'Stoc epuizat');
+    (inStock <= 0 && 'Stoc epuizat');
 
   return (
     <>
