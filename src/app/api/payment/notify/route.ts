@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
         notificationData = JSON.parse(rawBody);
       } else {
         // Handle form-encoded or XML data
+        // @ts-ignore
         const parsedData = parseNetopiaIPN(rawBody);
         if (!parsedData) {
           throw new Error('Failed to parse IPN data');

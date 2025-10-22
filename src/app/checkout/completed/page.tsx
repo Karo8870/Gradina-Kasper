@@ -1,7 +1,7 @@
 import { ContinueButton } from '@/components/buttons/continue-button';
 import { Suspense } from 'react';
 
-function CompletedContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+function CompletedContent({ searchParams }: { searchParams: any }) {
   const orderId = searchParams.orderId as string;
   const ntpID = searchParams.ntpID as string;
 
@@ -32,7 +32,7 @@ function CompletedContent({ searchParams }: { searchParams: { [key: string]: str
   );
 }
 
-export default function Page({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default function Page({ searchParams }: { searchParams: any }) {
   return (
     <main className='flex w-full max-w-[45rem] flex-col items-stretch gap-16 px-4 sm:px-6'>
       <Suspense fallback={
