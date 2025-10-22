@@ -128,6 +128,8 @@ export async function createOrderWithPayment(orderData: OrderData) {
 
     const paymentInitResult = await resp.json();
 
+    console.log('paymentInitResult', paymentInitResult);
+
     const paymentResponse = (paymentInitResult && paymentInitResult.error?.code === '101' && paymentInitResult.payment?.paymentURL)
       ? { success: true, paymentURL: paymentInitResult.payment.paymentURL }
       : { success: false, error: { message: paymentInitResult?.error?.message || 'Payment init failed' } };
