@@ -39,6 +39,7 @@ export async function createOrderAndInitiatePayment(
 
     // Validate required fields
     if (!products || !userData || !Array.isArray(products) || products.length === 0) {
+      console.log('1')
       return { success: false, error: 'Missing required fields or empty basket' };
     }
 
@@ -46,6 +47,7 @@ export async function createOrderAndInitiatePayment(
     const requiredFields = ['email', 'name'];
     for (const field of requiredFields) {
       if (!userData[field as keyof typeof userData]) {
+        console.log('2')
         return { success: false, error: `Missing required field: ${field}` };
       }
     }
@@ -53,6 +55,7 @@ export async function createOrderAndInitiatePayment(
     // Validate products have positive quantities
     for (const product of products) {
       if (!product.id || product.quantity <= 0) {
+        console.log('3')
         return { success: false, error: 'Invalid product data' };
       }
     }

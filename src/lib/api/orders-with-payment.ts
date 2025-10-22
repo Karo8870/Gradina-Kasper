@@ -62,9 +62,7 @@ export async function createOrderWithPayment(orderData: OrderData) {
     // Step 2: Try to initiate payment with Netopia via REST API
     console.log('Attempting to initiate payment for order:', pendingOrderId);
 
-    const NETOPIA_BASE = env.NETOPIA_SANDBOX
-      ? 'https://secure.sandbox.netopia-payments.com'
-      : 'https://secure.netopia-payments.com';
+    const NETOPIA_BASE = 'https://secure-sandbox.netopia-payments.com'
 
     const payload = {
       config: {
