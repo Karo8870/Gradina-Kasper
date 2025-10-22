@@ -164,66 +164,6 @@ export default function PaymentForm() {
         </div>
       )}
 
-      {/* Payment Methods Selection */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Selectează metoda de plată
-        </h3>
-        
-        <div className="grid gap-3">
-          {paymentMethods.map((method) => (
-            <label
-              key={method.id}
-              className={`
-                flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all
-                ${selectedMethod === method.id
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-200 hover:border-gray-300'
-                }
-                ${!method.available ? 'opacity-50 cursor-not-allowed' : ''}
-              `}
-            >
-              <input
-                type="radio"
-                name="paymentMethod"
-                value={method.id}
-                checked={selectedMethod === method.id}
-                onChange={(e) => setSelectedMethod(e.target.value)}
-                disabled={!method.available}
-                className="sr-only"
-              />
-              
-              <div className="flex items-center space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <i className={`fa ${method.icon} text-xl text-gray-600`} />
-                </div>
-                
-                <div className="flex-grow">
-                  <div className="font-medium text-gray-900">
-                    {method.name}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {method.description}
-                  </div>
-                </div>
-                
-                <div className={`
-                  w-4 h-4 rounded-full border-2 flex-shrink-0
-                  ${selectedMethod === method.id
-                    ? 'border-primary-500 bg-primary-500'
-                    : 'border-gray-300'
-                  }
-                `}>
-                  {selectedMethod === method.id && (
-                    <div className="w-2 h-2 bg-white rounded-full m-auto" />
-                  )}
-                </div>
-              </div>
-            </label>
-          ))}
-        </div>
-      </div>
-
       {/* Payment Button */}
       <Button
         type="submit"
