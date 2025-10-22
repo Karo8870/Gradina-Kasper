@@ -56,5 +56,12 @@ export default {
   SOFTONE_BASE_URL: env.SOFTONE_BASE_URL,
 
   SOFTONE_DEV_KEY: env.SOFTONE_DEV_KEY,
-  MODE: env.MODE! ?? 'DEV'
+  MODE: env.MODE! ?? 'DEV',
+
+  // Netopia Configuration
+  NETOPIA_API_KEY: env.NETOPIA_API_KEY,
+  NETOPIA_SIGNATURE: env.NETOPIA_SIGNATURE,
+  NETOPIA_SANDBOX: env.NETOPIA_SANDBOX === 'true',
+  NETOPIA_CONFIRM_URL: env.NETOPIA_CONFIRM_URL || 'https://gradina-kasper.com/api/payment/notify',
+  NETOPIA_RETURN_URL: env.NETOPIA_RETURN_URL || 'https://gradina-kasper.com/api/payment/callback'
 };

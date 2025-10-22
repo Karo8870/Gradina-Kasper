@@ -101,6 +101,8 @@ export async function createOrder(
     }
   }
 
+  console.log('orderedProducts', orderedProducts);
+
   await db.update(products).set(
     caseArrayStatement(
       orderedProducts.map((el) => ({
@@ -110,7 +112,7 @@ export async function createOrder(
       })),
       ['stock']
     )
-  );
+  ).where(inArray(products.id, orderedProducts.map((el) => el.id)));
 
   const [{ id: orderID }] = await db
     .insert(orders)

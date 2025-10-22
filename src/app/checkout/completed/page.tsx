@@ -1,19 +1,50 @@
 import { ContinueButton } from '@/components/buttons/continue-button';
+import { Suspense } from 'react';
 
-export default function Page() {
+function CompletedContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const orderId = searchParams.orderId as string;
+  const ntpID = searchParams.ntpID as string;
+
   return (
-    <main className='flex w-full max-w-[45rem] flex-col items-stretch gap-16 px-4 sm:px-6'>
+    <>
       <i className='fa fa-circle-check text-[7.5rem] text-primary-500' />
       <h1 className='text-center text-2xl font-bold text-black sm:text-4xl'>
-        Felicitări, comanda ta a fost plasată!
+        Felicitări, comanda ta a fost plasată și plătită!
       </h1>
       <p className='text-center text-base font-medium text-black/80 sm:text-xl'>
-        V-am trimis un e-mail de confirmare si o factura. Găsiți acolo toate
-        informațiile relevante.
+        Plata a fost procesată cu succes prin Netopia Payments. 
+        V-am trimis un e-mail de confirmare și o factură.
       </p>
+      {orderId && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+          <div className="text-sm text-green-800">
+            <div className="font-medium">Numărul comenzii: #{orderId}</div>
+            {ntpID && (
+              <div className="text-xs mt-1">ID Tranzacție: {ntpID}</div>
+            )}
+          </div>
+        </div>
+      )}
       <p className='text-center text-base font-medium text-black/80 sm:text-xl'>
         Vă mulțumim pentru că ați comandat de la Grădina Kasper!
       </p>
+    </>
+  );
+}
+
+export default function Page({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  return (
+    <main className='flex w-full max-w-[45rem] flex-col items-stretch gap-16 px-4 sm:px-6'>
+      <Suspense fallback={
+        <>
+          <i className='fa fa-circle-check text-[7.5rem] text-primary-500' />
+          <h1 className='text-center text-2xl font-bold text-black sm:text-4xl'>
+            Se încarcă...
+          </h1>
+        </>
+      }>
+        <CompletedContent searchParams={searchParams} />
+      </Suspense>
       <ContinueButton href='/' />
     </main>
   );
