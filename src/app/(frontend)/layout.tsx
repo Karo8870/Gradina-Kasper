@@ -1,19 +1,26 @@
-import React from 'react'
-import './styles.css'
+import React from 'react';
+import { Footer } from '@/components/layout/footer';
+import '../../globals.css';
+import { Lexend } from 'next/font/google';
 
 export const metadata = {
   description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
-}
+  title: 'Payload Blank Template'
+};
+
+const lexend = Lexend({
+  subsets: ['latin']
+});
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
-  const { children } = props
+  const { children } = props;
 
   return (
-    <html lang="en">
+    <html lang='en' className={lexend.className}>
       <body>
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
-  )
+  );
 }
