@@ -1,4 +1,5 @@
 import { payload } from '@/lib/payload';
+import Link from 'next/link';
 
 export async function Footer() {
   const footer = await payload.findGlobal({
@@ -24,13 +25,13 @@ export async function Footer() {
             </h3>
             <div className='flex flex-col gap-2'>
               {column.links?.map((link, index) => (
-                <a
+                <Link
                   key={index}
                   href={link.url}
                   className='text-center text-base text-white/90 max-md:text-sm'
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
