@@ -15,5 +15,8 @@ export const AboutUs: GlobalConfig = {
 			type: 'richText',
 			required: true
 		}
-	]
+	],
+	hooks: {
+		afterChange: []
+	}
 };

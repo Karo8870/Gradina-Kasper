@@ -5,13 +5,15 @@ import { Lexend } from 'next/font/google';
 import { Header } from '@/components/layout/header';
 
 export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template'
+  description: 'Grădina Kasper',
+  title: 'Grădina Kasper'
 };
 
 const lexend = Lexend({
   subsets: ['latin']
 });
+
+export const dynamic = 'force-dynamic';
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props;
