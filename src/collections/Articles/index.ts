@@ -69,7 +69,6 @@ export const Articles: CollectionConfig = {
               name: 'relatedArticles',
               type: 'relationship',
               relationTo: 'articles',
-              required: true,
               defaultValue: [],
               hasMany: true,
               filterOptions: ({ id }) => {

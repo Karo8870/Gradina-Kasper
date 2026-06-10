@@ -55,7 +55,7 @@ export default async function Page({ params }: Args) {
       </h1>
 
       <RichText
-        data={page.Content}
+        data={page.content}
         className='prose-p:text-neutral-700 prose-headings:text-primary-900 prose-strong:text-primary-950 !mx-0 !px-0'
       />
     </article>

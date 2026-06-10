@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       throw new Error('Invalid login');
     } catch (e) {
-      throw new Error(e.message);
+      throw new Error((e as any)?.message);
     }
   }, []);
 

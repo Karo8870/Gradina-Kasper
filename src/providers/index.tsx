@@ -41,11 +41,6 @@ export const Providers: React.FC<{
                     name: true,
                     gallery: true,
                     inventory: true
-                  },
-                  variants: {
-                    title: true,
-                    inventory: true,
-                    priceInRON: true
                   }
                 }
               }

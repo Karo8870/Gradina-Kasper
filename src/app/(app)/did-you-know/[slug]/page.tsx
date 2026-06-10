@@ -53,7 +53,7 @@ export default async function ({
 
   if (!article) return notFound();
 
-  const relatedArticles = article.relatedArticles.filter((relatedArticle) => {
+  const relatedArticles = article.relatedArticles?.filter((relatedArticle) => {
     return typeof relatedArticle === 'object' && relatedArticle !== null;
   });
 
@@ -75,19 +75,21 @@ export default async function ({
         className='prose-p:text-neutral-700 prose-headings:text-primary-900 prose-strong:text-primary-950 !mx-0 !px-0'
       />
 
-      {relatedArticles.length > 0 && (
-        <section className='pt-8'>
-          <h2 className='text-primary-900 text-3xl font-semibold'>Vezi și</h2>
+      {relatedArticles !== null &&
+        relatedArticles !== undefined &&
+        relatedArticles.length > 0 && (
+          <section className='pt-8'>
+            <h2 className='text-primary-900 text-3xl font-semibold'>Vezi și</h2>
 
-          <ul className='mt-5 grid gap-4 sm:grid-cols-2'>
-            {relatedArticles.map((relatedArticle) => (
-              <li key={relatedArticle.id}>
-                <ArticleCard {...relatedArticle} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+            <ul className='mt-5 grid gap-4 sm:grid-cols-2'>
+              {relatedArticles.map((relatedArticle) => (
+                <li key={relatedArticle.id}>
+                  <ArticleCard {...relatedArticle} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
     </article>
   );
 }

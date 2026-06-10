@@ -19,11 +19,7 @@ export function EditItemQuantityButton({
     if (!item.id) return true;
 
     const target =
-      item.variant && typeof item.variant === 'object'
-        ? item.variant
-        : item.product && typeof item.product === 'object'
-          ? item.product
-          : null;
+      item.product && typeof item.product === 'object' ? item.product : null;
 
     if (
       target &&

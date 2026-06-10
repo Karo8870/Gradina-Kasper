@@ -590,7 +590,7 @@ export interface Article {
     };
     [k: string]: unknown;
   };
-  relatedArticles: (number | Article)[];
+  relatedArticles?: (number | Article)[] | null;
   meta?: {
     title?: string | null;
     /**
