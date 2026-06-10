@@ -1,193 +1,139 @@
-'use client'
+'use client';
 
-import { FormError } from '@/components/forms/FormError'
-import { FormItem } from '@/components/forms/FormItem'
-import { Message } from '@/components/Message'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { User } from '@/payload-types'
-import { useAuth } from '@/providers/Auth'
-import { useRouter } from 'next/navigation'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { AuthPasswordInput } from '@/components/forms/auth/shared/AuthPasswordInput';
+import { AuthSubmitButton } from '@/components/forms/auth/shared/AuthSubmitButton';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/providers/Auth';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 type FormData = {
-  email: string
-  name: User['name']
-  password: string
-  passwordConfirm: string
-}
+  password: string;
+  passwordConfirm: string;
+};
 
 export const AccountForm: React.FC = () => {
-  const { setUser, user } = useAuth()
-  const [changePassword, setChangePassword] = useState(false)
+  const { setUser, user } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const {
     formState: { errors, isLoading, isSubmitting, isDirty },
     handleSubmit,
     register,
     reset,
-    watch,
-  } = useForm<FormData>()
+    watch
+  } = useForm<FormData>({
+    defaultValues: {
+      password: '',
+      passwordConfirm: ''
+    }
+  });
 
-  const password = useRef({})
-  password.current = watch('password', '')
+  const password = useRef({});
+  password.current = watch('password', '');
 
-  const router = useRouter()
+  const router = useRouter();
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      if (user) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${user.id}`, {
-          // Make sure to include cookies with fetch
-          body: JSON.stringify(data),
+      if (!user) return;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${user.id}`,
+        {
+          body: JSON.stringify({
+            password: data.password
+          }),
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          method: 'PATCH',
-        })
-
-        if (response.ok) {
-          const json = await response.json()
-          setUser(json.doc)
-          toast.success('Successfully updated account.')
-          setChangePassword(false)
-          reset({
-            name: json.doc.name,
-            email: json.doc.email,
-            password: '',
-            passwordConfirm: '',
-          })
-        } else {
-          toast.error('There was a problem updating your account.')
+          method: 'PATCH'
         }
+      );
+
+      if (response.ok) {
+        const json = await response.json();
+        setUser(json.doc);
+        toast.success('Parola a fost schimbată cu succes.');
+        reset({
+          password: '',
+          passwordConfirm: ''
+        });
+        return;
       }
+
+      toast.error('A apărut o problemă la schimbarea parolei.');
     },
-    [user, setUser, reset],
-  )
+    [user, setUser, reset]
+  );
 
   useEffect(() => {
     if (user === null) {
       router.push(
         `/login?error=${encodeURIComponent(
-          'You must be logged in to view this page.',
-        )}&redirect=${encodeURIComponent('/account')}`,
-      )
+          'Trebuie să fii autentificat pentru a vedea această pagină.'
+        )}&redirect=${encodeURIComponent('/account')}`
+      );
     }
-
-    // Once user is loaded, reset form to have default values
-    if (user) {
-      reset({
-        name: user.name,
-        email: user.email,
-        password: '',
-        passwordConfirm: '',
-      })
-    }
-  }, [user, router, reset, changePassword])
+  }, [user, router]);
 
   return (
-    <form className="max-w-xl" onSubmit={handleSubmit(onSubmit)}>
-      {!changePassword ? (
-        <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p className="">
-              {'Change your account details below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                click here
-              </Button>
-              {' to change your password.'}
-            </p>
-          </div>
+    <div className='max-w-xl'>
+      <div className='mb-8 rounded-2xl border border-neutral-200 bg-white p-5'>
+        <Label className='!text-base font-semibold text-neutral-900'>
+          Adresă de email
+        </Label>
+        <p className='mt-2 text-sm font-medium text-neutral-700'>
+          {user?.email}
+        </p>
+      </div>
 
-          <div className="flex flex-col gap-8 mb-8">
-            <FormItem>
-              <Label htmlFor="email" className="mb-2">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                {...register('email', { required: 'Please provide an email.' })}
-                type="email"
-              />
-              {errors.email && <FormError message={errors.email.message} />}
-            </FormItem>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className='mb-8 max-w-none'>
+          <p className='text-sm leading-7 text-neutral-700'>
+            Poți schimba parola contului mai jos.
+          </p>
+        </div>
 
-            <FormItem>
-              <Label htmlFor="name" className="mb-2">
-                Name
-              </Label>
-              <Input
-                id="name"
-                {...register('name', { required: 'Please provide a name.' })}
-                type="text"
-              />
-              {errors.name && <FormError message={errors.name.message} />}
-            </FormItem>
-          </div>
-        </Fragment>
-      ) : (
-        <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p>
-              {'Change your password below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                cancel
-              </Button>
-              .
-            </p>
-          </div>
+        <div className='mb-8 flex flex-col gap-5'>
+          <AuthPasswordInput
+            error={errors.password}
+            label='Parolă nouă'
+            name='password'
+            onToggle={() => setShowPassword((prev) => !prev)}
+            placeholder='Parolă nouă'
+            register={register('password', {
+              required: 'Te rugăm să introduci o parolă nouă.'
+            })}
+            showPassword={showPassword}
+          />
 
-          <div className="flex flex-col gap-8 mb-8">
-            <FormItem>
-              <Label htmlFor="password" className="mb-2">
-                New password
-              </Label>
-              <Input
-                id="password"
-                {...register('password', { required: 'Please provide a new password.' })}
-                type="password"
-              />
-              {errors.password && <FormError message={errors.password.message} />}
-            </FormItem>
+          <AuthPasswordInput
+            error={errors.passwordConfirm}
+            label='Confirmă parola'
+            name='passwordConfirm'
+            onToggle={() => setShowPasswordConfirm((prev) => !prev)}
+            placeholder='Confirmă parola'
+            register={register('passwordConfirm', {
+              required: 'Te rugăm să confirmi noua parolă.',
+              validate: (value) =>
+                value === password.current || 'Parolele nu coincid.'
+            })}
+            showPassword={showPasswordConfirm}
+          />
+        </div>
 
-            <FormItem>
-              <Label htmlFor="passwordConfirm" className="mb-2">
-                Confirm password
-              </Label>
-              <Input
-                id="passwordConfirm"
-                {...register('passwordConfirm', {
-                  required: 'Please confirm your new password.',
-                  validate: (value) => value === password.current || 'The passwords do not match',
-                })}
-                type="password"
-              />
-              {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
-            </FormItem>
-          </div>
-        </Fragment>
-      )}
-      <Button disabled={isLoading || isSubmitting || !isDirty} type="submit" variant="default">
-        {isLoading || isSubmitting
-          ? 'Processing'
-          : changePassword
-            ? 'Change Password'
-            : 'Update Account'}
-      </Button>
-    </form>
-  )
-}
+        <AuthSubmitButton
+          disabled={!isDirty}
+          loading={isLoading || isSubmitting}
+        >
+          Schimbă parola
+        </AuthSubmitButton>
+      </form>
+    </div>
+  );
+};

@@ -1,63 +1,92 @@
-'use client'
+'use client';
 
-import { LoadingSpinner } from '@/components/LoadingSpinner'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
-export const ConfirmOrder: React.FC = () => {
-  const { confirmOrder } = usePayments()
-  const { cart } = useCart()
+type ConfirmStatusResponse = {
+  status: 'succeeded' | 'pending' | 'failed' | 'cancelled' | 'expired' | string;
+  orderID?: string | number;
+  accessToken?: string;
+};
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  // Ensure we only confirm the order once, even if the component re-renders
-  const isConfirming = useRef(false)
+export function ConfirmOrder() {
+  const [message, setMessage] = useState('Verificăm plata...');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!cart || !cart.items || cart.items?.length === 0) {
-      return
+    const orderId = searchParams.get('orderId');
+    const transactionID = searchParams.get('transactionID');
+    const identifier = orderId
+      ? `orderId=${encodeURIComponent(orderId)}`
+      : transactionID
+        ? `transactionID=${encodeURIComponent(transactionID)}`
+        : '';
+
+    if (!identifier) {
+      setMessage('Nu am putut identifica plata.');
+      return;
     }
 
-    const paymentIntentID = searchParams.get('payment_intent')
-    const email = searchParams.get('email')
+    let cancelled = false;
+    let attempts = 0;
 
-    if (paymentIntentID) {
-      if (!isConfirming.current) {
-        isConfirming.current = true
+    const checkOrder = async () => {
+      attempts += 1;
 
-        confirmOrder('stripe', {
-          additionalData: {
-            paymentIntentID,
-          },
-        }).then((result) => {
-          if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
-            const accessToken = 'accessToken' in result ? (result.accessToken as string) : ''
-            const queryParams = new URLSearchParams()
+      const response = await fetch(
+        `/checkout/confirm-order/status?${identifier}`,
+        {
+          credentials: 'include'
+        }
+      );
+      const data = (await response.json()) as ConfirmStatusResponse;
 
-            if (email) {
-              queryParams.set('email', email)
-            }
-            if (accessToken) {
-              queryParams.set('accessToken', accessToken)
-            }
+      if (cancelled || hasRedirected.current) return;
 
-            const queryString = queryParams.toString()
-            router.push(`/orders/${result.orderID}${queryString ? `?${queryString}` : ''}`)
-          }
-        })
+      if (data.status === 'succeeded' && data.orderID) {
+        hasRedirected.current = true;
+
+        const params = new URLSearchParams();
+        if (data.accessToken) params.set('accessToken', data.accessToken);
+
+        router.replace(
+          `/orders/${data.orderID}${params.toString() ? `?${params}` : ''}`
+        );
+        return;
       }
-    } else {
-      // If no payment intent ID is found, redirect to the home
-      router.push('/')
-    }
-  }, [cart, confirmOrder, router, searchParams])
+
+      if (['failed', 'cancelled', 'expired'].includes(data.status)) {
+        setMessage('Plata nu a fost finalizată. Te rugăm să încerci din nou.');
+        return;
+      }
+
+      setMessage('Plata este în procesare...');
+
+      if (attempts < 30) {
+        window.setTimeout(checkOrder, 2000);
+        return;
+      }
+
+      setMessage(
+        'Plata este încă în procesare. Te rugăm să revii peste câteva momente.'
+      );
+    };
+
+    void checkOrder();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router, searchParams]);
 
   return (
-    <div className="text-center w-full flex flex-col items-center justify-start gap-4">
-      <h1 className="text-2xl">Confirming Order</h1>
+    <div className='text-center w-full flex flex-col items-center justify-start gap-4'>
+      <h1 className='text-2xl'>{message}</h1>
 
-      <LoadingSpinner className="w-12 h-6" />
+      <LoadingSpinner className='w-12 h-6' />
     </div>
-  )
+  );
 }

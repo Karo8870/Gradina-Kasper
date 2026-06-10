@@ -1,20 +1,21 @@
-import type { Media as MediaType } from '@/payload-types'
+import type { Media as MediaType } from '@/payload-types';
 
-import { Media } from '@/components/Media'
-import { Label } from '@/components/Grid/Label'
-import clsx from 'clsx'
-import React from 'react'
+import { Media } from '@/components/Media';
+import { Label } from '@/components/Grid/Label';
+import clsx from 'clsx';
+import React from 'react';
+import RenderImage from '@/components/RenderImage';
 
 type Props = {
-  active?: boolean
-  isInteractive?: boolean
+  active?: boolean;
+  isInteractive?: boolean;
   label?: {
-    amount: number
-    position?: 'bottom' | 'center'
-    title: string
-  }
-  media: MediaType
-}
+    amount: number;
+    position?: 'bottom' | 'center';
+    title: string;
+  };
+  media: MediaType;
+};
 
 export const GridTileImage: React.FC<Props> = ({
   active,
@@ -29,22 +30,29 @@ export const GridTileImage: React.FC<Props> = ({
         {
           'border-2 border-blue-600': active,
           'border-neutral-200 dark:border-neutral-800': !active,
-          relative: label,
-        },
+          relative: label
+        }
       )}
     >
       {props.media ? (
-        <Media
+        <RenderImage
           className={clsx('relative h-full w-full object-cover', {
-            'transition duration-300 ease-in-out group-hover:scale-105': isInteractive,
+            'transition duration-300 ease-in-out group-hover:scale-105':
+              isInteractive
           })}
           height={80}
-          imgClassName="h-full w-full object-cover"
-          resource={props.media}
+          // imgClassName='h-full w-full object-cover'
+          src={props.media}
           width={80}
         />
       ) : null}
-      {label ? <Label amount={label.amount} position={label.position} title={label.title} /> : null}
+      {label ? (
+        <Label
+          amount={label.amount}
+          position={label.position}
+          title={label.title}
+        />
+      ) : null}
     </div>
-  )
-}
+  );
+};

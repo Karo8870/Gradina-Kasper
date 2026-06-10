@@ -1,7 +1,7 @@
-import { slugField } from 'payload'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload';
+import { slugField } from 'payload';
 
-import { adminOnly } from '@/access/adminOnly'
+import { adminOnly } from '@/access/adminOnly';
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -9,20 +9,21 @@ export const Categories: CollectionConfig = {
     create: adminOnly,
     delete: adminOnly,
     read: () => true,
-    update: adminOnly,
+    update: adminOnly
   },
   admin: {
     useAsTitle: 'title',
-    group: 'Content',
+    // group: 'Content',
+    hidden: true
   },
   fields: [
     {
       name: 'title',
       type: 'text',
-      required: true,
+      required: true
     },
     slugField({
-      position: undefined,
-    }),
-  ],
-}
+      position: undefined
+    })
+  ]
+};

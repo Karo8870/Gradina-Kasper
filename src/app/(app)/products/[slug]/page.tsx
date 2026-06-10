@@ -1,191 +1,181 @@
-import type { Media, Product } from '@/payload-types'
-
-import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { GridTileImage } from '@/components/Grid/tile'
-import { Gallery } from '@/components/product/Gallery'
-import { ProductDescription } from '@/components/product/ProductDescription'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import React, { Suspense } from 'react'
-import { Button } from '@/components/ui/button'
-import { ChevronLeftIcon } from 'lucide-react'
-import { Metadata } from 'next'
+import { Gallery } from '@/components/product/Gallery';
+import configPromise from '@payload-config';
+import { getPayload } from 'payload';
+import { draftMode } from 'next/headers';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import React, { Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeftIcon } from 'lucide-react';
+import { Metadata } from 'next';
+import { generateMeta } from '@/utilities/generateMeta';
+import {
+  getInventoryBadge,
+  getNextDeliveryDate,
+  getUnavailableNotice,
+  isProductTemporarilyUnavailable
+} from '@/lib/boxHelpers';
+import { Price } from '@/components/Price';
+import { formatDateTime } from '@/utilities/formatDateTime';
+import { RichText } from '@/components/RichText';
+import RenderImage from '@/components/RenderImage';
+import { Vegetable } from '@/payload-types';
+import { ProductBasketControls } from '@/components/product/ProductBasketControls';
+import { NotifyWhenAvailableButton } from '@/components/box/NotifyWhenAvailableButton';
 
 type Args = {
   params: Promise<{
-    slug: string
-  }>
-}
+    slug: string;
+  }>;
+};
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
-  const { slug } = await params
-  const product = await queryProductBySlug({ slug })
+  const { slug } = await params;
 
-  if (!product) return notFound()
+  const article = await queryProductBySlug({
+    slug
+  });
 
-  const gallery = product.gallery?.filter((item) => typeof item.image === 'object') || []
-
-  const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
-  const canIndex = product._status === 'published'
-
-  const seoImage = metaImage || (gallery.length ? (gallery[0]?.image as Media) : undefined)
-
-  return {
-    description: product.meta?.description || '',
-    openGraph: seoImage?.url
-      ? {
-          images: [
-            {
-              alt: seoImage?.alt,
-              height: seoImage.height!,
-              url: seoImage?.url,
-              width: seoImage.width!,
-            },
-          ],
-        }
-      : null,
-    robots: {
-      follow: canIndex,
-      googleBot: {
-        follow: canIndex,
-        index: canIndex,
-      },
-      index: canIndex,
-    },
-    title: product.meta?.title || product.title,
-  }
+  return generateMeta({ doc: article as any });
 }
 
 export default async function ProductPage({ params }: Args) {
-  const { slug } = await params
-  const product = await queryProductBySlug({ slug })
+  const { slug } = await params;
+  const result = await queryProductBySlug({ slug });
 
-  if (!product) return notFound()
+  if (!result.product) return notFound();
 
-  const gallery =
-    product.gallery
-      ?.filter((item) => typeof item.image === 'object')
-      .map((item) => ({
-        ...item,
-        image: item.image as Media,
-      })) || []
-
-  const metaImage = typeof product.meta?.image === 'object' ? product.meta?.image : undefined
-  const hasStock = product.enableVariants
-    ? product?.variants?.docs?.some((variant) => {
-        if (typeof variant !== 'object') return false
-        return variant.inventory && variant?.inventory > 0
-      })
-    : product.inventory! > 0
-
-  let price = product.priceInUSD
-
-  if (product.enableVariants && product?.variants?.docs?.length) {
-    price = product?.variants?.docs?.reduce((acc, variant) => {
-      if (typeof variant === 'object' && variant?.priceInUSD && acc && variant?.priceInUSD > acc) {
-        return variant.priceInUSD
-      }
-      return acc
-    }, price)
-  }
-
-  const productJsonLd = {
-    name: product.title,
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    description: product.description,
-    image: metaImage?.url,
-    offers: {
-      '@type': 'AggregateOffer',
-      availability: hasStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      price: price,
-      priceCurrency: 'usd',
-    },
-  }
-
-  const relatedProducts =
-    product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct === 'object') ?? []
+  const isTemporarilyUnavailable = isProductTemporarilyUnavailable(
+    result.product
+  );
+  const inventoryBadge = getInventoryBadge(result.product.inventory);
+  const nextDeliveryDate = getNextDeliveryDate(result.holidayDates);
+  const unavailableNotice = getUnavailableNotice(result.product);
 
   return (
-    <React.Fragment>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd),
-        }}
-        type="application/ld+json"
-      />
-      <div className="container pt-8 pb-8">
-        <Button asChild variant="ghost" className="mb-4">
-          <Link href="/shop">
-            <ChevronLeftIcon />
-            All products
-          </Link>
-        </Button>
-        <div className="flex flex-col gap-12 rounded-lg border p-8 md:py-12 lg:flex-row lg:gap-8 bg-primary-foreground">
-          <div className="h-full w-full basis-full lg:basis-1/2">
-            <Suspense
-              fallback={
-                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
-              }
-            >
-              {Boolean(gallery?.length) && <Gallery gallery={gallery} />}
-            </Suspense>
-          </div>
+    <div className='container pt-24'>
+      <Button asChild variant='ghost' className='mb-5'>
+        <Link href='/products'>
+          <ChevronLeftIcon />
+          Toate produsele
+        </Link>
+      </Button>
 
-          <div className="basis-full lg:basis-1/2">
-            <ProductDescription product={product} />
-          </div>
-        </div>
-      </div>
-
-      {product.layout?.length ? <RenderBlocks blocks={product.layout} /> : <></>}
-
-      {relatedProducts.length ? (
-        <div className="container">
-          <RelatedProducts products={relatedProducts as Product[]} />
-        </div>
-      ) : (
-        <></>
-      )}
-    </React.Fragment>
-  )
-}
-
-function RelatedProducts({ products }: { products: Product[] }) {
-  if (!products.length) return null
-
-  return (
-    <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
-      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {products.map((product) => (
-          <li
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
-            key={product.id}
+      <div className='overflow-hidden rounded-[2rem] border border-neutral-200 bg-white md:grid md:grid-cols-2'>
+        <section className='min-h-56 md:min-h-[22rem]'>
+          <Suspense
+            fallback={
+              <div className='bg-secondary-100 relative aspect-square h-full max-h-[550px] w-full overflow-hidden' />
+            }
           >
-            <Link className="relative h-full w-full" href={`/products/${product.slug}`}>
-              <GridTileImage
-                label={{
-                  amount: product.priceInUSD!,
-                  title: product.title,
-                }}
-                media={product.meta?.image as Media}
+            {Boolean(result.product.gallery?.length) ? (
+              <Gallery gallery={result.product.gallery!} />
+            ) : (
+              <div className='bg-secondary-100 relative aspect-square h-full max-h-[550px] w-full overflow-hidden' />
+            )}
+          </Suspense>
+        </section>
+
+        <section className='space-y-4 p-5 md:space-y-6 md:p-7'>
+          <div className='flex flex-wrap items-start justify-between gap-3'>
+            <h1 className='text-primary-900 text-2xl font-semibold md:text-3xl'>
+              {result.product.name}
+            </h1>
+
+            {result.product.hasDiscount ? (
+              <div className='flex flex-col items-end'>
+                <span className='text-sm text-neutral-500 line-through'>
+                  <Price amount={+result.product.price} />
+                </span>
+                <span className='text-primary-900 text-xl font-bold'>
+                  <Price amount={+(result.product.discountedPrice ?? 0)} />
+                </span>
+              </div>
+            ) : (
+              <Price
+                amount={+result.product.price}
+                className='text-primary-900 text-xl font-bold'
               />
-            </Link>
-          </li>
-        ))}
-      </ul>
+            )}
+          </div>
+
+          {isTemporarilyUnavailable ? (
+            <span className='inline-flex rounded-full bg-neutral-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-700'>
+              {unavailableNotice}
+            </span>
+          ) : (
+            <span
+              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${inventoryBadge.className}`}
+            >
+              {inventoryBadge.label}
+            </span>
+          )}
+
+          <p className='text-sm text-neutral-600'>
+            Prețul include TVA. Costurile de livrare nu sunt incluse.
+          </p>
+
+          <p className='text-sm leading-relaxed'>
+            <span className='text-primary-900 font-semibold'>
+              Livrare / Ridicare:
+            </span>{' '}
+            <span className='font-medium text-neutral-500'>
+              {formatDateTime({
+                date: nextDeliveryDate
+              })}
+            </span>
+          </p>
+
+          <RichText
+            data={result.product.description}
+            enableGutter={false}
+            enableProse={false}
+            className='w-full leading-relaxed text-neutral-700'
+          />
+
+          <div className='space-y-2'>
+            <p className='text-primary-900 text-sm font-semibold'>
+              Conținut posibil
+            </p>
+            <ul className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
+              {(result.product.possibleVegetables as Vegetable[]).map(
+                (item) => {
+                  return (
+                    <li
+                      key={item.id}
+                      className='bg-secondary-100 flex items-center gap-2 rounded-xl px-2 py-2'
+                    >
+                      <RenderImage
+                        className='h-10 w-10 rounded-lg object-cover'
+                        src={item.image}
+                      />
+                      <span className='text-primary-900 text-sm font-medium'>
+                        {item.name}
+                      </span>
+                    </li>
+                  );
+                }
+              )}
+            </ul>
+          </div>
+
+          <div className='pt-2'>
+            {isTemporarilyUnavailable ? (
+              <NotifyWhenAvailableButton boxID={result.product.id} />
+            ) : (
+              <ProductBasketControls product={result.product} />
+            )}
+          </div>
+        </section>
+      </div>
     </div>
-  )
+  );
 }
 
 const queryProductBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = await draftMode()
+  const { isEnabled: draft } = await draftMode();
 
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
 
   const result = await payload.find({
     collection: 'products',
@@ -198,21 +188,28 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
       and: [
         {
           slug: {
-            equals: slug,
-          },
+            equals: slug
+          }
         },
-        ...(draft ? [] : [{ _status: { equals: 'published' } }]),
-      ],
-    },
-    populate: {
-      variants: {
-        title: true,
-        priceInUSD: true,
-        inventory: true,
-        options: true,
-      },
-    },
-  })
+        ...(draft ? [] : [{ _status: { equals: 'published' } }])
+      ]
+    }
+  });
 
-  return result.docs?.[0] || null
-}
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const holidayDates = await payload.find({
+    collection: 'holiday-dates',
+    where: {
+      date: {
+        greater_than_equal: today.toISOString()
+      }
+    }
+  });
+
+  return {
+    product: result.docs?.[0] || null,
+    holidayDates: holidayDates.docs.map((date) => date.date)
+  };
+};

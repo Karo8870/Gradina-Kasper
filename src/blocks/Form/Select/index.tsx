@@ -1,28 +1,28 @@
-import type { SelectField } from '@payloadcms/plugin-form-builder/types'
-import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form'
+import type { SelectField } from '@payloadcms/plugin-form-builder/types';
+import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
-import { Label } from '@/components/ui/label'
+import { Label } from '@/components/ui/label';
 import {
   Select as SelectComponent,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import React from 'react'
-import { Controller } from 'react-hook-form'
+  SelectValue
+} from '@/components/ui/select';
+import React from 'react';
 
-import { Error } from '../Error'
-import { Width } from '../Width'
+import { Error } from '../Error';
+import { Width } from '../Width';
 
 export const Select: React.FC<
   SelectField & {
-    control: Control<FieldValues, any>
+    control: Control<FieldValues, any>;
     errors: Partial<
       FieldErrorsImpl<{
-        [x: string]: any
+        [x: string]: any;
       }>
-    >
+    >;
   }
 > = ({ name, control, errors, label, options, required, width }) => {
   return (
@@ -30,14 +30,17 @@ export const Select: React.FC<
       <Label htmlFor={name}>{label}</Label>
       <Controller
         control={control}
-        defaultValue=""
+        defaultValue=''
         name={name}
         render={({ field: { onChange, value } }) => {
-          const controlledValue = options.find((t) => t.value === value)
+          const controlledValue = options.find((t) => t.value === value);
 
           return (
-            <SelectComponent onValueChange={(val) => onChange(val)} value={controlledValue?.value}>
-              <SelectTrigger className="w-full" id={name}>
+            <SelectComponent
+              onValueChange={(val) => onChange(val)}
+              value={controlledValue?.value}
+            >
+              <SelectTrigger className='w-full' id={name}>
                 <SelectValue placeholder={label} />
               </SelectTrigger>
               <SelectContent>
@@ -46,15 +49,15 @@ export const Select: React.FC<
                     <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>
-                  )
+                  );
                 })}
               </SelectContent>
             </SelectComponent>
-          )
+          );
         }}
         rules={{ required }}
       />
       {required && errors[name] && <Error />}
     </Width>
-  )
-}
+  );
+};

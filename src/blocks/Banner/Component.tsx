@@ -1,12 +1,12 @@
-import type { BannerBlock as BannerBlockProps } from '@/payload-types'
-import { cn } from '@/utilities/cn'
-import React from 'react'
-import { RichText } from '@/components/RichText'
+import type { BannerBlock as BannerBlockProps } from '@/payload-types';
+import { cn } from '@/utilities/cn';
+import React from 'react';
+import { RichText } from '@/components/RichText';
 
 export const BannerBlock: React.FC<
   BannerBlockProps & {
-    id?: string | number
-    className?: string
+    id?: string | number;
+    className?: string;
   }
 > = ({ className, content, style }) => {
   return (
@@ -16,11 +16,11 @@ export const BannerBlock: React.FC<
           'border-border bg-card': style === 'info',
           'border-error bg-error/30': style === 'error',
           'border-success bg-success/30': style === 'success',
-          'border-warning bg-warning/30': style === 'warning',
+          'border-warning bg-warning/30': style === 'warning'
         })}
       >
         <RichText data={content} enableGutter={false} enableProse={false} />
       </div>
     </div>
-  )
-}
+  );
+};

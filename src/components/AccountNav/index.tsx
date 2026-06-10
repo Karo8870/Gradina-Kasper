@@ -1,70 +1,85 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import clsx from 'clsx'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import clsx from 'clsx';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Props = {
-  className?: string
-}
+  className?: string;
+};
 
 export const AccountNav: React.FC<Props> = ({ className }) => {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
-    <div className={clsx(className)}>
-      <ul className="flex flex-col gap-2">
+    <nav
+      className={clsx(
+        'rounded-[2rem] bg-white p-4 shadow-[0_0_35px_8px_rgba(0,0,0,0.06)] ring-1 ring-black/5',
+        className
+      )}
+    >
+      <ul className='flex flex-col gap-4'>
         <li>
-          <Button asChild variant="link">
-            <Link
-              href="/account"
-              className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-                'text-primary': pathname === '/account',
-              })}
-            >
-              Account settings
-            </Link>
-          </Button>
-        </li>
-
-        <li>
-          <Button asChild variant="link">
-            <Link
-              href="/account/addresses"
-              className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-                'text-primary': pathname === '/account/addresses',
-              })}
-            >
-              Addresses
-            </Link>
-          </Button>
-        </li>
-
-        <li>
-          <Button
-            asChild
-            variant="link"
-            className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-              'text-primary': pathname === '/orders' || pathname.includes('/orders'),
-            })}
+          <Link
+            href='/account'
+            className={clsx(
+              'text-sm font-medium text-neutral-700 underline-offset-4 transition-colors hover:text-primary-900 hover:underline',
+              {
+                underline: pathname === '/account',
+                'text-primary-900': pathname === '/account'
+              }
+            )}
           >
-            <Link href="/orders">Orders</Link>
-          </Button>
+            Setări cont
+          </Link>
+        </li>
+
+        <li>
+          <Link
+            href='/account/addresses'
+            className={clsx(
+              'text-sm font-medium text-neutral-700 underline-offset-4 transition-colors hover:text-primary-900 hover:underline',
+              {
+                underline: pathname === '/account/addresses',
+                'text-primary-900': pathname === '/account/addresses'
+              }
+            )}
+          >
+            Adrese
+          </Link>
+        </li>
+
+        <li>
+          <Link
+            href='/orders'
+            className={clsx(
+              'text-sm font-medium text-neutral-700 underline-offset-4 transition-colors hover:text-primary-900 hover:underline',
+              {
+                underline: pathname === '/orders' || pathname.includes('/orders'),
+                'text-primary-900':
+                  pathname === '/orders' || pathname.includes('/orders')
+              }
+            )}
+          >
+            Comenzi
+          </Link>
+        </li>
+
+        <li>
+          <Link
+            href='/logout'
+            className={clsx(
+              'text-sm font-medium text-neutral-700 underline-offset-4 transition-colors hover:text-primary-900 hover:underline',
+              {
+                underline: pathname === '/logout',
+                'text-primary-900': pathname === '/logout'
+              }
+            )}
+          >
+            Deconectare
+          </Link>
         </li>
       </ul>
-
-      <hr className="w-full border-white/5" />
-
-      <Button
-        asChild
-        variant="link"
-        className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-          'text-primary': pathname === '/logout',
-        })}
-      >
-        <Link href="/logout">Log out</Link>
-      </Button>
-    </div>
-  )
-}
+    </nav>
+  );
+};

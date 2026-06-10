@@ -1,36 +1,46 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import type { Page, Product } from '../payload-types'
+import type { Page, Product } from '@/payload-types';
 
-import { mergeOpenGraph } from './mergeOpenGraph'
+import { mergeOpenGraph } from './mergeOpenGraph';
 
-export const generateMeta = async (args: { doc: Page | Product }): Promise<Metadata> => {
-  const { doc } = args || {}
+export const generateMeta = async (args: {
+  doc: Page | Product;
+}): Promise<Metadata> => {
+  const { doc } = args || {};
 
   const ogImage =
     typeof doc?.meta?.image === 'object' &&
     doc.meta.image !== null &&
     'url' in doc.meta.image &&
-    `${process.env.NEXT_PUBLIC_SERVER_URL}${doc.meta.image.url}`
+    `${process.env.NEXT_PUBLIC_SERVER_URL}${doc.meta.image.url}`;
 
   return {
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
       ...(doc?.meta?.description
         ? {
-            description: doc?.meta?.description,
+            description: doc?.meta?.description
           }
         : {}),
       images: ogImage
         ? [
             {
-              url: ogImage,
-            },
+              url: ogImage
+            }
           ]
         : undefined,
-      title: doc?.meta?.title || doc?.title || 'Payload Ecommerce Template',
-      url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/',
+      title:
+        doc?.meta?.title ||
+        (doc as Page)?.title ||
+        (doc as Product)?.name ||
+        'Payload Ecommerce Template',
+      url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/'
     }),
-    title: doc?.meta?.title || doc?.title || 'Payload Ecommerce Template',
-  }
-}
+    title:
+      doc?.meta?.title ||
+      (doc as Page)?.title ||
+      (doc as Product)?.name ||
+      'Payload Ecommerce Template'
+  };
+};

@@ -1,3 +1,3 @@
-import type { Access } from 'payload'
+import type { Access } from 'payload';
 
-export const publicAccess: Access = () => true
+export const publicAccess: Access = () => true;

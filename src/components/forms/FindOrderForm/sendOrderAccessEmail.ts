@@ -1,43 +1,43 @@
-'use server'
+'use server';
 
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { getServerSideURL } from '@/utilities/getURL'
+import configPromise from '@payload-config';
+import { getPayload } from 'payload';
+import { getServerSideURL } from '@/utilities/getURL';
 
 type SendOrderAccessEmailArgs = {
-  email: string
-  orderID: string
-}
+  email: string;
+  orderID: string;
+};
 
 type SendOrderAccessEmailResult = {
-  success: boolean
-  error?: string
-}
+  success: boolean;
+  error?: string;
+};
 
 export async function sendOrderAccessEmail({
   email,
-  orderID,
+  orderID
 }: SendOrderAccessEmailArgs): Promise<SendOrderAccessEmailResult> {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
 
   try {
     const { docs: orders } = await payload.find({
       collection: 'orders',
       where: {
-        and: [{ id: { equals: orderID } }, { customerEmail: { equals: email } }],
+        and: [{ id: { equals: orderID } }, { customerEmail: { equals: email } }]
       },
       limit: 1,
-      depth: 0,
-    })
+      depth: 0
+    });
 
-    const order = orders[0]
+    const order = orders[0];
 
     if (!order || !order.accessToken) {
-      return { success: true }
+      return { success: true };
     }
 
-    const serverURL = getServerSideURL()
-    const orderURL = `${serverURL}/orders/${order.id}?email=${encodeURIComponent(email)}&accessToken=${order.accessToken}`
+    const serverURL = getServerSideURL();
+    const orderURL = `${serverURL}/orders/${order.id}?email=${encodeURIComponent(email)}&accessToken=${order.accessToken}`;
 
     const emailBody = `
         <h1>View Your Order</h1>
@@ -46,19 +46,19 @@ export async function sendOrderAccessEmail({
         <p>Or copy and paste this URL into your browser:</p>
         <p>${orderURL}</p>
         <p>This link will give you access to view your order details.</p>
-      `
+      `;
 
-    console.log('[sendOrderAccessEmail] Email body:', emailBody)
+    console.log('[sendOrderAccessEmail] Email body:', emailBody);
 
     await payload.sendEmail({
       to: email,
       subject: `Access your order #${order.id}`,
-      html: emailBody,
-    })
+      html: emailBody
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (err) {
-    payload.logger.error({ msg: 'Failed to send order access email', err })
-    return { success: true }
+    payload.logger.error({ msg: 'Failed to send order access email', err });
+    return { success: true };
   }
 }

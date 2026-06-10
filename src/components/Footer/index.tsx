@@ -1,67 +1,70 @@
-import type { Footer } from '@/payload-types'
-
-import { FooterMenu } from '@/components/Footer/menu'
-import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
-import { getCachedGlobal } from '@/utilities/getGlobals'
-import Link from 'next/link'
-import React, { Suspense } from 'react'
-import { LogoIcon } from '@/components/icons/logo'
-
-const { COMPANY_NAME, SITE_NAME } = process.env
+import { getPayload } from 'payload';
+import config from '@payload-config';
+import Link from 'next/link';
+import RenderImage from '@/components/RenderImage';
+import { SiFacebook, SiInstagram } from '@icons-pack/react-simple-icons';
 
 export async function Footer() {
-  const footer: Footer = await getCachedGlobal('footer', 1)()
-  const menu = footer.navItems || []
-  const currentYear = new Date().getFullYear()
-  const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : '')
-  const skeleton = 'w-full h-6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700'
+  const payload = await getPayload({ config });
 
-  const copyrightName = COMPANY_NAME || SITE_NAME || ''
+  const footer = await payload.findGlobal({
+    slug: 'footer'
+  });
 
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="container">
-        <div className="flex w-full flex-col gap-6 border-t border-neutral-200 py-12 text-sm md:flex-row md:gap-12 dark:border-neutral-700">
-          <div>
-            <Link className="flex items-center gap-2 text-black md:pt-1 dark:text-white" href="/">
-              <LogoIcon className="w-6" />
-              <span className="sr-only">{SITE_NAME}</span>
+    <footer className='bg-primary-900 mx-6 mt-12 mb-6 flex justify-between rounded-[1.25rem] p-8 max-md:mx-2 max-md:mb-2 max-md:flex-col max-md:gap-12'>
+      <div className='flex w-1/5 flex-col items-center justify-center gap-4 max-md:w-full'>
+        <RenderImage
+          className='h-20 w-auto object-contain md:h-24'
+          src={footer.footerImage}
+        />
+        <p className='text-center text-sm text-white/80'>{footer.slogan}</p>
+      </div>
+      <div className='flex gap-12 max-md:flex-col'>
+        <div className='flex flex-col items-center gap-5'>
+          <h3 className='text-xl font-bold text-white max-md:text-base'>
+            Social Media
+          </h3>
+          <div className='flex items-center gap-4'>
+            <Link
+              href={footer.social.facebookUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              aria-label='Facebook'
+              className='text-primary-900 rounded-full bg-white p-2 transition cursor-pointer'
+            >
+              <SiFacebook className='h-7 w-7' strokeWidth={1.75} />
+            </Link>
+            <Link
+              href={footer.social.instagramUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              aria-label='Instagram'
+              className='text-primary-900 rounded-full bg-white p-2 transition cursor-pointer'
+            >
+              <SiInstagram className='h-7 w-7' strokeWidth={1.75} />
             </Link>
           </div>
-          <Suspense
-            fallback={
-              <div className="flex h-[188px] w-[200px] flex-col gap-2">
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-              </div>
-            }
-          >
-            <FooterMenu menu={menu} />
-          </Suspense>
-          <div className="md:ml-auto flex flex-col gap-4 items-end">
-            <ThemeSelector />
+        </div>
+        {footer.columns.map((column, index) => (
+          <div key={index} className='flex flex-col items-center gap-5'>
+            <h3 className='text-xl font-bold text-white max-md:text-base'>
+              {column.title}
+            </h3>
+            <div className='flex flex-col gap-2'>
+              {column.links.map((link, linkIndex) => (
+                <Link
+                  key={linkIndex}
+                  href={link.url}
+                  className='text-center text-base text-white/90 max-md:text-sm'
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <div className="container mx-auto flex w-full flex-col items-center gap-1 md:flex-row md:gap-0">
-          <p>
-            &copy; {copyrightDate} {copyrightName}
-            {copyrightName.length && !copyrightName.endsWith('.') ? '.' : ''} All rights reserved.
-          </p>
-          <hr className="mx-4 hidden h-4 w-px border-l border-neutral-400 md:inline-block" />
-          <p>Designed in Michigan</p>
-          <p className="md:ml-auto">
-            <a className="text-black dark:text-white" href="https://payloadcms.com">
-              Crafted by Payload
-            </a>
-          </p>
-        </div>
+        ))}
       </div>
     </footer>
-  )
+  );
 }

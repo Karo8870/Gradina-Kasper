@@ -1,60 +1,66 @@
-import { CallToAction } from '@/blocks/CallToAction/config'
-import { Content } from '@/blocks/Content/config'
-import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { slugField } from 'payload'
-import { generatePreviewPath } from '@/utilities/generatePreviewPath'
-import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
-import {
-  MetaDescriptionField,
-  MetaImageField,
-  MetaTitleField,
-  OverviewField,
-  PreviewField,
-} from '@payloadcms/plugin-seo/fields'
+import { slugField } from 'payload';
+import { generatePreviewPath } from '@/utilities/generatePreviewPath';
+import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types';
 import {
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
   InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import { DefaultDocumentIDType, Where } from 'payload'
+  lexicalEditor
+} from '@payloadcms/richtext-lexical';
+import { seoFields } from '@/fields/seo-fields';
 
-export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
+function validatePrice(value: string | null | undefined | string[]) {
+  if (!value || typeof value === 'object') {
+    return "Value isn't a valid number with 2 decimal places";
+  }
+
+  if (value.match(/^([^0]\d+|0)\.\d{2}$/g)) {
+    return true;
+  }
+
+  if (parseInt(value) < 0) {
+    return 'Price must be positive';
+  }
+
+  return "Value isn't a valid number with 2 decimal places";
+}
+
+export const ProductsCollection: CollectionOverride = ({
+  defaultCollection
+}) => ({
   ...defaultCollection,
   admin: {
     ...defaultCollection?.admin,
-    defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
+    defaultColumns: [
+      'title',
+      'enableVariants',
+      '_status',
+      'variants.variants',
+      ''
+    ],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
           slug: data?.slug,
           collection: 'products',
-          req,
-        }),
+          req
+        })
     },
     preview: (data, { req }) =>
       generatePreviewPath({
         slug: data?.slug as string,
         collection: 'products',
-        req,
+        req
       }),
-    useAsTitle: 'title',
-  },
-  defaultPopulate: {
-    ...defaultCollection?.defaultPopulate,
-    title: true,
-    slug: true,
-    variantOptions: true,
-    variants: true,
-    enableVariants: true,
-    gallery: true,
-    priceInUSD: true,
-    inventory: true,
-    meta: true,
+    useAsTitle: 'name'
   },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    {
+      name: 'name',
+      type: 'text',
+      required: true
+    },
     {
       type: 'tabs',
       tabs: [
@@ -67,15 +73,17 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 features: ({ rootFeatures }) => {
                   return [
                     ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    HeadingFeature({
+                      enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4']
+                    }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
-                    HorizontalRuleFeature(),
-                  ]
-                },
+                    HorizontalRuleFeature()
+                  ];
+                }
               }),
               label: false,
-              required: false,
+              required: true
             },
             {
               name: 'gallery',
@@ -86,127 +94,117 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                   name: 'image',
                   type: 'upload',
                   relationTo: 'media',
-                  required: true,
-                },
-                {
-                  name: 'variantOption',
-                  type: 'relationship',
-                  relationTo: 'variantOptions',
-                  admin: {
-                    condition: (data) => {
-                      return data?.enableVariants === true && data?.variantTypes?.length > 0
-                    },
-                  },
-                  filterOptions: ({ data }) => {
-                    if (data?.enableVariants && data?.variantTypes?.length) {
-                      const variantTypeIDs = data.variantTypes.map((item: any) => {
-                        if (typeof item === 'object' && item?.id) {
-                          return item.id
-                        }
-                        return item
-                      }) as DefaultDocumentIDType[]
-
-                      if (variantTypeIDs.length === 0)
-                        return {
-                          variantType: {
-                            in: [],
-                          },
-                        }
-
-                      const query: Where = {
-                        variantType: {
-                          in: variantTypeIDs,
-                        },
-                      }
-
-                      return query
-                    }
-
-                    return {
-                      variantType: {
-                        in: [],
-                      },
-                    }
-                  },
-                },
-              ],
+                  required: true
+                }
+              ]
             },
-
             {
-              name: 'layout',
-              type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock],
-            },
+              name: 'possibleVegetables',
+              label: 'Possible vegetables',
+              type: 'relationship',
+              relationTo: 'vegetables',
+              hasMany: true,
+              required: true,
+              defaultValue: []
+            }
           ],
-          label: 'Content',
+          label: 'Content'
         },
         {
           fields: [
-            ...defaultCollection.fields,
             {
-              name: 'relatedProducts',
-              type: 'relationship',
-              filterOptions: ({ id }) => {
-                if (id) {
-                  return {
-                    id: {
-                      not_in: [id],
-                    },
-                  }
-                }
-
-                // ID comes back as undefined during seeding so we need to handle that case
-                return {
-                  id: {
-                    exists: true,
-                  },
-                }
-              },
-              hasMany: true,
-              relationTo: 'products',
+              name: 'inventory',
+              label: 'Inventory',
+              type: 'number',
+              required: true,
+              defaultValue: 0
             },
+            {
+              name: 'price',
+              label: 'Price (RON)',
+              type: 'text',
+              required: true,
+              defaultValue: '50.00',
+              admin: {
+                description:
+                  'The price of the item in RON using 2 decimal points'
+              },
+              validate: validatePrice
+            },
+            {
+              name: 'hasDiscount',
+              label: 'Enable Discount',
+              type: 'checkbox',
+              defaultValue: false
+            },
+            {
+              name: 'discountedPrice',
+              label: 'Discounted price (RON)',
+              type: 'text',
+              required: true,
+              defaultValue: '50.00',
+              admin: {
+                description:
+                  'The discounted price of the item in RON using 2 decimal points',
+                condition: (_, siblingData) => siblingData.hasDiscount
+              },
+              validate: validatePrice
+            },
+            {
+              name: 'availableFrom',
+              type: 'date',
+              label: 'Available from',
+              required: true,
+              admin: {
+                date: {
+                  pickerAppearance: 'dayOnly'
+                }
+              }
+            },
+            {
+              name: 'availableUntil',
+              type: 'date',
+              label: 'Available until',
+              required: true,
+              admin: {
+                date: {
+                  pickerAppearance: 'dayOnly'
+                }
+              }
+            },
+            {
+              name: 'hideProduct',
+              type: 'checkbox',
+              label: 'Hide product',
+              required: true,
+              defaultValue: false,
+              admin: {
+                description: 'Hides the product from the client'
+              }
+            },
+            {
+              name: 'disableProduct',
+              type: 'checkbox',
+              label: 'Disable product',
+              required: true,
+              defaultValue: false,
+              admin: {
+                description:
+                  'Disables the product while still showing it for the clients. If checked, availability dates will be completely ignored. Hide product still works as usual'
+              }
+            }
           ],
-          label: 'Product Details',
+          label: 'Product Details'
         },
         {
           name: 'meta',
           label: 'SEO',
-          fields: [
-            OverviewField({
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-              imagePath: 'meta.image',
-            }),
-            MetaTitleField({
-              hasGenerateFn: true,
-            }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
-
-            MetaDescriptionField({}),
-            PreviewField({
-              // if the `generateUrl` function is configured
-              hasGenerateFn: true,
-
-              // field paths to match the target field for data
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-            }),
-          ],
-        },
-      ],
+          fields: seoFields
+        }
+      ]
     },
-    {
-      name: 'categories',
-      type: 'relationship',
-      admin: {
-        position: 'sidebar',
-        sortOptions: 'title',
-      },
-      hasMany: true,
-      relationTo: 'categories',
-    },
-    slugField(),
-  ],
-})
+    slugField({
+      useAsSlug: 'name'
+    })
+  ]
+});

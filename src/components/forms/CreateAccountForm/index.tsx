@@ -1,137 +1,139 @@
-'use client'
+'use client';
 
-import { FormError } from '@/components/forms/FormError'
-import { FormItem } from '@/components/forms/FormItem'
-import { Message } from '@/components/Message'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useAuth } from '@/providers/Auth'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Message } from '@/components/Message';
+import { AuthHeaderIcon } from '@/components/forms/auth/shared/AuthHeaderIcon';
+import { AuthInput } from '@/components/forms/auth/shared/AuthInput';
+import { AuthPasswordInput } from '@/components/forms/auth/shared/AuthPasswordInput';
+import { AuthSubmitButton } from '@/components/forms/auth/shared/AuthSubmitButton';
+import { AuthSwitchCard } from '@/components/forms/auth/shared/AuthSwitchCard';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { LogIn, UserPlus } from 'lucide-react';
 
 type FormData = {
-  email: string
-  password: string
-  passwordConfirm: string
-}
+  email: string;
+  password: string;
+  passwordConfirm: string;
+};
 
 export const CreateAccountForm: React.FC = () => {
-  const searchParams = useSearchParams()
-  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
-  const { login } = useAuth()
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<null | string>(null)
+  const searchParams = useSearchParams();
+  const allParams = searchParams.toString()
+    ? `?${searchParams.toString()}`
+    : '';
+  const router = useRouter();
+  const [loading] = useState(false);
+  const [error, setError] = useState<null | string>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const {
     formState: { errors },
     handleSubmit,
     register,
-    watch,
-  } = useForm<FormData>()
+    watch
+  } = useForm<FormData>();
 
-  const password = useRef({})
-  password.current = watch('password', '')
+  const password = useRef({});
+  password.current = watch('password', '');
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`,
+        {
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          method: 'POST'
+        }
+      );
 
       if (!response.ok) {
-        const message = response.statusText || 'There was an error creating the account.'
-        setError(message)
-        return
+        const message =
+          response.statusText || 'A apărut o eroare la crearea contului.';
+        setError(message);
+        return;
       }
 
-      const redirect = searchParams.get('redirect')
-
-      const timer = setTimeout(() => {
-        setLoading(true)
-      }, 1000)
-
-      try {
-        await login(data)
-        clearTimeout(timer)
-        if (redirect) router.push(redirect)
-        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
-      } catch (_) {
-        clearTimeout(timer)
-        setError('There was an error with the credentials provided. Please try again.')
-      }
+      router.push(
+        `/create-account?success=${encodeURIComponent(
+          'Contul a fost creat cu succes. Verifică-ți emailul pentru a-ți activa contul.'
+        )}`
+      );
     },
-    [login, router, searchParams],
-  )
+    [router]
+  );
 
   return (
-    <form className="max-w-lg py-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="prose dark:prose-invert mb-6">
-        <p>
-          {`This is where new customers can signup and create a new account. To manage all users, `}
-          <Link href="/admin/collections/users">login to the admin dashboard</Link>.
-        </p>
+    <form
+      className='mx-auto w-full max-w-3xl'
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <AuthHeaderIcon>
+        <UserPlus strokeWidth={3} className='size-11' />
+      </AuthHeaderIcon>
+
+      <h1 className='mb-7 text-center text-3xl font-semibold tracking-tight text-neutral-800 md:text-4xl'>
+        Înregistrare
+      </h1>
+
+      <Message className='mb-6' error={error} />
+
+      <div className='flex flex-col gap-5'>
+        <AuthInput
+          error={errors.email}
+          label='Email'
+          name='email'
+          placeholder='Email'
+          register={register('email', {
+            required: 'Adresa de email este obligatorie.'
+          })}
+          type='email'
+        />
+
+        <AuthPasswordInput
+          error={errors.password}
+          label='Parolă'
+          name='password'
+          onToggle={() => setShowPassword((prev) => !prev)}
+          placeholder='Parolă'
+          register={register('password', {
+            required: 'Parola este obligatorie.'
+          })}
+          showPassword={showPassword}
+        />
+
+        <AuthPasswordInput
+          error={errors.passwordConfirm}
+          label='Confirmare parolă'
+          name='passwordConfirm'
+          onToggle={() => setShowPasswordConfirm((prev) => !prev)}
+          placeholder='Confirmă parola'
+          register={register('passwordConfirm', {
+            required: 'Te rugăm să confirmi parola.',
+            validate: (value) =>
+              value === password.current || 'Parolele nu coincid.'
+          })}
+          showPassword={showPasswordConfirm}
+        />
       </div>
 
-      <Message error={error} />
+      <AuthSubmitButton loading={loading}>Înregistrează-te</AuthSubmitButton>
 
-      <div className="flex flex-col gap-8 mb-8">
-        <FormItem>
-          <Label htmlFor="email" className="mb-2">
-            Email Address
-          </Label>
-          <Input
-            id="email"
-            {...register('email', { required: 'Email is required.' })}
-            type="email"
-          />
-          {errors.email && <FormError message={errors.email.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="password" className="mb-2">
-            New password
-          </Label>
-          <Input
-            id="password"
-            {...register('password', { required: 'Password is required.' })}
-            type="password"
-          />
-          {errors.password && <FormError message={errors.password.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="passwordConfirm" className="mb-2">
-            Confirm Password
-          </Label>
-          <Input
-            id="passwordConfirm"
-            {...register('passwordConfirm', {
-              required: 'Please confirm your password.',
-              validate: (value) => value === password.current || 'The passwords do not match',
-            })}
-            type="password"
-          />
-          {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
-        </FormItem>
-      </div>
-      <Button disabled={loading} type="submit" variant="default">
-        {loading ? 'Processing' : 'Create Account'}
-      </Button>
-
-      <div className="prose dark:prose-invert mt-8">
-        <p>
-          {'Already have an account? '}
-          <Link href={`/login${allParams}`}>Login</Link>
-        </p>
-      </div>
+      <AuthSwitchCard
+        href={`/login${allParams}`}
+        icon={<LogIn className='size-5' />}
+        text={
+          <>
+            Ai deja un cont?
+            <br />
+            Autentifică-te aici.
+          </>
+        }
+      />
     </form>
-  )
-}
+  );
+};

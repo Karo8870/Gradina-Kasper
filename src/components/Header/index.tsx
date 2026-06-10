@@ -1,10 +1,13 @@
-import { getCachedGlobal } from '@/utilities/getGlobals'
-
-import './index.css'
-import { HeaderClient } from './index.client'
+import { getPayload } from 'payload';
+import config from '@payload-config';
+import HeaderClient from './index.client';
 
 export async function Header() {
-  const header = await getCachedGlobal('header', 1)()
+  const payload = await getPayload({ config });
 
-  return <HeaderClient header={header} />
+  const header = await payload.findGlobal({
+    slug: 'header'
+  });
+
+  return <HeaderClient header={header} />;
 }

@@ -76,12 +76,13 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    articles: Article;
+    vegetables: Vegetable;
+    'holiday-dates': HolidayDate;
+    'box-notifications': BoxNotification;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
-    variants: Variant;
-    variantTypes: VariantType;
-    variantOptions: VariantOption;
     products: Product;
     carts: Cart;
     orders: Order;
@@ -97,24 +98,19 @@ export interface Config {
       cart: 'carts';
       addresses: 'addresses';
     };
-    variantTypes: {
-      options: 'variantOptions';
-    };
-    products: {
-      variants: 'variants';
-    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    vegetables: VegetablesSelect<false> | VegetablesSelect<true>;
+    'holiday-dates': HolidayDatesSelect<false> | HolidayDatesSelect<true>;
+    'box-notifications': BoxNotificationsSelect<false> | BoxNotificationsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
-    variants: VariantsSelect<false> | VariantsSelect<true>;
-    variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
-    variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     carts: CartsSelect<false> | CartsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
@@ -125,16 +121,36 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
+    'faq-page': FaqPage;
+    'home-page': HomePage;
+    'about-page': AboutPage;
+    'products-page': ProductsPage;
+    'did-you-know-page': DidYouKnowPage;
+    'pickup-point-page': PickupPointPage;
+    'contact-page': ContactPage;
+    'support-page': SupportPage;
+    'checkout-settings': CheckoutSetting;
+    'mail-settings': MailSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
+    'products-page': ProductsPageSelect<false> | ProductsPageSelect<true>;
+    'did-you-know-page': DidYouKnowPageSelect<false> | DidYouKnowPageSelect<true>;
+    'pickup-point-page': PickupPointPageSelect<false> | PickupPointPageSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    'support-page': SupportPageSelect<false> | SupportPageSelect<true>;
+    'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
+    'mail-settings': MailSettingsSelect<false> | MailSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -156,9 +172,6 @@ export interface Config {
       orders: Order;
       products: Product;
       transactions: Transaction;
-      variantOptions: VariantOption;
-      variants: Variant;
-      variantTypes: VariantType;
     };
   };
 }
@@ -185,21 +198,20 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  name?: string | null;
+  id: number;
   roles?: ('admin' | 'customer')[] | null;
   orders?: {
-    docs?: (string | Order)[];
+    docs?: (number | Order)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   cart?: {
-    docs?: (string | Cart)[];
+    docs?: (number | Cart)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   addresses?: {
-    docs?: (string | Address)[];
+    docs?: (number | Address)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -210,6 +222,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -227,11 +241,10 @@ export interface User {
  * via the `definition` "orders".
  */
 export interface Order {
-  id: string;
+  id: number;
   items?:
     | {
-        product?: (string | null) | Product;
-        variant?: (string | null) | Variant;
+        product?: (number | null) | Product;
         quantity: number;
         id?: string | null;
       }[]
@@ -249,13 +262,14 @@ export interface Order {
     country?: string | null;
     phone?: string | null;
   };
-  customer?: (string | null) | User;
+  customer?: (number | null) | User;
   customerEmail?: string | null;
-  transactions?: (string | Transaction)[] | null;
+  transactions?: (number | Transaction)[] | null;
   status?: OrderStatus;
   amount?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'RON' | null;
   accessToken?: string | null;
+  shouldBeDeliveredOn?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -264,9 +278,9 @@ export interface Order {
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
-  title: string;
-  description?: {
+  id: number;
+  name: string;
+  description: {
     root: {
       type: string;
       children: {
@@ -280,35 +294,42 @@ export interface Product {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
+  };
   gallery?:
     | {
-        image: string | Media;
-        variantOption?: (string | null) | VariantOption;
+        image: number | Media;
         id?: string | null;
       }[]
     | null;
-  layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
-  inventory?: number | null;
-  enableVariants?: boolean | null;
-  variantTypes?: (string | VariantType)[] | null;
-  variants?: {
-    docs?: (string | Variant)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
-  relatedProducts?: (string | Product)[] | null;
+  possibleVegetables: (number | Vegetable)[];
+  inventory: number;
+  /**
+   * The price of the item in RON using 2 decimal points
+   */
+  price: string;
+  hasDiscount?: boolean | null;
+  /**
+   * The discounted price of the item in RON using 2 decimal points
+   */
+  discountedPrice?: string | null;
+  availableFrom: string;
+  availableUntil: string;
+  /**
+   * Hides the product from the client
+   */
+  hideProduct: boolean;
+  /**
+   * Disables the product while still showing it for the clients. If checked, availability dates will be completely ignored. Hide product still works as usual
+   */
+  disableProduct: boolean;
   meta?: {
     title?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     description?: string | null;
   };
-  categories?: (string | Category)[] | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -324,23 +345,8 @@ export interface Product {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -355,306 +361,163 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantOptions".
+ * via the `definition` "vegetables".
  */
-export interface VariantOption {
-  id: string;
-  _variantOptions_options_order?: string | null;
-  variantType: string | VariantType;
-  label: string;
-  /**
-   * should be defaulted or dynamic based on label
-   */
-  value: string;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantTypes".
- */
-export interface VariantType {
-  id: string;
-  label: string;
+export interface Vegetable {
+  id: number;
   name: string;
-  options?: {
-    docs?: (string | VariantOption)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  image: number | Media;
   updatedAt: string;
   createdAt: string;
-  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
+ * via the `definition` "transactions".
  */
-export interface CallToActionBlock {
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  links?:
+export interface Transaction {
+  id: number;
+  items?:
     | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
+        product?: (number | null) | Product;
+        quantity: number;
         id?: string | null;
       }[]
     | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
+  paymentMethod?: 'netopia' | null;
+  netopia?: {
+    ntpID?: string | null;
+    tempOrderID?: string | null;
+    fulfillmentMethod?: ('delivery' | 'pickup') | null;
+    shippingAddress?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    shouldBeDeliveredOn?: string | null;
+  };
+  billingAddress?: {
+    title?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    company?: string | null;
+    addressLine1?: string | null;
+    addressLine2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+  };
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
+  customer?: (number | null) | User;
+  customerEmail?: string | null;
+  order?: (number | null) | Order;
+  cart?: (number | null) | Cart;
+  amount?: number | null;
+  currency?: 'RON' | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts".
+ */
+export interface Cart {
+  id: number;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  secret?: string | null;
+  customer?: (number | null) | User;
+  purchasedAt?: string | null;
+  status?: ('active' | 'purchased' | 'abandoned') | null;
+  subtotal?: number | null;
+  currency?: 'RON' | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses".
+ */
+export interface Address {
+  id: number;
+  customer?: (number | null) | User;
+  title?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  company?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country:
+    | 'US'
+    | 'GB'
+    | 'CA'
+    | 'AU'
+    | 'AT'
+    | 'BE'
+    | 'BR'
+    | 'BG'
+    | 'CY'
+    | 'CZ'
+    | 'DK'
+    | 'EE'
+    | 'FI'
+    | 'FR'
+    | 'DE'
+    | 'GR'
+    | 'HK'
+    | 'HU'
+    | 'IN'
+    | 'IE'
+    | 'IT'
+    | 'JP'
+    | 'LV'
+    | 'LT'
+    | 'LU'
+    | 'MY'
+    | 'MT'
+    | 'MX'
+    | 'NL'
+    | 'NZ'
+    | 'NO'
+    | 'PL'
+    | 'PT'
+    | 'RO'
+    | 'SG'
+    | 'SK'
+    | 'SI'
+    | 'ES'
+    | 'SE'
+    | 'CH';
+  phone?: string | null;
+  mapboxVerified?: boolean | null;
+  mapboxPlaceID?: string | null;
+  mapboxFullAddress?: string | null;
+  mapboxLatitude?: number | null;
+  mapboxLongitude?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   publishedOn?: string | null;
-  hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?: {
-              relationTo: 'pages';
-              value: string | Page;
-            } | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
-  };
-  layout: (
-    | CallToActionBlock
-    | ContentBlock
-    | MediaBlock
-    | ArchiveBlock
-    | CarouselBlock
-    | ThreeItemGridBlock
-    | BannerBlock
-    | FormBlock
-  )[];
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  columns?:
-    | {
-        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        enableLink?: boolean | null;
-        link?: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
- */
-export interface MediaBlock {
-  media: string | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock".
- */
-export interface ArchiveBlock {
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'products' | null;
-  categories?: (string | Category)[] | null;
-  limit?: number | null;
-  selectedDocs?:
-    | {
-        relationTo: 'products';
-        value: string | Product;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CarouselBlock".
- */
-export interface CarouselBlock {
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'products' | null;
-  categories?: (string | Category)[] | null;
-  limit?: number | null;
-  selectedDocs?:
-    | {
-        relationTo: 'products';
-        value: string | Product;
-      }[]
-    | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocs?:
-    | {
-        relationTo: 'products';
-        value: string | Product;
-      }[]
-    | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocsTotal?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'carousel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ThreeItemGridBlock".
- */
-export interface ThreeItemGridBlock {
-  products?: (string | Product)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'threeItemGrid';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock".
- */
-export interface BannerBlock {
-  style: 'info' | 'warning' | 'error' | 'success';
   content: {
     root: {
       type: string;
@@ -670,18 +533,49 @@ export interface BannerBlock {
     };
     [k: string]: unknown;
   };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'banner';
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
+ * via the `definition` "categories".
  */
-export interface FormBlock {
-  form: string | Form;
-  enableIntro?: boolean | null;
-  introContent?: {
+export interface Category {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  publishedOn?: string | null;
+  description: string;
+  thumbnail: number | Media;
+  content: {
     root: {
       type: string;
       children: {
@@ -695,17 +589,53 @@ export interface FormBlock {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
+  };
+  relatedArticles: (number | Article)[];
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "holiday-dates".
+ */
+export interface HolidayDate {
+  id: number;
+  date: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "box-notifications".
+ */
+export interface BoxNotification {
+  id: number;
+  user: number | User;
+  box: number | Product;
+  sentAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
 export interface Form {
-  id: string;
+  id: number;
   title: string;
   fields?:
     | (
@@ -876,157 +806,11 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variants".
- */
-export interface Variant {
-  id: string;
-  /**
-   * Used for administrative purposes, not shown to customers. This is populated by default.
-   */
-  title?: string | null;
-  product: string | Product;
-  options: (string | VariantOption)[];
-  inventory?: number | null;
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transactions".
- */
-export interface Transaction {
-  id: string;
-  items?:
-    | {
-        product?: (string | null) | Product;
-        variant?: (string | null) | Variant;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  paymentMethod?: 'stripe' | null;
-  stripe?: {
-    customerID?: string | null;
-    paymentIntentID?: string | null;
-  };
-  billingAddress?: {
-    title?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    company?: string | null;
-    addressLine1?: string | null;
-    addressLine2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    postalCode?: string | null;
-    country?: string | null;
-    phone?: string | null;
-  };
-  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
-  customer?: (string | null) | User;
-  customerEmail?: string | null;
-  order?: (string | null) | Order;
-  cart?: (string | null) | Cart;
-  amount?: number | null;
-  currency?: 'USD' | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "carts".
- */
-export interface Cart {
-  id: string;
-  items?:
-    | {
-        product?: (string | null) | Product;
-        variant?: (string | null) | Variant;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  secret?: string | null;
-  customer?: (string | null) | User;
-  purchasedAt?: string | null;
-  status?: ('active' | 'purchased' | 'abandoned') | null;
-  subtotal?: number | null;
-  currency?: 'USD' | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "addresses".
- */
-export interface Address {
-  id: string;
-  customer?: (string | null) | User;
-  title?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  company?: string | null;
-  addressLine1?: string | null;
-  addressLine2?: string | null;
-  city?: string | null;
-  state?: string | null;
-  postalCode?: string | null;
-  country:
-    | 'US'
-    | 'GB'
-    | 'CA'
-    | 'AU'
-    | 'AT'
-    | 'BE'
-    | 'BR'
-    | 'BG'
-    | 'CY'
-    | 'CZ'
-    | 'DK'
-    | 'EE'
-    | 'FI'
-    | 'FR'
-    | 'DE'
-    | 'GR'
-    | 'HK'
-    | 'HU'
-    | 'IN'
-    | 'IE'
-    | 'IT'
-    | 'JP'
-    | 'LV'
-    | 'LT'
-    | 'LU'
-    | 'MY'
-    | 'MT'
-    | 'MX'
-    | 'NL'
-    | 'NZ'
-    | 'NO'
-    | 'PL'
-    | 'PT'
-    | 'RO'
-    | 'SG'
-    | 'SK'
-    | 'SI'
-    | 'ES'
-    | 'SE'
-    | 'CH';
-  phone?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
-  id: string;
-  form: string | Form;
+  id: number;
+  form: number | Form;
   submissionData?:
     | {
         field: string;
@@ -1042,7 +826,7 @@ export interface FormSubmission {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -1059,68 +843,72 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'vegetables';
+        value: number | Vegetable;
+      } | null)
+    | ({
+        relationTo: 'holiday-dates';
+        value: number | HolidayDate;
+      } | null)
+    | ({
+        relationTo: 'box-notifications';
+        value: number | BoxNotification;
       } | null)
     | ({
         relationTo: 'forms';
-        value: string | Form;
+        value: number | Form;
       } | null)
     | ({
         relationTo: 'form-submissions';
-        value: string | FormSubmission;
+        value: number | FormSubmission;
       } | null)
     | ({
         relationTo: 'addresses';
-        value: string | Address;
-      } | null)
-    | ({
-        relationTo: 'variants';
-        value: string | Variant;
-      } | null)
-    | ({
-        relationTo: 'variantTypes';
-        value: string | VariantType;
-      } | null)
-    | ({
-        relationTo: 'variantOptions';
-        value: string | VariantOption;
+        value: number | Address;
       } | null)
     | ({
         relationTo: 'products';
-        value: string | Product;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'carts';
-        value: string | Cart;
+        value: number | Cart;
       } | null)
     | ({
         relationTo: 'orders';
-        value: string | Order;
+        value: number | Order;
       } | null)
     | ({
         relationTo: 'transactions';
-        value: string | Transaction;
+        value: number | Transaction;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1130,10 +918,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -1153,7 +941,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1164,7 +952,6 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  name?: T;
   roles?: T;
   orders?: T;
   cart?: T;
@@ -1176,6 +963,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1193,40 +982,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   publishedOn?: T;
-  hero?:
-    | T
-    | {
-        type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
-      };
-  layout?:
-    | T
-    | {
-        cta?: T | CallToActionBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
-        mediaBlock?: T | MediaBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
-        carousel?: T | CarouselBlockSelect<T>;
-        threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
-        banner?: T | BannerBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
-      };
+  content?: T;
   meta?:
     | T
     | {
@@ -1239,124 +995,6 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock_select".
- */
-export interface CallToActionBlockSelect<T extends boolean = true> {
-  richText?: T;
-  links?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  columns?:
-    | T
-    | {
-        size?: T;
-        richText?: T;
-        enableLink?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock_select".
- */
-export interface MediaBlockSelect<T extends boolean = true> {
-  media?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock_select".
- */
-export interface ArchiveBlockSelect<T extends boolean = true> {
-  introContent?: T;
-  populateBy?: T;
-  relationTo?: T;
-  categories?: T;
-  limit?: T;
-  selectedDocs?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CarouselBlock_select".
- */
-export interface CarouselBlockSelect<T extends boolean = true> {
-  populateBy?: T;
-  relationTo?: T;
-  categories?: T;
-  limit?: T;
-  selectedDocs?: T;
-  populatedDocs?: T;
-  populatedDocsTotal?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ThreeItemGridBlock_select".
- */
-export interface ThreeItemGridBlockSelect<T extends boolean = true> {
-  products?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock_select".
- */
-export interface BannerBlockSelect<T extends boolean = true> {
-  style?: T;
-  content?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock_select".
- */
-export interface FormBlockSelect<T extends boolean = true> {
-  form?: T;
-  enableIntro?: T;
-  introContent?: T;
-  id?: T;
-  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1375,7 +1013,6 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  caption?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1387,6 +1024,60 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  publishedOn?: T;
+  description?: T;
+  thumbnail?: T;
+  content?: T;
+  relatedArticles?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vegetables_select".
+ */
+export interface VegetablesSelect<T extends boolean = true> {
+  name?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "holiday-dates_select".
+ */
+export interface HolidayDatesSelect<T extends boolean = true> {
+  date?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "box-notifications_select".
+ */
+export interface BoxNotificationsSelect<T extends boolean = true> {
+  user?: T;
+  box?: T;
+  sentAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1554,78 +1245,36 @@ export interface AddressesSelect<T extends boolean = true> {
   postalCode?: T;
   country?: T;
   phone?: T;
+  mapboxVerified?: T;
+  mapboxPlaceID?: T;
+  mapboxFullAddress?: T;
+  mapboxLatitude?: T;
+  mapboxLongitude?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variants_select".
- */
-export interface VariantsSelect<T extends boolean = true> {
-  title?: T;
-  product?: T;
-  options?: T;
-  inventory?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantTypes_select".
- */
-export interface VariantTypesSelect<T extends boolean = true> {
-  label?: T;
-  name?: T;
-  options?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variantOptions_select".
- */
-export interface VariantOptionsSelect<T extends boolean = true> {
-  _variantOptions_options_order?: T;
-  variantType?: T;
-  label?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  title?: T;
+  name?: T;
   description?: T;
   gallery?:
     | T
     | {
         image?: T;
-        variantOption?: T;
         id?: T;
       };
-  layout?:
-    | T
-    | {
-        cta?: T | CallToActionBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
-        mediaBlock?: T | MediaBlockSelect<T>;
-      };
+  possibleVegetables?: T;
   inventory?: T;
-  enableVariants?: T;
-  variantTypes?: T;
-  variants?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
-  relatedProducts?: T;
+  price?: T;
+  hasDiscount?: T;
+  discountedPrice?: T;
+  availableFrom?: T;
+  availableUntil?: T;
+  hideProduct?: T;
+  disableProduct?: T;
   meta?:
     | T
     | {
@@ -1633,7 +1282,6 @@ export interface ProductsSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  categories?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -1650,7 +1298,6 @@ export interface CartsSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
-        variant?: T;
         quantity?: T;
         id?: T;
       };
@@ -1672,7 +1319,6 @@ export interface OrdersSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
-        variant?: T;
         quantity?: T;
         id?: T;
       };
@@ -1698,6 +1344,7 @@ export interface OrdersSelect<T extends boolean = true> {
   amount?: T;
   currency?: T;
   accessToken?: T;
+  shouldBeDeliveredOn?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1710,16 +1357,18 @@ export interface TransactionsSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
-        variant?: T;
         quantity?: T;
         id?: T;
       };
   paymentMethod?: T;
-  stripe?:
+  netopia?:
     | T
     | {
-        customerID?: T;
-        paymentIntentID?: T;
+        ntpID?: T;
+        tempOrderID?: T;
+        fulfillmentMethod?: T;
+        shippingAddress?: T;
+        shouldBeDeliveredOn?: T;
       };
   billingAddress?:
     | T
@@ -1791,22 +1440,13 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
+  id: number;
+  headerImage?: (number | null) | Media;
+  links: {
+    label: string;
+    url: string;
+    id?: string | null;
+  }[];
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1815,22 +1455,538 @@ export interface Header {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: string;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
+  id: number;
+  slogan: string;
+  footerImage?: (number | null) | Media;
+  social: {
+    facebookUrl: string;
+    instagramUrl: string;
+  };
+  columns: {
+    title: string;
+    links: {
+      label: string;
+      url: string;
+      id?: string | null;
+    }[];
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page".
+ */
+export interface FaqPage {
+  id: number;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  items: {
+    question: string;
+    answer: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    id?: string | null;
+  }[];
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  heroBackgroundImage: number | Media;
+  /**
+   * The title to be used on the hero image
+   */
+  heroTitle: string;
+  /**
+   * The subtitle to be used on the hero image
+   */
+  subtitle: string;
+  /**
+   * The text to appear on the call to action button
+   */
+  callToActionText: string;
+  /**
+   * The title to be used for the highlighted box section within home
+   */
+  highlightBoxTitle: string;
+  /**
+   * The content to be used for the highlighted box section within home
+   */
+  highlightBoxContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * The box to be displayed on home
+   */
+  featuredProduct?: (number | null) | Product;
+  /**
+   * The title to be used for the highlighted articles section within home
+   */
+  highlightArticlesTitle: string;
+  /**
+   * The content to be used for the highlighted articles section within home
+   */
+  highlightArticlesContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * The articles to be displayed on home
+   */
+  highlightedArticles?: (number | Article)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page".
+ */
+export interface AboutPage {
+  id: number;
+  teamImage: number | Media;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  members: {
+    photo: number | Media;
+    name: string;
+    bio: string;
+    id?: string | null;
+  }[];
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products-page".
+ */
+export interface ProductsPage {
+  id: number;
+  /**
+   * The title to be used for the boxes section
+   */
+  boxesSectionTitle: string;
+  /**
+   * The content to be used for the boxes section
+   */
+  boxesSectionContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * The title to be used for the how it works section
+   */
+  howItWorksTitle: string;
+  /**
+   * The content to be used for the how it works section
+   */
+  howItWorksContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  step1: {
+    title: string;
+    description: string;
+  };
+  step2: {
+    title: string;
+    description: string;
+  };
+  step3: {
+    title: string;
+    description: string;
+  };
+  /**
+   * The title to be used for the What's In Your Box section
+   */
+  whatsInYourBoxTitle: string;
+  /**
+   * The content to be used for the What's In Your Box section
+   */
+  whatsInYourBoxContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "did-you-know-page".
+ */
+export interface DidYouKnowPage {
+  id: number;
+  title: string;
+  /**
+   * The content to be used for the did you know page
+   */
+  didYouKnowContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pickup-point-page".
+ */
+export interface PickupPointPage {
+  id: number;
+  heroImage: number | Media;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  locationTitle: string;
+  locationLine1: string;
+  locationLine2: string;
+  openingHoursTitle: string;
+  openingHours: {
+    day: string;
+    hours: string;
+    id?: string | null;
+  }[];
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  title: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  phoneLabel?: string | null;
+  phone: string;
+  emailLabel?: string | null;
+  email: string;
+  whatsappLabel?: string | null;
+  whatsappNumber: string;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "support-page".
+ */
+export interface SupportPage {
+  id: number;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  phoneLabel: string;
+  phone: string;
+  emailLabel: string;
+  email: string;
+  whatsappLabel: string;
+  whatsappNumber: string;
+  whatsappPrefillMessage: string;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings".
+ */
+export interface CheckoutSetting {
+  id: number;
+  /**
+   * The price for delivery in RON using 2 decimal points
+   */
+  deliveryPrice: string;
+  addressDescription: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Configure transactional order emails. Templates support HTML bodies and {{param}} placeholders. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mail-settings".
+ */
+export interface MailSetting {
+  id: number;
+  orderPlaced: {
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    body: string;
+  };
+  orderCancelled: {
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    body: string;
+  };
+  orderDelivered: {
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    body: string;
+  };
+  orderPickedUp: {
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    body: string;
+  };
+  boxAvailable: {
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body. Inject order values using double curly braces. Available params: {{orderID}}, {{orderDate}}, {{deliveryDate}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{fulfillmentMethod}}, {{fulfillmentLabel}}, {{billingAddress}}, {{shippingAddress}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{boxName}}, {{boxURL}}, {{availableFrom}}
+     */
+    body: string;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1839,18 +1995,12 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
+  headerImage?: T;
+  links?:
     | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
+        label?: T;
+        url?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1862,19 +2012,291 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+  slogan?: T;
+  footerImage?: T;
+  social?:
     | T
     | {
-        link?:
+        facebookUrl?: T;
+        instagramUrl?: T;
+      };
+  columns?:
+    | T
+    | {
+        title?: T;
+        links?:
           | T
           | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
               label?: T;
+              url?: T;
+              id?: T;
             };
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page_select".
+ */
+export interface FaqPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  heroBackgroundImage?: T;
+  heroTitle?: T;
+  subtitle?: T;
+  callToActionText?: T;
+  highlightBoxTitle?: T;
+  highlightBoxContent?: T;
+  featuredProduct?: T;
+  highlightArticlesTitle?: T;
+  highlightArticlesContent?: T;
+  highlightedArticles?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page_select".
+ */
+export interface AboutPageSelect<T extends boolean = true> {
+  teamImage?: T;
+  title?: T;
+  description?: T;
+  members?:
+    | T
+    | {
+        photo?: T;
+        name?: T;
+        bio?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products-page_select".
+ */
+export interface ProductsPageSelect<T extends boolean = true> {
+  boxesSectionTitle?: T;
+  boxesSectionContent?: T;
+  howItWorksTitle?: T;
+  howItWorksContent?: T;
+  step1?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  step2?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  step3?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  whatsInYourBoxTitle?: T;
+  whatsInYourBoxContent?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "did-you-know-page_select".
+ */
+export interface DidYouKnowPageSelect<T extends boolean = true> {
+  title?: T;
+  didYouKnowContent?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pickup-point-page_select".
+ */
+export interface PickupPointPageSelect<T extends boolean = true> {
+  heroImage?: T;
+  title?: T;
+  description?: T;
+  locationTitle?: T;
+  locationLine1?: T;
+  locationLine2?: T;
+  openingHoursTitle?: T;
+  openingHours?:
+    | T
+    | {
+        day?: T;
+        hours?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  phoneLabel?: T;
+  phone?: T;
+  emailLabel?: T;
+  email?: T;
+  whatsappLabel?: T;
+  whatsappNumber?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "support-page_select".
+ */
+export interface SupportPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  phoneLabel?: T;
+  phone?: T;
+  emailLabel?: T;
+  email?: T;
+  whatsappLabel?: T;
+  whatsappNumber?: T;
+  whatsappPrefillMessage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings_select".
+ */
+export interface CheckoutSettingsSelect<T extends boolean = true> {
+  deliveryPrice?: T;
+  addressDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mail-settings_select".
+ */
+export interface MailSettingsSelect<T extends boolean = true> {
+  orderPlaced?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderCancelled?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderDelivered?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderPickedUp?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  boxAvailable?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
       };
   updatedAt?: T;
   createdAt?: T;

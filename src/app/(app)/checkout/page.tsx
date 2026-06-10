@@ -1,49 +1,48 @@
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import React, { Fragment } from 'react'
+import { mergeOpenGraph } from '@/utilities/mergeOpenGraph';
+import React from 'react';
+import configPromise from '@payload-config';
+import { getPayload } from 'payload';
 
-import { CheckoutPage } from '@/components/checkout/CheckoutPage'
+import { CheckoutPage } from '@/components/checkout/CheckoutPage';
 
-export default function Checkout() {
+export default async function Checkout() {
+  const payload = await getPayload({ config: configPromise });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const holidayDates = await payload.find({
+    collection: 'holiday-dates',
+    where: {
+      date: {
+        greater_than_equal: today.toISOString()
+      }
+    }
+  });
+
+  const checkoutSettings = await payload.findGlobal({
+    slug: 'checkout-settings'
+  });
+
   return (
-    <div className="container min-h-[90vh] flex">
-      {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
-        <div>
-          <Fragment>
-            {'To enable checkout, you must '}
-            <a
-              href="https://dashboard.stripe.com/test/apikeys"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              obtain your Stripe API Keys
-            </a>
-            {' then set them as environment variables. See the '}
-            <a
-              href="https://github.com/payloadcms/payload/blob/3.x/templates/ecommerce/README.md#stripe"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              README
-            </a>
-            {' for more details.'}
-          </Fragment>
-        </div>
-      )}
+    <div className='container min-h-[90vh] flex pt-24'>
+      <h1 className='sr-only'>Checkout</h1>
 
-      <h1 className="sr-only">Checkout</h1>
-
-      <CheckoutPage />
+      <CheckoutPage
+        checkoutSettings={checkoutSettings}
+        holidayDates={holidayDates.docs.map((el) => el.date)}
+      />
     </div>
-  )
+  );
 }
 
 export const metadata: Metadata = {
   description: 'Checkout.',
   openGraph: mergeOpenGraph({
     title: 'Checkout',
-    url: '/checkout',
+    url: '/checkout'
   }),
-  title: 'Checkout',
-}
+  title: 'Checkout'
+};

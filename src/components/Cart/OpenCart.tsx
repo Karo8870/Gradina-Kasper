@@ -1,31 +1,31 @@
-import { Button } from '@/components/ui/button'
-import clsx from 'clsx'
-import { ShoppingCart } from 'lucide-react'
-import React from 'react'
+import { ShoppingCart } from 'lucide-react';
+import React from 'react';
+import { cn } from '@/utilities/cn';
 
 export function OpenCartButton({
   className,
   quantity,
   ...rest
 }: {
-  className?: string
-  quantity?: number
+  className?: string;
+  quantity?: number;
 }) {
   return (
-    <Button
-      variant="nav"
-      size="clear"
-      className="navLink relative items-end hover:cursor-pointer"
+    <button
+      aria-label='Open cart'
+      className={cn(
+        'relative inline-flex items-center justify-center text-primary-800 transition-colors cursor-pointer',
+        className
+      )}
       {...rest}
     >
-      <span>Cart</span>
+      <ShoppingCart className='size-5 md:size-6' />
 
       {quantity ? (
-        <>
-          <span>•</span>
-          <span>{quantity}</span>
-        </>
+        <span className='bg-primary-900 aspect-square text-white absolute -top-1 -right-1 flex w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none'>
+          {quantity}
+        </span>
       ) : null}
-    </Button>
-  )
+    </button>
+  );
 }

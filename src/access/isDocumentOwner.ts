@@ -1,6 +1,6 @@
-import type { Access } from 'payload'
+import type { Access } from 'payload';
 
-import { checkRole } from '@/access/utilities'
+import { checkRole } from '@/access/utilities';
 
 /**
  * Atomic access checker that verifies if the user owns the document being accessed.
@@ -14,18 +14,18 @@ import { checkRole } from '@/access/utilities'
 export const isDocumentOwner: Access = ({ req }) => {
   // Admin has full access
   if (req.user && checkRole(['admin'], req.user)) {
-    return true
+    return true;
   }
 
   // Authenticated user - return Where query to filter by customer
   if (req.user?.id) {
     return {
       customer: {
-        equals: req.user.id,
-      },
-    }
+        equals: req.user.id
+      }
+    };
   }
 
   // Guest - no access
-  return false
-}
+  return false;
+};

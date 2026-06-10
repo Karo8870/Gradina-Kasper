@@ -1,4 +1,4 @@
-import type { Block } from 'payload'
+import type { Block } from 'payload';
 
 export const ThreeItemGrid: Block = {
   slug: 'threeItemGrid',
@@ -7,18 +7,18 @@ export const ThreeItemGrid: Block = {
       name: 'products',
       type: 'relationship',
       admin: {
-        isSortable: true,
+        isSortable: true
       },
       hasMany: true,
       label: 'Products to show',
       maxRows: 3,
       minRows: 3,
-      relationTo: 'products',
-    },
+      relationTo: 'products'
+    }
   ],
   interfaceName: 'ThreeItemGridBlock',
   labels: {
     plural: 'Three Item Grids',
-    singular: 'Three Item Grid',
-  },
-}
+    singular: 'Three Item Grid'
+  }
+};

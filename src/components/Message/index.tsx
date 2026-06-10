@@ -1,5 +1,5 @@
-import clsx from 'clsx'
-import React from 'react'
+import clsx from 'clsx';
+import React from 'react';
 
 /* [
           classes.message,
@@ -13,13 +13,13 @@ import React from 'react'
           .join(' '), */
 
 export const Message: React.FC<{
-  className?: string
-  error?: React.ReactNode
-  message?: React.ReactNode
-  success?: React.ReactNode
-  warning?: React.ReactNode
+  className?: string;
+  error?: React.ReactNode;
+  message?: React.ReactNode;
+  success?: React.ReactNode;
+  warning?: React.ReactNode;
 }> = ({ className, error, message, success, warning }) => {
-  const messageToRender = message || error || success || warning
+  const messageToRender = message || error || success || warning;
 
   if (messageToRender) {
     return (
@@ -29,14 +29,14 @@ export const Message: React.FC<{
           {
             'bg-success ': Boolean(success),
             ' bg-warning': Boolean(warning),
-            'bg-error': Boolean(error),
+            'bg-error': Boolean(error)
           },
-          className,
+          className
         )}
       >
         {messageToRender}
       </div>
-    )
+    );
   }
-  return null
-}
+  return null;
+};

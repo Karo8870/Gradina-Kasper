@@ -1,251 +1,419 @@
-'use client'
+'use client';
 
-import { Media } from '@/components/Media'
-import { Message } from '@/components/Message'
-import { Price } from '@/components/Price'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useAuth } from '@/providers/Auth'
-import { useTheme } from '@/providers/Theme'
-import { Elements } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import React, { Suspense, useCallback, useEffect, useState } from 'react'
+import { Message } from '@/components/Message';
+import { Price } from '@/components/Price';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/providers/Auth';
+import Link from 'next/link';
+import { redirect, useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { cssVariables } from '@/cssVariables'
-import { CheckoutForm } from '@/components/forms/CheckoutForm'
-import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
-import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
-import { Address } from '@/payload-types'
-import { Checkbox } from '@/components/ui/checkbox'
-import { AddressItem } from '@/components/addresses/AddressItem'
-import { FormItem } from '@/components/forms/FormItem'
-import { toast } from 'sonner'
-import { LoadingSpinner } from '@/components/LoadingSpinner'
+import {
+  useAddresses,
+  useCart,
+  usePayments
+} from '@payloadcms/plugin-ecommerce/client/react';
+import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses';
+import { CreateAddressModal } from '@/components/addresses/CreateAddressModal';
+import { Address, CheckoutSetting } from '@/payload-types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AddressItem } from '@/components/addresses/AddressItem';
+import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { getNextDeliveryDate } from '@/lib/boxHelpers';
+import { formatDateTime } from '@/utilities/formatDateTime';
+import RenderImage from '@/components/RenderImage';
+import Section from '@/components/Section';
+import { cn } from '@/utilities/cn';
+import { isVerifiedBrasovAddress } from '@/lib/addressValidation';
 
-const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
-const stripe = loadStripe(apiKey)
+type Props = {
+  holidayDates: string[];
+  checkoutSettings: CheckoutSetting;
+};
 
-export const CheckoutPage: React.FC = () => {
-  const { user } = useAuth()
-  const router = useRouter()
-  const { cart } = useCart()
-  const [error, setError] = useState<null | string>(null)
-  const { theme } = useTheme()
+type NetopiaAction =
+  | {
+      type: 'redirect';
+      url: string;
+    }
+  | {
+      type: 'submit_form';
+      url: string;
+      fields: Record<string, string>;
+    }
+  | {
+      type: 'pending';
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+const submitPostForm = (url: string, fields: Record<string, string>) => {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  form.style.display = 'none';
+
+  for (const [name, value] of Object.entries(fields)) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+};
+
+const roundToCents = (amount: number) => Math.round(amount * 100) / 100;
+
+export const CheckoutPage: React.FC<Props> = ({
+  holidayDates,
+  checkoutSettings
+}) => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { cart } = useCart();
+  const [error, setError] = useState<null | string>(null);
   /**
    * State to manage the email input for guest checkout.
    */
-  const [email, setEmail] = useState('')
-  const [emailEditable, setEmailEditable] = useState(true)
-  const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
-  const { initiatePayment } = usePayments()
-  const { addresses } = useAddresses()
-  const [shippingAddress, setShippingAddress] = useState<Partial<Address>>()
-  const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
-  const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
-  const [isProcessingPayment, setProcessingPayment] = useState(false)
+  const [email, setEmail] = useState('');
+  const [emailEditable, setEmailEditable] = useState(true);
+  const { initiatePayment } = usePayments();
+  const { addresses } = useAddresses();
+  const [shippingAddress, setShippingAddress] = useState<Partial<Address>>();
+  const [billingAddress, setBillingAddress] = useState<Partial<Address>>();
+  const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] =
+    useState(true);
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<
+    'delivery' | 'pickup'
+  >('delivery');
+  const [isProcessingPayment, setProcessingPayment] = useState(false);
 
-  const cartIsEmpty = !cart || !cart.items || !cart.items.length
+  const cartIsEmpty = !cart || !cart.items || !cart.items.length;
+  const deliveryFeeLabel = 'Taxă de livrare';
+  const deliveryFeeAmount = Number(checkoutSettings.deliveryPrice);
+  const deliveryFeeValue =
+    fulfillmentMethod === 'delivery' ? deliveryFeeAmount : 0;
+  const payableTotal = Number(cart?.subtotal || 0) + deliveryFeeValue;
+  const tvaRate = 0.21;
+  const subtotalWithoutTVA = roundToCents(payableTotal / (1 + tvaRate));
+  const tvaAmount = roundToCents(
+    Math.max(0, payableTotal - subtotalWithoutTVA)
+  );
+  const nextDeliveryDate = getNextDeliveryDate(holidayDates);
+  const selectedDeliveryAddress = billingAddressSameAsShipping
+    ? billingAddress
+    : shippingAddress;
+  const deliveryAddressIsValid =
+    fulfillmentMethod !== 'delivery' ||
+    isVerifiedBrasovAddress(selectedDeliveryAddress);
+
+  if (!user) {
+    redirect(
+      `/login?warning=${encodeURIComponent('Trebuie să fiți autentificat pentru a putea plasa o comandă')}`
+    );
+  }
 
   const canGoToPayment = Boolean(
-    (email || user) && billingAddress && (billingAddressSameAsShipping || shippingAddress),
-  )
+    (email || user) &&
+    billingAddress &&
+    (fulfillmentMethod === 'pickup' ||
+      ((billingAddressSameAsShipping || shippingAddress) &&
+        deliveryAddressIsValid))
+  );
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
   useEffect(() => {
     if (!shippingAddress) {
       if (addresses && addresses.length > 0) {
-        const defaultAddress = addresses[0]
+        const defaultAddress = addresses[0];
         if (defaultAddress) {
-          setBillingAddress(defaultAddress)
+          setBillingAddress(defaultAddress);
         }
       }
     }
-  }, [addresses])
+  }, [addresses]);
 
   useEffect(() => {
     return () => {
-      setShippingAddress(undefined)
-      setBillingAddress(undefined)
-      setBillingAddressSameAsShipping(true)
-      setEmail('')
-      setEmailEditable(true)
-    }
-  }, [])
+      setShippingAddress(undefined);
+      setBillingAddress(undefined);
+      setBillingAddressSameAsShipping(true);
+      setEmail('');
+      setEmailEditable(true);
+    };
+  }, []);
 
-  const initiatePaymentIntent = useCallback(
-    async (paymentID: string) => {
-      try {
-        const paymentData = (await initiatePayment(paymentID, {
-          additionalData: {
-            ...(email ? { customerEmail: email } : {}),
-            billingAddress,
-            shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
-          },
-        })) as Record<string, unknown>
+  const initiatePaymentIntent = useCallback(async () => {
+    setError(null);
+    setProcessingPayment(true);
 
-        if (paymentData) {
-          setPaymentData(paymentData)
+    try {
+      const paymentData = (await initiatePayment('netopia', {
+        additionalData: {
+          ...(email ? { customerEmail: email } : {}),
+          billingAddress,
+          shippingAddress:
+            fulfillmentMethod === 'delivery'
+              ? billingAddressSameAsShipping
+                ? billingAddress
+                : shippingAddress
+              : undefined
         }
-      } catch (error) {
-        const errorData = error instanceof Error ? JSON.parse(error.message) : {}
-        let errorMessage = 'An error occurred while initiating payment.'
+      })) as Record<string, unknown>;
 
-        if (errorData?.cause?.code === 'OutOfStock') {
-          errorMessage = 'One or more items in your cart are out of stock.'
-        }
+      const action = paymentData.action as NetopiaAction | undefined;
 
-        setError(errorMessage)
-        toast.error(errorMessage)
+      if (action?.type === 'redirect') {
+        window.location.assign(action.url);
+        return;
       }
-    },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress],
-  )
 
-  if (!stripe) return null
+      if (action?.type === 'submit_form') {
+        submitPostForm(action.url, action.fields);
+        return;
+      }
+
+      if (action?.type === 'error') {
+        setError(action.message);
+        toast.error(action.message);
+        setProcessingPayment(false);
+        return;
+      }
+
+      const transactionID = paymentData.transactionID;
+      if (transactionID) {
+        router.push(`/checkout/confirm-order?transactionID=${transactionID}`);
+        return;
+      }
+
+      router.push('/checkout/confirm-order');
+    } catch (error) {
+      console.log(error, 666);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'A apărut o eroare la inițierea plății.';
+
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setProcessingPayment(false);
+    }
+  }, [
+    billingAddress,
+    billingAddressSameAsShipping,
+    email,
+    fulfillmentMethod,
+    initiatePayment,
+    router,
+    shippingAddress
+  ]);
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
-      <div className="py-12 w-full items-center justify-center">
-        <div className="prose dark:prose-invert text-center max-w-none self-center mb-8">
-          <p>Processing your payment...</p>
+      <div className='prose dark:prose-invert flex w-full items-center justify-center py-12'>
+        <div className='mb-8 max-w-none self-center text-center'>
+          <p>Procesăm plata...</p>
         </div>
         <LoadingSpinner />
       </div>
-    )
+    );
   }
 
   if (cartIsEmpty) {
     return (
-      <div className="prose dark:prose-invert py-12 w-full items-center">
-        <p>Your cart is empty.</p>
-        <Link href="/search">Continue shopping?</Link>
+      <div className='prose dark:prose-invert flex w-full flex-col items-center py-12'>
+        <p>Coșul tău este gol.</p>
+        <Link href='/search'>Continuă cumpărăturile</Link>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="flex flex-col items-stretch justify-stretch my-8 md:flex-row grow gap-10 md:gap-6 lg:gap-8">
-      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 justify-stretch">
-        <h2 className="font-medium text-3xl">Contact</h2>
-        {!user && (
-          <div className=" bg-accent dark:bg-black rounded-lg p-4 w-full flex items-center">
-            <div className="prose dark:prose-invert">
-              <Button asChild className="no-underline text-inherit" variant="outline">
-                <Link href="/login">Log in</Link>
-              </Button>
-              <p className="mt-0">
-                <span className="mx-2">or</span>
-                <Link href="/create-account">create an account</Link>
-              </p>
-            </div>
-          </div>
-        )}
-        {user ? (
-          <div className="bg-accent dark:bg-card rounded-lg p-4 ">
-            <div>
-              <p>{user.email}</p>{' '}
-              <p>
-                Not you?{' '}
-                <Link className="underline" href="/logout">
-                  Log out
-                </Link>
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
-            <div>
-              <p className="mb-4">Enter your email to checkout as a guest.</p>
+    <div className='my-8 flex grow flex-col items-stretch justify-stretch gap-10 md:flex-row md:gap-6 lg:gap-8'>
+      <div className='flex basis-full flex-col justify-stretch lg:basis-2/3'>
+        <div className='bg-secondary-50 rounded-lg p-4'>
+          <p>{user.email}</p>{' '}
+          <p>
+            Nu ești tu?{' '}
+            <Link className='underline' href='/logout'>
+              Deconectează-te
+            </Link>
+          </p>
+        </div>
 
-              <FormItem className="mb-6">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  disabled={!emailEditable}
-                  id="email"
-                  name="email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  type="email"
+        <Section
+          className='!px-0 pb-0 pt-8'
+          title='Adresă'
+          description={checkoutSettings.addressDescription}
+        >
+          <></>
+        </Section>
+
+        <div className='bg-white'>
+          <h3 className='text-primary-900 mb-3 text-base font-semibold'>
+            Modalitate de primire
+          </h3>
+          <div className='flex flex-wrap gap-3'>
+            <Button
+              type='button'
+              className={
+                fulfillmentMethod === 'delivery'
+                  ? 'bg-primary-900 hover:bg-primary-800 shadow-none h-11 self-start rounded-full px-6 text-white'
+                  : 'bg-white border-black border-[1px] text-black shadow-none hover:bg-neutral-100 h-11 rounded-full px-6'
+              }
+              disabled={isProcessingPayment}
+              onClick={(e) => {
+                e.preventDefault();
+                setFulfillmentMethod('delivery');
+              }}
+            >
+              Livrare
+            </Button>
+            <Button
+              type='button'
+              className={cn(
+                'h-10 rounded-full px-5',
+                fulfillmentMethod === 'pickup'
+                  ? 'bg-primary-900 hover:bg-primary-800 shadow-none h-11 self-start rounded-full px-6 text-white'
+                  : 'bg-white border-black border-[1px] hover:bg-neutral-100 text-black shadow-none h-11 rounded-full px-6'
+              )}
+              disabled={isProcessingPayment}
+              onClick={(e) => {
+                e.preventDefault();
+                setFulfillmentMethod('pickup');
+              }}
+            >
+              Ridicare personală
+            </Button>
+          </div>
+
+          {fulfillmentMethod === 'delivery' && deliveryFeeAmount > 0 && (
+            <div className='mt-4 rounded-xl bg-secondary-50 p-3 text-sm text-primary-900'>
+              <p className='font-medium'>
+                {deliveryFeeLabel}:{' '}
+                <Price
+                  amount={deliveryFeeAmount}
+                  currencyCode='RON'
+                  as='span'
                 />
-              </FormItem>
-
-              <Button
-                disabled={!email || !emailEditable}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setEmailEditable(false)
-                }}
-                variant="default"
-              >
-                Continue as guest
-              </Button>
+              </p>
+              <p className='mt-1'>
+                Costul livrării este adăugat la totalul comenzii.
+              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        <h2 className="font-medium text-3xl">Address</h2>
+          <p className='mt-4 leading-relaxed mb-4'>
+            <span className='text-primary-900 font-semibold'>
+              {fulfillmentMethod === 'pickup'
+                ? 'Comanda va putea fi ridicată în data de:'
+                : 'Comanda va fi livrată în data de:'}
+            </span>{' '}
+            <span className='font-medium text-neutral-500'>
+              {formatDateTime({ date: nextDeliveryDate })}
+            </span>
+          </p>
+
+          {fulfillmentMethod === 'pickup' && (
+            <p className='my-4'>
+              Puteți găsi mai multe informații despre ridicarea personală{' '}
+              <Link className='underline' href='/pickup-point'>
+                aici
+              </Link>
+              .
+            </p>
+          )}
+        </div>
 
         {billingAddress ? (
-          <div>
+          <div className='rounded-2xl border mb-4 border-neutral-200 bg-white p-5'>
             <AddressItem
               actions={
                 <Button
                   variant={'outline'}
-                  disabled={Boolean(paymentData)}
+                  className='bg-primary-900 hover:bg-primary-800 shadow-none h-11 self-start rounded-full px-6 text-white'
+                  disabled={isProcessingPayment}
                   onClick={(e) => {
-                    e.preventDefault()
-                    setBillingAddress(undefined)
+                    e.preventDefault();
+                    setBillingAddress(undefined);
                   }}
                 >
-                  Remove
+                  Elimină
                 </Button>
               }
               address={billingAddress}
             />
           </div>
         ) : user ? (
-          <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+          <CheckoutAddresses
+            heading='Adresa de facturare'
+            description='Selectează sau adaugă adresa de facturare.'
+            setAddress={setBillingAddress}
+          />
         ) : (
           <CreateAddressModal
             disabled={!email || Boolean(emailEditable)}
             callback={(address) => {
-              setBillingAddress(address)
+              setBillingAddress(address);
             }}
             skipSubmission={true}
           />
         )}
 
-        <div className="flex gap-4 items-center">
-          <Checkbox
-            id="shippingTheSameAsBilling"
-            checked={billingAddressSameAsShipping}
-            disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
-            onCheckedChange={(state) => {
-              setBillingAddressSameAsShipping(state as boolean)
-            }}
-          />
-          <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
-        </div>
+        {fulfillmentMethod === 'delivery' && (
+          <div className='bg-secondary-50 flex items-center gap-3 mb-4 rounded-2xl border border-neutral-200 p-4'>
+            <Checkbox
+              id='shippingTheSameAsBilling'
+              checked={billingAddressSameAsShipping}
+              disabled={Boolean(
+                isProcessingPayment ||
+                (!user && (!email || Boolean(emailEditable)))
+              )}
+              onCheckedChange={(state) => {
+                setBillingAddressSameAsShipping(state as boolean);
+              }}
+            />
+            <Label
+              className='text-sm text-neutral-700'
+              htmlFor='shippingTheSameAsBilling'
+            >
+              Adresa de livrare este aceeași cu adresa de facturare
+            </Label>
+          </div>
+        )}
 
-        {!billingAddressSameAsShipping && (
+        {fulfillmentMethod === 'delivery' &&
+          selectedDeliveryAddress &&
+          !deliveryAddressIsValid && (
+            <div className='mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900'>
+              Pentru livrare, adresa trebuie selectată din Mapbox și să fie în
+              Brașov. Poți edita adresa sau alege o altă adresă de livrare.
+            </div>
+          )}
+
+        {fulfillmentMethod === 'delivery' && !billingAddressSameAsShipping && (
           <>
             {shippingAddress ? (
-              <div>
+              <div className='rounded-2xl border  mb-4 border-neutral-200 bg-white p-5'>
                 <AddressItem
                   actions={
                     <Button
                       variant={'outline'}
-                      disabled={Boolean(paymentData)}
+                      className='bg-primary-900 hover:bg-primary-800 shadow-none h-11 self-start rounded-full px-6 text-white'
+                      disabled={isProcessingPayment}
                       onClick={(e) => {
-                        e.preventDefault()
-                        setShippingAddress(undefined)
+                        e.preventDefault();
+                        setShippingAddress(undefined);
                       }}
                     >
-                      Remove
+                      Elimină
                     </Button>
                   }
                   address={shippingAddress}
@@ -253,188 +421,144 @@ export const CheckoutPage: React.FC = () => {
               </div>
             ) : user ? (
               <CheckoutAddresses
-                heading="Shipping address"
-                description="Please select a shipping address."
+                heading='Adresa de livrare'
+                description='Selectează sau adaugă adresa de livrare. Pentru livrare acceptăm doar adrese din Brașov verificate prin Mapbox.'
+                requireVerifiedBrasov
                 setAddress={setShippingAddress}
               />
             ) : (
-              <CreateAddressModal
-                callback={(address) => {
-                  setShippingAddress(address)
-                }}
-                disabled={!email || Boolean(emailEditable)}
-                skipSubmission={true}
-              />
+              <div className='rounded-2xl border border-neutral-200 bg-white p-5'>
+                <CreateAddressModal
+                  callback={(address) => {
+                    setShippingAddress(address);
+                  }}
+                  disabled={!email || Boolean(emailEditable)}
+                  skipSubmission={true}
+                />
+              </div>
             )}
           </>
         )}
 
-        {!paymentData && (
-          <Button
-            className="self-start"
-            disabled={!canGoToPayment}
-            onClick={(e) => {
-              e.preventDefault()
-              void initiatePaymentIntent('stripe')
-            }}
-          >
-            Go to payment
-          </Button>
-        )}
+        <Button
+          className='bg-primary-900 hover:bg-primary-800 h-11 self-start rounded-full px-6 text-white'
+          disabled={!canGoToPayment || isProcessingPayment}
+          onClick={(e) => {
+            e.preventDefault();
+            void initiatePaymentIntent();
+          }}
+        >
+          {isProcessingPayment ? 'Se procesează...' : 'Plătește cu cardul'}
+        </Button>
 
-        {!paymentData?.['clientSecret'] && error && (
-          <div className="my-8">
+        {error && (
+          <div className='my-8 rounded-2xl border border-red-200 bg-red-50 p-5'>
             <Message error={error} />
 
             <Button
+              className='mt-4 h-10 rounded-full px-5'
               onClick={(e) => {
-                e.preventDefault()
-                router.refresh()
+                e.preventDefault();
+                router.refresh();
               }}
-              variant="default"
+              variant='default'
             >
-              Try again
+              Încearcă din nou
             </Button>
           </div>
         )}
-
-        <Suspense fallback={<React.Fragment />}>
-          {/* @ts-ignore */}
-          {paymentData && paymentData?.['clientSecret'] && (
-            <div className="pb-16">
-              <h2 className="font-medium text-3xl">Payment</h2>
-              {error && <p>{`Error: ${error}`}</p>}
-              <Elements
-                options={{
-                  appearance: {
-                    theme: 'stripe',
-                    variables: {
-                      borderRadius: '6px',
-                      colorPrimary: '#858585',
-                      gridColumnSpacing: '20px',
-                      gridRowSpacing: '20px',
-                      colorBackground: theme === 'dark' ? '#0a0a0a' : cssVariables.colors.base0,
-                      colorDanger: cssVariables.colors.error500,
-                      colorDangerText: cssVariables.colors.error500,
-                      colorIcon:
-                        theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                      colorText: theme === 'dark' ? '#858585' : cssVariables.colors.base1000,
-                      colorTextPlaceholder: '#858585',
-                      fontFamily: 'Geist, sans-serif',
-                      fontSizeBase: '16px',
-                      fontWeightBold: '600',
-                      fontWeightNormal: '500',
-                      spacingUnit: '4px',
-                    },
-                  },
-                  clientSecret: paymentData['clientSecret'] as string,
-                }}
-                stripe={stripe}
-              >
-                <div className="flex flex-col gap-8">
-                  <CheckoutForm
-                    customerEmail={email}
-                    billingAddress={billingAddress}
-                    setProcessingPayment={setProcessingPayment}
-                  />
-                  <Button
-                    variant="ghost"
-                    className="self-start"
-                    onClick={() => setPaymentData(null)}
-                  >
-                    Cancel payment
-                  </Button>
-                </div>
-              </Elements>
-            </div>
-          )}
-        </Suspense>
       </div>
 
       {!cartIsEmpty && (
-        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-none bg-primary/5 flex flex-col gap-8 rounded-lg">
-          <h2 className="text-3xl font-medium">Your cart</h2>
+        <aside className='bg-secondary-50 flex h-fit basis-full flex-col gap-5 rounded-2xl border border-neutral-200 p-6 lg:sticky lg:top-24 lg:basis-1/3'>
+          <h2 className='text-primary-900 text-2xl font-semibold'>Coșul tău</h2>
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object' && item.product) {
               const {
                 product,
-                product: { id, meta, title, gallery },
-                quantity,
-                variant,
-              } = item
+                product: { meta, name, gallery },
+                quantity
+              } = item;
 
-              if (!quantity) return null
+              if (!quantity) return null;
 
-              let image = gallery?.[0]?.image || meta?.image
-              let price = product?.priceInUSD
-
-              const isVariant = Boolean(variant) && typeof variant === 'object'
-
-              if (isVariant) {
-                price = variant?.priceInUSD
-
-                const imageVariant = product.gallery?.find((item) => {
-                  if (!item.variantOption) return false
-                  const variantOptionID =
-                    typeof item.variantOption === 'object'
-                      ? item.variantOption.id
-                      : item.variantOption
-
-                  const hasMatch = variant?.options?.some((option) => {
-                    if (typeof option === 'object') return option.id === variantOptionID
-                    else return option === variantOptionID
-                  })
-
-                  return hasMatch
-                })
-
-                if (imageVariant && typeof imageVariant.image !== 'string') {
-                  image = imageVariant.image
-                }
-              }
+              let image = gallery?.[0]?.image || meta?.image;
+              let price =
+                product?.hasDiscount && product?.discountedPrice
+                  ? Number(product.discountedPrice)
+                  : Number(product.price);
 
               return (
-                <div className="flex items-start gap-4" key={index}>
-                  <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
-                    <div className="relative w-full h-full">
-                      {image && typeof image !== 'string' && (
-                        <Media className="" fill imgClassName="rounded-lg" resource={image} />
-                      )}
-                    </div>
+                <div
+                  className='flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-3'
+                  key={index}
+                >
+                  <div className='flex h-16 w-16 shrink-0 items-stretch justify-stretch rounded-lg border'>
+                    <RenderImage
+                      className='rounded-lg object-cover'
+                      src={image}
+                    />
                   </div>
-                  <div className="flex grow justify-between items-center">
-                    <div className="flex flex-col gap-1">
-                      <p className="font-medium text-lg">{title}</p>
-                      {variant && typeof variant === 'object' && (
-                        <p className="text-sm font-mono text-primary/50 tracking-widest">
-                          {variant.options
-                            ?.map((option) => {
-                              if (typeof option === 'object') return option.label
-                              return null
-                            })
-                            .join(', ')}
-                        </p>
-                      )}
-                      <div>
-                        {'x'}
-                        {quantity}
-                      </div>
+                  <div className='flex grow items-center justify-between gap-3'>
+                    <div className='flex flex-col gap-1'>
+                      <p className='text-primary-900 text-lg font-semibold'>
+                        {name}
+                      </p>
+                      <div>x {quantity}</div>
                     </div>
 
-                    {typeof price === 'number' && <Price amount={price} />}
+                    {
+                      <Price
+                        amount={price}
+                        className='text-primary-900 text-sm font-semibold'
+                        currencyCode={cart?.currency || 'RON'}
+                      />
+                    }
                   </div>
                 </div>
-              )
+              );
             }
-            return null
+            return null;
           })}
-          <hr />
-          <div className="flex justify-between items-center gap-2">
-            <span className="uppercase">Total</span>{' '}
-            <Price className="text-3xl font-medium" amount={cart.subtotal || 0} />
+          <hr className='border-neutral-200' />
+          <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
+            <span>Subtotal</span>
+            <Price
+              amount={Number(cart?.subtotal || 0)}
+              currencyCode='RON'
+              as='span'
+            />
           </div>
-        </div>
+          <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
+            <span>
+              {deliveryFeeLabel}
+              {fulfillmentMethod === 'pickup' ? ' (ridicare personală)' : ''}
+            </span>
+            <Price amount={deliveryFeeValue} currencyCode='RON' as='span' />
+          </div>
+          <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
+            <span>Subtotal fără TVA</span>
+            <Price amount={subtotalWithoutTVA} currencyCode='RON' as='span' />
+          </div>
+          <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
+            <span>TVA (21%)</span>
+            <Price amount={tvaAmount} currencyCode='RON' as='span' />
+          </div>
+          <p className='text-xs text-neutral-600'>
+            Subtotal fără TVA + TVA (21%) = Total
+          </p>
+          <div className='flex items-center justify-between gap-2'>
+            <span className='text-sm font-medium uppercase text-neutral-700'>
+              Total
+            </span>
+            <Price
+              className='text-primary-900 text-2xl font-bold'
+              amount={payableTotal}
+              currencyCode='RON'
+            />
+          </div>
+        </aside>
       )}
     </div>
-  )
-}
+  );
+};
