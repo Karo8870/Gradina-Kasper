@@ -2,7 +2,6 @@
 
 import type { Product } from '@/payload-types';
 import { GridTileImage } from '@/components/Grid/tile';
-import { useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 import {
@@ -18,7 +17,6 @@ type Props = {
 };
 
 export const Gallery: React.FC<Props> = ({ gallery }) => {
-  const searchParams = useSearchParams();
   const [current, setCurrent] = React.useState(0);
   const [api, setApi] = React.useState<CarouselApi>();
 
@@ -29,10 +27,10 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
   }, [api]);
 
   return (
-    <div>
-      <div className='relative w-full overflow-hidden mb-8'>
+    <div className='h-full flex flex-col'>
+      <div className='relative w-full grow basis-0 overflow-hidden mb-8 max-h-[600px]'>
         <RenderImage
-          className='w-full rounded-lg'
+          className='w-full rounded-lg absolute top-0 left-0 h-full object-cover'
           src={gallery[current].image}
         />
       </div>

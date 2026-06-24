@@ -34,10 +34,10 @@ export default function ({
           'border-neutral-300 bg-neutral-50 text-neutral-500'
       )}
     >
-      <div className='min-h-56 md:min-h-[22rem]'>
+      <div className='relative min-h-72 md:min-h-0'>
         <RenderImage
           className={cn(
-            'h-full w-full object-cover',
+            'h-full w-full object-cover absolute top-0 left-0',
             isTemporarilyUnavailable && 'opacity-70 grayscale'
           )}
           src={product.gallery![0].image}

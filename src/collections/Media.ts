@@ -13,6 +13,14 @@ export const Media: CollectionConfig = {
     read: () => true,
     update: adminOnly
   },
+  upload: {
+    formatOptions: {
+      format: 'webp',
+      options: {
+        quality: 80
+      }
+    }
+  },
   fields: [
     {
       name: 'alt',
