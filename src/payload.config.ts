@@ -30,6 +30,8 @@ import { CheckoutSettings } from '@/globals/CheckoutSettings';
 import { MailSettings } from '@/globals/MailSettings';
 import { BoxNotifications } from '@/collections/BoxNotifications';
 
+import 'dotenv/config';
+
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 

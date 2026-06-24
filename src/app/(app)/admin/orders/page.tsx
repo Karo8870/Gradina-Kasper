@@ -5,6 +5,10 @@ import { headers as getHeaders } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getPayload } from 'payload';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'Admin - Orders'
 };

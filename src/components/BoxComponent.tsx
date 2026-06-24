@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Price } from '@/components/Price';
 import RenderImage from '@/components/RenderImage';
 import { cn } from '@/utilities/cn';
-import { Product, Vegetable } from '@/payload-types';
+import { Product } from '@/payload-types';
 import { RichText } from '@/components/RichText';
 import { formatDateTime } from '@/utilities/formatDateTime';
 import {
@@ -96,21 +96,21 @@ export default function ({
           className='w-full leading-relaxed text-neutral-700 line-clamp-3'
         />
 
-        <div className='space-y-2'>
-          <p className='text-primary-900 text-sm font-semibold'>
-            Conținut posibil
-          </p>
-          <ul className='flex flex-wrap gap-2'>
-            {product.possibleVegetables!.map((item) => (
-              <li
-                key={(item as Vegetable).id}
-                className='bg-secondary-100 text-primary-900 rounded-full px-3 py-1 text-sm'
-              >
-                {(item as Vegetable).name}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/*<div className='space-y-2'>*/}
+        {/*  <p className='text-primary-900 text-sm font-semibold'>*/}
+        {/*    Conținut posibil*/}
+        {/*  </p>*/}
+        {/*  <ul className='flex flex-wrap gap-2'>*/}
+        {/*    {product.possibleVegetables!.map((item) => (*/}
+        {/*      <li*/}
+        {/*        key={(item as Vegetable).id}*/}
+        {/*        className='bg-secondary-100 text-primary-900 rounded-full px-3 py-1 text-sm'*/}
+        {/*      >*/}
+        {/*        {(item as Vegetable).name}*/}
+        {/*      </li>*/}
+        {/*    ))}*/}
+        {/*  </ul>*/}
+        {/*</div>*/}
 
         {isTemporarilyUnavailable || !product.slug ? (
           <NotifyWhenAvailableButton boxID={product.id} />
