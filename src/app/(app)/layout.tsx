@@ -37,6 +37,8 @@ const twitterSite = TWITTER_SITE ? ensureStartsWith(TWITTER_SITE, 'https://') : 
     }),
 } */
 
+export const dynamic = 'force-dynamic';
+
 const lexend = Lexend({
   subsets: ['latin']
 });
