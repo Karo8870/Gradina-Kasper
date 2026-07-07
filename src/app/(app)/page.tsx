@@ -21,18 +21,11 @@ export default async function () {
     depth: 3
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const holidayDates = await payload.find({
-    collection: 'holiday-dates',
-    where: {
-      date: {
-        greater_than_equal: today.toISOString()
-      }
-    }
+  const deliveryPickupConfig = await payload.findGlobal({
+    slug: 'delivery-pickup-configuration' as any,
+    depth: 0
   });
-
+  
   return (
     <>
       <section className='flex flex-col gap-7 px-4 pb-0 h-[100dvh] sm:pb-7 md:px-0 lg:px-0 mb-10'>
@@ -43,17 +36,17 @@ export default async function () {
             src={home.heroBackgroundImage}
           />
           <div className='flex flex-col w-full md:w-1/2 items-start'>
-            <h1 className='text-primary-950 pb-8 text-3xl md:text-[4rem] leading-tight font-bold'>
+            <h1 className='text-primary-950 pb-8 text-3xl md:text-[4rem] leading-tight font-bold whitespace-pre-line'>
               {home.heroTitle}
             </h1>
-            <h2 className='text-primary-800 pb-10 text-xl font-medium'>
+            <h2 className='text-primary-800 pb-10 text-xl font-medium whitespace-pre-line'>
               {home.subtitle}
             </h2>
             <Button
               asChild
               className='bg-primary-900 hover:bg-primary-950 h-auto rounded-full px-5 py-3 md:px-10 md:py-6 text-base md:text-[1.125rem] font-bold text-white'
             >
-              <Link href='/shop'>{home.callToActionText}</Link>
+              <Link href='/products'>{home.callToActionText}</Link>
             </Button>
           </div>
         </div>
@@ -64,7 +57,7 @@ export default async function () {
       >
         <BoxComponent
           product={home.featuredProduct as Product}
-          holidayDates={holidayDates.docs.map((el) => el.date)}
+          deliveryPickupConfig={deliveryPickupConfig}
         />
       </Section>
       <Section

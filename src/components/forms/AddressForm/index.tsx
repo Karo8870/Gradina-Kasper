@@ -344,9 +344,12 @@ export const AddressForm: React.FC<Props> = ({
 
         <FormItem>
           <Label htmlFor='phone' className='mb-1 text-sm text-neutral-700'>
-            Număr de telefon
+            Număr de telefon*
           </Label>
           <Controller
+            rules={{
+              required: 'Numărul de telefon este obligatoriu.'
+            }}
             control={control}
             name='phone'
             render={({ field }) => (

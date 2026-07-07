@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: Args) {
     result.product
   );
   const inventoryBadge = getInventoryBadge(result.product.inventory);
-  const nextDeliveryDate = getNextDeliveryDate(result.holidayDates);
+  const nextDeliveryDate = getNextDeliveryDate(result.deliveryPickupConfig);
   const unavailableNotice = getUnavailableNotice(result.product);
 
   return (
@@ -196,20 +196,13 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
     }
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const holidayDates = await payload.find({
-    collection: 'holiday-dates',
-    where: {
-      date: {
-        greater_than_equal: today.toISOString()
-      }
-    }
+  const deliveryPickupConfig = await payload.findGlobal({
+    slug: 'delivery-pickup-configuration' as any,
+    depth: 0
   });
 
   return {
     product: result.docs?.[0] || null,
-    holidayDates: holidayDates.docs.map((date) => date.date)
+    deliveryPickupConfig
   };
 };

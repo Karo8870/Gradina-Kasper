@@ -31,7 +31,7 @@ export const HomePage: GlobalConfig = {
               admin: {
                 description: 'The title to be used on the hero image'
               },
-              type: 'text',
+              type: 'textarea',
               required: true,
               defaultValue: 'Bine ai venit la Gradina Kasper!'
             },
@@ -40,7 +40,7 @@ export const HomePage: GlobalConfig = {
               admin: {
                 description: 'The subtitle to be used on the hero image'
               },
-              type: 'text',
+              type: 'textarea',
               required: true,
               defaultValue:
                 'Aici trebuie să scrie direct că lucrăm fără pesticide + SLOGAN'

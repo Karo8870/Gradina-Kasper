@@ -27,10 +27,11 @@ import RenderImage from '@/components/RenderImage';
 import Section from '@/components/Section';
 import { cn } from '@/utilities/cn';
 import { isVerifiedBrasovAddress } from '@/lib/addressValidation';
+import { DeliveryPickupConfig } from '@/lib/deliveryPickupConfig';
 
 type Props = {
-  holidayDates: string[];
   checkoutSettings: CheckoutSetting;
+  deliveryPickupConfig?: DeliveryPickupConfig | null;
 };
 
 type NetopiaAction =
@@ -72,8 +73,8 @@ const submitPostForm = (url: string, fields: Record<string, string>) => {
 const roundToCents = (amount: number) => Math.round(amount * 100) / 100;
 
 export const CheckoutPage: React.FC<Props> = ({
-  holidayDates,
-  checkoutSettings
+  checkoutSettings,
+  deliveryPickupConfig
 }) => {
   const { user } = useAuth();
   const router = useRouter();
@@ -106,7 +107,7 @@ export const CheckoutPage: React.FC<Props> = ({
   const tvaAmount = roundToCents(
     Math.max(0, payableTotal - subtotalWithoutTVA)
   );
-  const nextDeliveryDate = getNextDeliveryDate(holidayDates);
+  const nextDeliveryDate = getNextDeliveryDate(deliveryPickupConfig);
   const selectedDeliveryAddress = billingAddressSameAsShipping
     ? billingAddress
     : shippingAddress;

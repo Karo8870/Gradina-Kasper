@@ -31,6 +31,7 @@ export const Users: CollectionConfig = {
 
         return `Resetare parolă`;
       },
+
       generateEmailHTML(params) {
         const { req, user, token } = params!;
 
@@ -117,7 +118,7 @@ export const Users: CollectionConfig = {
                             </h2>
 
                             <p style="margin:0 0 24px;color:#555;line-height:1.6;">
-                                Salut ${user.mail},
+                                Salut ${user.email},
                                 <br><br>
                                 Îți mulțumim pentru crearea contului. Pentru a activa contul și a confirma că această adresă de email îți aparține, apasă pe butonul de mai jos.
                             </p>

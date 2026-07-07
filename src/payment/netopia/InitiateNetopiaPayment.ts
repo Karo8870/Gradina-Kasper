@@ -6,6 +6,7 @@ import {
   isVerifiedBrasovAddress,
   type MapboxAddressFields
 } from '@/lib/addressValidation';
+import { getDeliveryPickupConfig } from '@/lib/deliveryPickupConfig';
 import { netopiaConfig } from '@/payment/netopia/creds';
 
 type StoredAddress = MapboxAddressFields & {
@@ -78,20 +79,6 @@ const copyCartItemsForTransaction = (items: any[] | null | undefined) => {
 
 const toJSONAddress = (address: unknown) =>
   address ? (address as Record<string, unknown>) : null;
-
-const getHolidayDates = async (payload: any) => {
-  const { docs } = await payload.find({
-    collection: 'holiday-dates',
-    depth: 0,
-    limit: 365,
-    pagination: false,
-    select: {
-      date: true
-    }
-  });
-
-  return docs.map((holidayDate: { date: string }) => holidayDate.date);
-};
 
 const toNetopiaAddress = ({
   address,
@@ -188,7 +175,7 @@ export const initiateNetopiaPayment: NonNullable<PaymentAdapter>['initiatePaymen
 
       const amount = Number(cart.subtotal) + deliveryFee;
       const shouldBeDeliveredOn = getNextDeliveryDate(
-        await getHolidayDates(payload)
+        await getDeliveryPickupConfig(payload)
       ).toISOString();
 
       if (isNaN(amount)) {

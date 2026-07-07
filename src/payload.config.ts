@@ -25,10 +25,10 @@ import { DidYouKnowPage } from '@/globals/pages/DidYouKnowPage';
 import { PickupPointPage } from '@/globals/pages/PickupPointPage';
 import { ContactPage } from '@/globals/pages/ContactPage';
 import { SupportPage } from '@/globals/pages/SupportPage';
-import { HolidayDates } from '@/collections/HolidayDates';
 import { CheckoutSettings } from '@/globals/CheckoutSettings';
 import { MailSettings } from '@/globals/MailSettings';
 import { BoxNotifications } from '@/collections/BoxNotifications';
+import { DeliveryPickupConfiguration } from '@/globals/DeliveryPickupConfiguration';
 
 import 'dotenv/config';
 
@@ -54,7 +54,6 @@ export default buildConfig({
     Media,
     Articles,
     Vegetables,
-    HolidayDates,
     BoxNotifications
   ],
   db: postgresAdapter({
@@ -92,6 +91,7 @@ export default buildConfig({
     ContactPage,
     SupportPage,
     CheckoutSettings,
+    DeliveryPickupConfiguration,
     MailSettings
   ],
   plugins,

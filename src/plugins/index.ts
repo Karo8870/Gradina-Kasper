@@ -36,53 +36,53 @@ export const plugins: Plugin[] = [
     generateTitle,
     generateURL
   }),
-  formBuilderPlugin({
-    fields: {
-      payment: false
-    },
-    formSubmissionOverrides: {
-      access: {
-        delete: isAdmin,
-        read: isAdmin,
-        update: isAdmin
-      },
-      admin: {
-        group: 'Content'
-      }
-    },
-    formOverrides: {
-      access: {
-        delete: isAdmin,
-        read: isAdmin,
-        update: isAdmin,
-        create: isAdmin
-      },
-      admin: {
-        group: 'Content'
-      },
-      fields: ({ defaultFields }) => {
-        return defaultFields.map((field) => {
-          if ('name' in field && field.name === 'confirmationMessage') {
-            return {
-              ...field,
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    FixedToolbarFeature(),
-                    HeadingFeature({
-                      enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4']
-                    })
-                  ];
-                }
-              })
-            };
-          }
-          return field;
-        });
-      }
-    }
-  }),
+  // formBuilderPlugin({
+  //   fields: {
+  //     payment: false
+  //   },
+  //   formSubmissionOverrides: {
+  //     access: {
+  //       delete: isAdmin,
+  //       read: isAdmin,
+  //       update: isAdmin
+  //     },
+  //     admin: {
+  //       group: 'Content'
+  //     }
+  //   },
+  //   formOverrides: {
+  //     access: {
+  //       delete: isAdmin,
+  //       read: isAdmin,
+  //       update: isAdmin,
+  //       create: isAdmin
+  //     },
+  //     admin: {
+  //       group: 'Content'
+  //     },
+  //     fields: ({ defaultFields }) => {
+  //       return defaultFields.map((field) => {
+  //         if ('name' in field && field.name === 'confirmationMessage') {
+  //           return {
+  //             ...field,
+  //             editor: lexicalEditor({
+  //               features: ({ rootFeatures }) => {
+  //                 return [
+  //                   ...rootFeatures,
+  //                   FixedToolbarFeature(),
+  //                   HeadingFeature({
+  //                     enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4']
+  //                   })
+  //                 ];
+  //               }
+  //             })
+  //           };
+  //         }
+  //         return field;
+  //       });
+  //     }
+  //   }
+  // }),
   ecommercePlugin({
     access: {
       adminOnlyFieldAccess,

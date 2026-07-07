@@ -13,17 +13,18 @@ import {
   isProductTemporarilyUnavailable
 } from '@/lib/boxHelpers';
 import { NotifyWhenAvailableButton } from '@/components/box/NotifyWhenAvailableButton';
+import { DeliveryPickupConfig } from '@/lib/deliveryPickupConfig';
 
 export default function ({
   product,
-  holidayDates
+  deliveryPickupConfig
 }: {
   product: Product;
-  holidayDates: string[];
+  deliveryPickupConfig?: DeliveryPickupConfig | null;
 }) {
   const isTemporarilyUnavailable = isProductTemporarilyUnavailable(product);
   const inventoryBadge = getInventoryBadge(product.inventory);
-  const nextDeliveryDate = getNextDeliveryDate(holidayDates);
+  const nextDeliveryDate = getNextDeliveryDate(deliveryPickupConfig);
   const unavailableNotice = getUnavailableNotice(product);
 
   return (

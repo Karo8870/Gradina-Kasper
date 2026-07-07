@@ -33,46 +33,43 @@ export default async function ProductsPage() {
   const { isEnabled: draft } = await draftMode();
   const payload = await getPayload({ config: configPromise });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const [productsResult, vegetablesResult, productsPageGlobal, holidayDates] =
-    await Promise.all([
-      payload.find({
-        collection: 'products',
-        depth: 2,
-        draft,
-        limit: 1000,
-        overrideAccess: draft,
-        pagination: false,
-        sort: 'title',
-        where: {
-          hideProduct: {
-            equals: false
-          }
+  const [
+    productsResult,
+    vegetablesResult,
+    productsPageGlobal,
+    deliveryPickupConfig
+  ] = await Promise.all([
+    payload.find({
+      collection: 'products',
+      depth: 2,
+      draft,
+      limit: 1000,
+      overrideAccess: draft,
+      pagination: false,
+      sort: 'title',
+      where: {
+        hideProduct: {
+          equals: false
         }
-      }),
-      payload.find({
-        collection: 'vegetables',
-        depth: 1,
-        draft,
-        limit: 1000,
-        overrideAccess: draft,
-        pagination: false
-      }),
-      payload.findGlobal({
-        slug: 'products-page',
-        depth: 2
-      }),
-      payload.find({
-        collection: 'holiday-dates',
-        where: {
-          date: {
-            greater_than_equal: today.toISOString()
-          }
-        }
-      })
-    ]);
+      }
+    }),
+    payload.find({
+      collection: 'vegetables',
+      depth: 1,
+      draft,
+      limit: 1000,
+      overrideAccess: draft,
+      pagination: false
+    }),
+    payload.findGlobal({
+      slug: 'products-page',
+      depth: 2
+    }),
+    payload.findGlobal({
+      slug: 'delivery-pickup-configuration' as any,
+      depth: 0
+    })
+  ]);
 
   return (
     <main className='flex flex-col gap-14 px-4 pb-14 md:px-6 lg:px-24 pt-24'>
@@ -83,7 +80,7 @@ export default async function ProductsPage() {
         {productsResult.docs.map((box) => (
           <BoxComponent
             product={box}
-            holidayDates={holidayDates.docs.map((el) => el.date)}
+            deliveryPickupConfig={deliveryPickupConfig}
           />
         ))}
       </Section>

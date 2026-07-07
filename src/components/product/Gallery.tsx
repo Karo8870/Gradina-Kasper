@@ -28,7 +28,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
   return (
     <div className='h-full flex flex-col'>
-      <div className='relative w-full grow basis-0 overflow-hidden mb-8 max-h-[600px]'>
+      <div className='relative w-full grow basis-0 overflow-hidden mb-8 min-h-[300px] max-h-[600px]'>
         <RenderImage
           className='w-full rounded-lg absolute top-0 left-0 h-full object-cover'
           src={gallery[current].image}

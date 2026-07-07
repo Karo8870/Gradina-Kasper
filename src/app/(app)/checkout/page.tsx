@@ -10,21 +10,15 @@ import { CheckoutPage } from '@/components/checkout/CheckoutPage';
 export default async function Checkout() {
   const payload = await getPayload({ config: configPromise });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const holidayDates = await payload.find({
-    collection: 'holiday-dates',
-    where: {
-      date: {
-        greater_than_equal: today.toISOString()
-      }
-    }
-  });
-
-  const checkoutSettings = await payload.findGlobal({
-    slug: 'checkout-settings'
-  });
+  const [checkoutSettings, deliveryPickupConfig] = await Promise.all([
+    payload.findGlobal({
+      slug: 'checkout-settings'
+    }),
+    payload.findGlobal({
+      slug: 'delivery-pickup-configuration' as any,
+      depth: 0
+    })
+  ]);
 
   return (
     <div className='container min-h-[90vh] flex pt-24'>
@@ -32,7 +26,7 @@ export default async function Checkout() {
 
       <CheckoutPage
         checkoutSettings={checkoutSettings}
-        holidayDates={holidayDates.docs.map((el) => el.date)}
+        deliveryPickupConfig={deliveryPickupConfig}
       />
     </div>
   );

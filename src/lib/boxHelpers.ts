@@ -1,8 +1,12 @@
 import { Product } from '@/payload-types';
+import {
+  DeliveryPickupConfig,
+  getDefaultAllowedWeekdays,
+  normalizeWeekOverrides
+} from '@/lib/deliveryPickupConfig';
 import { formatDateTime } from '@/utilities/formatDateTime';
 
 const LOW_SUPPLY_THRESHOLD = 10;
-const DELIVERY_WEEKDAYS = new Set([2, 5]);
 const BUCHAREST_TIME_ZONE = 'Europe/Bucharest';
 
 export function getInventoryBadge(inventory: number): {
@@ -48,21 +52,30 @@ export const isProductTemporarilyUnavailable = (
   return new Date(product.availableFrom).getTime() > now.getTime();
 };
 
-export function createBlockedDateSet(holidayDates: string[]) {
-  return new Set(
-    holidayDates.map((value) =>
-      formatDateTime({
-        date: value
-      })
-    )
-  );
-}
-
 export function buildDateFromOffset(base: Date, offsetDays: number): Date {
   const candidate = new Date(base);
   candidate.setUTCHours(12, 0, 0, 0);
   candidate.setUTCDate(candidate.getUTCDate() + offsetDays);
   return candidate;
+}
+
+export function getBucharestDateKey(date: Date | string): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: BUCHAREST_TIME_ZONE,
+    year: 'numeric'
+  }).formatToParts(new Date(date));
+
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
+export function dateFromDateKey(dateKey: string): Date {
+  return new Date(`${dateKey}T12:00:00.000Z`);
 }
 
 export function getRomanianWeekday(date: Date): number {
@@ -86,34 +99,45 @@ export function getRomanianWeekday(date: Date): number {
       return 6;
     case 'Sun':
     default:
-      return 0;
+      return 7;
   }
+}
+
+export function getBucharestWeekStartKey(date: Date | string): string {
+  const candidate = new Date(date);
+  const weekday = getRomanianWeekday(candidate);
+  const weekStart = buildDateFromOffset(candidate, (weekday - 1) * -1);
+
+  return getBucharestDateKey(weekStart);
+}
+
+export function createWeekOverrideMap(config?: DeliveryPickupConfig | null) {
+  return new Map(
+    normalizeWeekOverrides(config?.weekOverrides).map((override) => [
+      override.weekStart,
+      new Set(override.allowedWeekdays)
+    ])
+  );
 }
 
 export function findNextAllowedDate({
   from,
-  holidayDates
+  config
 }: {
   from: Date;
-  holidayDates: string[];
+  config?: DeliveryPickupConfig | null;
 }): Date {
-  const blockedDates = createBlockedDateSet(holidayDates);
+  const defaultWeekdays = new Set(getDefaultAllowedWeekdays(config));
+  const weekOverrideMap = createWeekOverrideMap(config);
 
   for (let offset = 1; offset <= 365; offset += 1) {
     const candidate = buildDateFromOffset(from, offset);
     const weekday = getRomanianWeekday(candidate);
+    const weekStart = getBucharestWeekStartKey(candidate);
+    const overriddenWeekdays = weekOverrideMap.get(weekStart);
+    const allowedWeekdays = overriddenWeekdays || defaultWeekdays;
 
-    if (!DELIVERY_WEEKDAYS.has(weekday)) {
-      continue;
-    }
-
-    if (
-      blockedDates.has(
-        formatDateTime({
-          date: candidate
-        })
-      )
-    ) {
+    if (!allowedWeekdays.has(weekday)) {
       continue;
     }
 
@@ -123,11 +147,11 @@ export function findNextAllowedDate({
   return new Date(0);
 }
 
-export function getNextDeliveryDate(holidayDates: string[]) {
+export function getNextDeliveryDate(config?: DeliveryPickupConfig | null) {
   const now = new Date();
 
   return findNextAllowedDate({
     from: now,
-    holidayDates: holidayDates
+    config
   });
 }
