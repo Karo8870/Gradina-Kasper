@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { formatDateTime } from '@/utilities/formatDateTime';
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ChevronLeftIcon } from 'lucide-react';
 import { headers as getHeaders } from 'next/headers.js';
 import configPromise from '@payload-config';
@@ -14,10 +14,6 @@ import { getPayload } from 'payload';
 import { OrderStatus } from '@/components/OrderStatus';
 import { AddressItem } from '@/components/addresses/AddressItem';
 import Image from 'next/image';
-import { revalidatePath } from 'next/cache';
-import { CancelOrderDialog } from './CancelOrderDialog';
-import { RenderParams } from '@/components/RenderParams';
-import { sendOrderEmail } from '@/lib/orderEmails';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,14 +23,6 @@ type PageProps = {
     accessToken?: string;
     email?: string;
   }>;
-};
-
-const getID = (value: unknown) => {
-  if (!value) return undefined;
-  if (typeof value === 'object' && 'id' in value) {
-    return value.id as string | number;
-  }
-  return value as string | number;
 };
 
 const hasAddressContent = (address: Order['shippingAddress']) => {
@@ -53,209 +41,6 @@ const hasAddressContent = (address: Order['shippingAddress']) => {
     address.country
   ].some(Boolean);
 };
-
-const getBucharestDateKey = (date: string | Date) => {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    day: '2-digit',
-    month: '2-digit',
-    timeZone: 'Europe/Bucharest',
-    year: 'numeric'
-  }).formatToParts(new Date(date));
-
-  const getPart = (type: string) =>
-    parts.find((part) => part.type === type)?.value || '';
-
-  return Number(`${getPart('year')}${getPart('month')}${getPart('day')}`);
-};
-
-const canCancelOrder = (
-  order: Pick<Order, 'shouldBeDeliveredOn' | 'status'>
-) => {
-  if (order.status !== 'processing' || !order.shouldBeDeliveredOn) return false;
-
-  return (
-    getBucharestDateKey(new Date()) <
-    getBucharestDateKey(order.shouldBeDeliveredOn)
-  );
-};
-
-const getOrderRedirectPath = ({
-  accessToken,
-  email,
-  orderID,
-  status
-}: {
-  accessToken?: string;
-  email?: string;
-  orderID: string;
-  status?: {
-    key: 'error' | 'success';
-    value: string;
-  };
-}) => {
-  const params = new URLSearchParams();
-
-  if (email) params.set('email', email);
-  if (accessToken) params.set('accessToken', accessToken);
-  if (status) params.set(status.key, status.value);
-
-  const queryString = params.toString();
-
-  return `/orders/${orderID}${queryString ? `?${queryString}` : ''}`;
-};
-
-const restockOrderItems = async ({
-  items,
-  payload
-}: {
-  items: Order['items'];
-  payload: Awaited<ReturnType<typeof getPayload>>;
-}) => {
-  if (!Array.isArray(items)) return;
-
-  for (const item of items) {
-    const quantity = Number(item.quantity) || 0;
-    if (quantity <= 0) continue;
-
-    const variantID = getID((item as any).variant);
-
-    if (variantID) {
-      await payload.db.updateOne({
-        id: variantID,
-        collection: 'variants' as any,
-        data: {
-          inventory: {
-            $inc: quantity
-          }
-        }
-      });
-
-      continue;
-    }
-
-    const productID = getID(item.product);
-
-    if (!productID) continue;
-
-    await payload.db.updateOne({
-      id: productID,
-      collection: 'products' as any,
-      data: {
-        inventory: {
-          $inc: quantity
-        }
-      }
-    });
-  }
-};
-
-async function cancelOrderAction(formData: FormData) {
-  'use server';
-
-  const orderID = String(formData.get('orderID') || '');
-  const email = String(formData.get('email') || '');
-  const accessToken = String(formData.get('accessToken') || '');
-
-  if (!orderID) {
-    redirect('/orders');
-  }
-
-  const headers = await getHeaders();
-  const payload = await getPayload({ config: configPromise });
-  const { user } = await payload.auth({ headers });
-  const redirectPath = (status: { key: 'error' | 'success'; value: string }) =>
-    getOrderRedirectPath({
-      accessToken,
-      email,
-      orderID,
-      status
-    });
-
-  let order: Order | null = null;
-
-  try {
-    order = (await payload.findByID({
-      id: orderID,
-      collection: 'orders',
-      depth: 0,
-      overrideAccess: true,
-      select: {
-        accessToken: true,
-        customer: true,
-        customerEmail: true,
-        items: true,
-        shouldBeDeliveredOn: true,
-        status: true
-      }
-    })) as Order;
-  } catch (error) {
-    redirect(
-      redirectPath({
-        key: 'error',
-        value: 'Comanda nu a putut fi găsită.'
-      })
-    );
-  }
-
-  const customerID =
-    order.customer && typeof order.customer === 'object'
-      ? order.customer.id
-      : order.customer;
-  const canAccessAsUser = Boolean(user && customerID === user.id);
-  const canAccessAsGuest = Boolean(
-    !user &&
-    accessToken &&
-    email &&
-    order.accessToken === accessToken &&
-    order.customerEmail === email
-  );
-
-  if ((!canAccessAsUser && !canAccessAsGuest) || !canCancelOrder(order)) {
-    redirect(
-      redirectPath({
-        key: 'error',
-        value: 'Comanda nu mai poate fi anulată.'
-      })
-    );
-  }
-
-  try {
-    await payload.update({
-      id: orderID,
-      collection: 'orders',
-      data: {
-        status: 'cancelled'
-      },
-      overrideAccess: true
-    });
-
-    await restockOrderItems({
-      items: order.items,
-      payload
-    });
-
-    await sendOrderEmail({
-      orderID,
-      payload,
-      type: 'orderCancelled'
-    });
-  } catch (error) {
-    redirect(
-      redirectPath({
-        key: 'error',
-        value: 'Comanda nu a putut fi anulată.'
-      })
-    );
-  }
-
-  revalidatePath(`/orders/${orderID}`);
-  redirect(
-    redirectPath({
-      key: 'success',
-      value: 'Comanda a fost anulată.'
-    })
-  );
-}
 
 export default async function Order({ params, searchParams }: PageProps) {
   const headers = await getHeaders();
@@ -349,7 +134,6 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const canCancel = canCancelOrder(order);
   const isDeliveryOrder = hasAddressContent(order.shippingAddress);
 
   return (
@@ -368,15 +152,6 @@ export default async function Order({ params, searchParams }: PageProps) {
           )}
 
           <div className='flex flex-wrap items-center justify-end gap-3'>
-            {canCancel && (
-              <CancelOrderDialog
-                accessToken={accessToken}
-                action={cancelOrderAction}
-                email={email}
-                orderID={String(order.id)}
-              />
-            )}
-
             <h1 className='rounded-full bg-secondary-100 px-3 py-1 text-sm font-mono uppercase tracking-[0.07em] text-primary-800'>
               {`Comanda #${order.id}`}
             </h1>

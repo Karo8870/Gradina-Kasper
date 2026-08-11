@@ -11,7 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/payload-types';
 import { cn } from '@/utilities/cn';
 
-export default function ({ header }: { header: Header }) {
+export default function ({
+  header,
+  minimumDeliveryOrderAmount
+}: {
+  header: Header;
+  minimumDeliveryOrderAmount: string;
+}) {
   const { user } = useAuth();
   const pathname = usePathname();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -115,7 +121,7 @@ export default function ({ header }: { header: Header }) {
         </nav>
 
         <div className='ml-auto flex items-center gap-4 lg:ml-3'>
-          <Cart />
+          <Cart minimumDeliveryOrderAmount={minimumDeliveryOrderAmount} />
 
           {user ? (
             <div className='relative hidden lg:block' ref={profileMenuRef}>

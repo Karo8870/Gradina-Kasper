@@ -37,6 +37,18 @@ export const CheckoutSettings: GlobalConfig = {
       validate: validatePrice
     },
     {
+      name: 'minimumDeliveryOrderAmount',
+      label: 'Minimum delivery order amount (RON)',
+      type: 'text',
+      required: true,
+      defaultValue: '100.00',
+      admin: {
+        description:
+          'The minimum product subtotal required for delivery in RON using 2 decimal points'
+      },
+      validate: validatePrice
+    },
+    {
       name: 'addressDescription',
       label: 'Address description',
       type: 'richText',

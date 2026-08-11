@@ -38,7 +38,6 @@ type MapboxSuggestion = {
   country?: string | null;
   fullAddress?: string | null;
   id?: string | null;
-  isBrasov?: boolean;
   latitude?: number | null;
   longitude?: number | null;
   postalCode?: string | null;
@@ -107,15 +106,13 @@ export const AddressForm: React.FC<Props> = ({
     [initialData?.country]
   );
 
-  const clearMapboxVerification = useCallback(() => {
+  const clearMapboxDetails = useCallback(() => {
     setValue('mapboxVerified', false);
     setValue('mapboxPlaceID', '');
     setValue('mapboxFullAddress', '');
     setValue('mapboxLatitude', null);
     setValue('mapboxLongitude', null);
-    setMapboxMessage(
-      'Adresa a fost modificată manual. Pentru livrare, selectează o sugestie Mapbox din Brașov.'
-    );
+    setMapboxMessage('Adresa a fost modificată manual.');
   }, [setValue]);
 
   const searchMapbox = useCallback(async () => {
@@ -169,18 +166,14 @@ export const AddressForm: React.FC<Props> = ({
       setValue('country', suggestion.country || 'RO', {
         shouldValidate: true
       });
-      setValue('mapboxVerified', Boolean(suggestion.isBrasov));
+      setValue('mapboxVerified', true);
       setValue('mapboxPlaceID', suggestion.id || '');
       setValue('mapboxFullAddress', suggestion.fullAddress || '');
       setValue('mapboxLatitude', suggestion.latitude || null);
       setValue('mapboxLongitude', suggestion.longitude || null);
       setMapboxQuery(suggestion.fullAddress || suggestion.addressLine1 || '');
       setMapboxSuggestions([]);
-      setMapboxMessage(
-        suggestion.isBrasov
-          ? 'Adresa este verificată prin Mapbox pentru livrare în Brașov.'
-          : 'Adresa a fost găsită prin Mapbox, dar nu este în Brașov.'
-      );
+      setMapboxMessage('Adresa a fost completată cu ajutorul Mapbox.');
     },
     [setValue]
   );
@@ -232,7 +225,7 @@ export const AddressForm: React.FC<Props> = ({
                   void searchMapbox();
                 }
               }}
-              placeholder='Strada, număr, Brașov'
+              placeholder='Strada, număr, oraș'
               value={mapboxQuery}
             />
             <button
@@ -248,8 +241,7 @@ export const AddressForm: React.FC<Props> = ({
             </button>
           </div>
           <p className='mt-1 text-xs text-neutral-600'>
-            Poți completa manual adresa, dar pentru livrare trebuie aleasă o
-            sugestie Mapbox din Brașov.
+            Poți completa manual adresa sau selecta o sugestie Mapbox.
           </p>
           {mapboxMessage && (
             <p className='mt-2 text-xs font-medium text-primary-900'>
@@ -272,9 +264,7 @@ export const AddressForm: React.FC<Props> = ({
                       {suggestion.fullAddress || suggestion.addressLine1}
                     </span>
                     <span className='text-xs text-neutral-600'>
-                      {suggestion.isBrasov
-                        ? 'Validă pentru livrare în Brașov'
-                        : 'Nu este validă pentru livrare în Brașov'}
+                      Adresă din România
                     </span>
                   </button>
                 </li>
@@ -393,7 +383,7 @@ export const AddressForm: React.FC<Props> = ({
             autoComplete='address-line1'
             className='h-11 rounded-xl border-0 bg-neutral-100 px-3 text-sm text-primary-900 shadow-none placeholder:text-neutral-700'
             {...register('addressLine1', {
-              onChange: clearMapboxVerification,
+              onChange: clearMapboxDetails,
               required: 'Prima linie a adresei este obligatorie.'
             })}
           />
@@ -414,7 +404,7 @@ export const AddressForm: React.FC<Props> = ({
             autoComplete='address-line2'
             className='h-11 rounded-xl border-0 bg-neutral-100 px-3 text-sm text-primary-900 shadow-none placeholder:text-neutral-700'
             {...register('addressLine2', {
-              onChange: clearMapboxVerification
+              onChange: clearMapboxDetails
             })}
           />
           {errors.addressLine2 && (
@@ -431,7 +421,7 @@ export const AddressForm: React.FC<Props> = ({
             autoComplete='address-level2'
             className='h-11 rounded-xl border-0 bg-neutral-100 px-3 text-sm text-primary-900 shadow-none placeholder:text-neutral-700'
             {...register('city', {
-              onChange: clearMapboxVerification,
+              onChange: clearMapboxDetails,
               required: 'Orașul este obligatoriu.'
             })}
           />
@@ -447,7 +437,7 @@ export const AddressForm: React.FC<Props> = ({
             autoComplete='address-level1'
             className='h-11 rounded-xl border-0 bg-neutral-100 px-3 text-sm text-primary-900 shadow-none placeholder:text-neutral-700'
             {...register('state', {
-              onChange: clearMapboxVerification
+              onChange: clearMapboxDetails
             })}
           />
           {errors.state && <FormError message={errors.state.message} />}
@@ -461,7 +451,7 @@ export const AddressForm: React.FC<Props> = ({
             id='postalCode'
             className='h-11 rounded-xl border-0 bg-neutral-100 px-3 text-sm text-primary-900 shadow-none placeholder:text-neutral-700'
             {...register('postalCode', {
-              onChange: clearMapboxVerification,
+              onChange: clearMapboxDetails,
               required: 'Codul poștal este obligatoriu.'
             })}
           />

@@ -16,27 +16,8 @@ type MapboxFeature = {
   text?: string;
 };
 
-const normalize = (value?: string | null) =>
-  value
-    ?.normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-
 const getContextValue = (feature: MapboxFeature, key: string) =>
   feature.context?.find((item) => item.id?.startsWith(`${key}.`))?.text || '';
-
-const isBrasovFeature = (feature: MapboxFeature) => {
-  const values = [
-    feature.text,
-    feature.place_name,
-    getContextValue(feature, 'place'),
-    getContextValue(feature, 'locality'),
-    getContextValue(feature, 'district')
-  ];
-
-  return values.some((value) => normalize(value)?.includes('brasov'));
-};
 
 export async function GET(request: Request) {
   const token = process.env.MAPBOX_API_KEY;
@@ -59,7 +40,6 @@ export async function GET(request: Request) {
     country: 'ro',
     language: 'ro',
     limit: '5',
-    proximity: '25.5887,45.6427',
     types: 'address,poi,place,locality,neighborhood'
   });
 
@@ -97,7 +77,6 @@ export async function GET(request: Request) {
       country: countryCode,
       fullAddress: feature.place_name || addressLine1,
       id: feature.id,
-      isBrasov: isBrasovFeature(feature),
       latitude: feature.center?.[1] || null,
       longitude: feature.center?.[0] || null,
       postalCode: getContextValue(feature, 'postcode'),

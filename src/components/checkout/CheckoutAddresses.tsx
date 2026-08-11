@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { isVerifiedBrasovAddress } from '@/lib/addressValidation';
+import { isRomanianAddress } from '@/lib/addressValidation';
 import { Address } from '@/payload-types';
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react';
 import { useState } from 'react';
@@ -22,7 +22,7 @@ type Props = {
   >;
   heading?: string;
   description?: string;
-  requireVerifiedBrasov?: boolean;
+  requireRomanian?: boolean;
   setSubmit?: React.Dispatch<React.SetStateAction<() => void | Promise<void>>>;
 };
 
@@ -30,7 +30,7 @@ export const CheckoutAddresses: React.FC<Props> = ({
   setAddress,
   heading = 'Adrese',
   description = 'Selectează sau adaugă adresa de facturare ori livrare.',
-  requireVerifiedBrasov = false
+  requireRomanian = false
 }) => {
   const { addresses } = useAddresses();
 
@@ -54,7 +54,7 @@ export const CheckoutAddresses: React.FC<Props> = ({
           {description}
         </p>
         <AddressesModal
-          requireVerifiedBrasov={requireVerifiedBrasov}
+          requireRomanian={requireRomanian}
           setAddress={setAddress}
         />
       </div>
@@ -63,7 +63,7 @@ export const CheckoutAddresses: React.FC<Props> = ({
 };
 
 const AddressesModal: React.FC<Props> = ({
-  requireVerifiedBrasov = false,
+  requireRomanian = false,
   setAddress
 }) => {
   const [open, setOpen] = useState(false);
@@ -113,8 +113,7 @@ const AddressesModal: React.FC<Props> = ({
                       <Button
                         className='bg-primary-900 hover:bg-primary-950 h-10 rounded-full px-4 text-white disabled:cursor-not-allowed disabled:opacity-50'
                         disabled={
-                          requireVerifiedBrasov &&
-                          !isVerifiedBrasovAddress(address)
+                          requireRomanian && !isRomanianAddress(address)
                         }
                         onClick={(e) => {
                           e.preventDefault();
@@ -125,13 +124,11 @@ const AddressesModal: React.FC<Props> = ({
                       >
                         Selectează
                       </Button>
-                      {requireVerifiedBrasov &&
-                        !isVerifiedBrasovAddress(address) && (
-                          <p className='max-w-48 text-xs text-neutral-600'>
-                            Pentru livrare, adresa trebuie selectată din Mapbox
-                            și să fie în Brașov.
-                          </p>
-                        )}
+                      {requireRomanian && !isRomanianAddress(address) && (
+                        <p className='max-w-48 text-xs text-neutral-600'>
+                          Pentru livrare, adresa trebuie să fie în România.
+                        </p>
+                      )}
                     </>
                   }
                 />

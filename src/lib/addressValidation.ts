@@ -8,14 +8,18 @@ export type MapboxAddressFields = {
   mapboxVerified?: boolean | null;
 };
 
-const normalizeCity = (value?: string | null) =>
+const normalizeCountry = (value?: string | number | null) =>
   value
+    ?.toString()
     ?.normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim();
 
-export const isVerifiedBrasovAddress = (
+export const isRomanianAddress = (
   address?: (Partial<Address> & MapboxAddressFields) | null
-) =>
-  Boolean(address?.mapboxVerified && normalizeCity(address.city) === 'brasov');
+) => {
+  const country = normalizeCountry(address?.country);
+
+  return country === 'ro' || country === 'romania' || country === '642';
+};

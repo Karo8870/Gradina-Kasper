@@ -1536,6 +1536,10 @@ export interface CheckoutSetting {
    * The price for delivery in RON using 2 decimal points
    */
   deliveryPrice: string;
+  /**
+   * The minimum product subtotal required for delivery in RON using 2 decimal points
+   */
+  minimumDeliveryOrderAmount: string;
   addressDescription: {
     root: {
       type: string;
@@ -1911,6 +1915,7 @@ export interface SupportPageSelect<T extends boolean = true> {
  */
 export interface CheckoutSettingsSelect<T extends boolean = true> {
   deliveryPrice?: T;
+  minimumDeliveryOrderAmount?: T;
   addressDescription?: T;
   updatedAt?: T;
   createdAt?: T;

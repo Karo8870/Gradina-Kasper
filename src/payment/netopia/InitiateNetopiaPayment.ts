@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import type { PaymentAdapter } from '@payloadcms/plugin-ecommerce/types';
 import { getNextDeliveryDate } from '@/lib/boxHelpers';
 import {
-  isVerifiedBrasovAddress,
+  isRomanianAddress,
   type MapboxAddressFields
 } from '@/lib/addressValidation';
 import { getDeliveryPickupConfig } from '@/lib/deliveryPickupConfig';
@@ -18,6 +18,7 @@ type StoredAddress = MapboxAddressFields & {
   state?: string | null;
   postalCode?: string | null;
   phone?: string | null;
+  country?: string | number | null;
 };
 
 const getClientIP = (req: { headers: Headers }) => {
@@ -147,33 +148,48 @@ export const initiateNetopiaPayment: NonNullable<PaymentAdapter>['initiatePaymen
         };
       }
 
-      const configuredDeliveryFee = Number(
-        (await payload.findGlobal({ slug: 'checkout-settings' })).deliveryPrice
+      const checkoutSettings = await payload.findGlobal({
+        slug: 'checkout-settings'
+      });
+      const configuredDeliveryFee = Number(checkoutSettings.deliveryPrice);
+      const minimumDeliveryOrderAmount = Number(
+        checkoutSettings.minimumDeliveryOrderAmount
       );
       const deliveryFee = isDelivery ? configuredDeliveryFee : 0;
 
-      if (isDelivery && !isVerifiedBrasovAddress(shippingAddress)) {
+      if (isDelivery && !isRomanianAddress(shippingAddress)) {
         return {
-          message: 'Delivery address is not verified for Brasov.',
+          message: 'Delivery address is not in Romania.',
           action: {
             type: 'error',
-            message:
-              'Pentru livrare, adresa trebuie selectată din Mapbox și să fie în Brașov.'
+            message: 'Pentru livrare, adresa trebuie să fie în România.'
           }
         };
       }
 
-      if (isNaN(configuredDeliveryFee)) {
+      if (isNaN(configuredDeliveryFee) || isNaN(minimumDeliveryOrderAmount)) {
         return {
-          message: 'Delivery fee not configuted.',
+          message: 'Checkout settings are not configured.',
           action: {
             type: 'error',
-            message: 'Delivery fee not configuted.'
+            message: 'Setările de checkout nu sunt configurate corect.'
           }
         };
       }
 
-      const amount = Number(cart.subtotal) + deliveryFee;
+      const cartSubtotal = Number(cart.subtotal);
+
+      if (isDelivery && cartSubtotal < minimumDeliveryOrderAmount) {
+        return {
+          message: 'Delivery minimum order amount not met.',
+          action: {
+            type: 'error',
+            message: `Comandă minimă pentru livrare: ${minimumDeliveryOrderAmount.toFixed(2)} RON`
+          }
+        };
+      }
+
+      const amount = cartSubtotal + deliveryFee;
       const shouldBeDeliveredOn = getNextDeliveryDate(
         await getDeliveryPickupConfig(payload)
       ).toISOString();

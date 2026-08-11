@@ -26,7 +26,7 @@ import { formatDateTime } from '@/utilities/formatDateTime';
 import RenderImage from '@/components/RenderImage';
 import Section from '@/components/Section';
 import { cn } from '@/utilities/cn';
-import { isVerifiedBrasovAddress } from '@/lib/addressValidation';
+import { isRomanianAddress } from '@/lib/addressValidation';
 import { DeliveryPickupConfig } from '@/lib/deliveryPickupConfig';
 
 type Props = {
@@ -101,7 +101,14 @@ export const CheckoutPage: React.FC<Props> = ({
   const deliveryFeeAmount = Number(checkoutSettings.deliveryPrice);
   const deliveryFeeValue =
     fulfillmentMethod === 'delivery' ? deliveryFeeAmount : 0;
-  const payableTotal = Number(cart?.subtotal || 0) + deliveryFeeValue;
+  const cartSubtotal = Number(cart?.subtotal || 0);
+  const payableTotal = cartSubtotal + deliveryFeeValue;
+  const minimumDeliveryOrderAmount = Number(
+    checkoutSettings.minimumDeliveryOrderAmount
+  );
+  const deliveryMinimumNotMet =
+    fulfillmentMethod === 'delivery' &&
+    cartSubtotal < minimumDeliveryOrderAmount;
   const tvaRate = 0.21;
   const subtotalWithoutTVA = roundToCents(payableTotal / (1 + tvaRate));
   const tvaAmount = roundToCents(
@@ -113,7 +120,7 @@ export const CheckoutPage: React.FC<Props> = ({
     : shippingAddress;
   const deliveryAddressIsValid =
     fulfillmentMethod !== 'delivery' ||
-    isVerifiedBrasovAddress(selectedDeliveryAddress);
+    isRomanianAddress(selectedDeliveryAddress);
 
   if (!user) {
     redirect(
@@ -394,8 +401,8 @@ export const CheckoutPage: React.FC<Props> = ({
           selectedDeliveryAddress &&
           !deliveryAddressIsValid && (
             <div className='mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900'>
-              Pentru livrare, adresa trebuie selectată din Mapbox și să fie în
-              Brașov. Poți edita adresa sau alege o altă adresă de livrare.
+              Pentru livrare, adresa trebuie să fie în România. Poți edita
+              adresa sau alege o altă adresă de livrare.
             </div>
           )}
 
@@ -423,8 +430,8 @@ export const CheckoutPage: React.FC<Props> = ({
             ) : user ? (
               <CheckoutAddresses
                 heading='Adresa de livrare'
-                description='Selectează sau adaugă adresa de livrare. Pentru livrare acceptăm doar adrese din Brașov verificate prin Mapbox.'
-                requireVerifiedBrasov
+                description='Selectează sau adaugă adresa de livrare din România.'
+                requireRomanian
                 setAddress={setShippingAddress}
               />
             ) : (
@@ -441,16 +448,27 @@ export const CheckoutPage: React.FC<Props> = ({
           </>
         )}
 
-        <Button
-          className='bg-primary-900 hover:bg-primary-800 h-11 self-start rounded-full px-6 text-white'
-          disabled={!canGoToPayment || isProcessingPayment}
-          onClick={(e) => {
-            e.preventDefault();
-            void initiatePaymentIntent();
-          }}
-        >
-          {isProcessingPayment ? 'Se procesează...' : 'Plătește cu cardul'}
-        </Button>
+        <div className='self-start'>
+          <Button
+            className='bg-primary-900 hover:bg-primary-800 h-11 rounded-full px-6 text-white disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:text-neutral-500 disabled:opacity-100 disabled:hover:bg-neutral-300'
+            disabled={
+              !canGoToPayment || isProcessingPayment || deliveryMinimumNotMet
+            }
+            onClick={(e) => {
+              e.preventDefault();
+              void initiatePaymentIntent();
+            }}
+          >
+            {isProcessingPayment ? 'Se procesează...' : 'Plătește cu cardul'}
+          </Button>
+
+          {deliveryMinimumNotMet && (
+            <p className='mt-2 text-sm text-red-700/70'>
+              *Comandă minimă pentru livrare:{' '}
+              {minimumDeliveryOrderAmount.toFixed(2)} RON
+            </p>
+          )}
+        </div>
 
         {error && (
           <div className='my-8 rounded-2xl border border-red-200 bg-red-50 p-5'>
@@ -524,11 +542,7 @@ export const CheckoutPage: React.FC<Props> = ({
           <hr className='border-neutral-200' />
           <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
             <span>Subtotal</span>
-            <Price
-              amount={Number(cart?.subtotal || 0)}
-              currencyCode='RON'
-              as='span'
-            />
+            <Price amount={cartSubtotal} currencyCode='RON' as='span' />
           </div>
           <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
             <span>

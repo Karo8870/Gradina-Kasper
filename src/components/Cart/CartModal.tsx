@@ -25,7 +25,11 @@ import { OpenCartButton } from './OpenCart';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/payload-types';
 
-export function CartModal() {
+export function CartModal({
+  minimumDeliveryOrderAmount
+}: {
+  minimumDeliveryOrderAmount: string;
+}) {
   const { cart } = useCart();
   const { currency } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +50,7 @@ export function CartModal() {
   }, [cart]);
 
   const currencyCode = cart?.currency ?? currency.code ?? 'RON';
+  const minimumDeliveryOrderAmountValue = Number(minimumDeliveryOrderAmount);
   const getItemPrice = useCallback(
     (item: any) => {
       const product = item.product;
@@ -258,6 +263,17 @@ export function CartModal() {
 
               <div className='mt-auto border-t border-neutral-200 px-6 py-4'>
                 <div className='text-sm text-neutral-600'>
+                  <div className='bg-primary-50/60 border-primary-100 mb-4 rounded-xl border px-3 py-2 text-xs text-primary-900'>
+                    Pentru livrare, comanda minimă este{' '}
+                    <Price
+                      amount={minimumDeliveryOrderAmountValue}
+                      as='span'
+                      className='font-semibold'
+                      currencyCode='RON'
+                    />
+                    .
+                  </div>
+
                   {typeof subtotal === 'number' && (
                     <div className='mb-4 flex items-center justify-between'>
                       <p className='font-medium text-neutral-700'>Total</p>
