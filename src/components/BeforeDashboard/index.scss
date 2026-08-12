@@ -3,6 +3,22 @@
 .dashboard .before-dashboard {
   margin-bottom: base(1.5);
 
+  &__orders-link {
+    align-items: center;
+    background: var(--theme-elevation-1000);
+    border-radius: 999px;
+    color: var(--theme-elevation-0);
+    display: inline-flex;
+    font-weight: 600;
+    margin-bottom: base(1);
+    padding: base(0.6) base(1.1);
+    text-decoration: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
   &__banner {
     & h4 {
       margin: 0;
