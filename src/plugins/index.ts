@@ -289,6 +289,9 @@ export const plugins: Plugin[] = [
       },
       region: process.env.S3_REGION!
     },
-    clientUploads: true
+    // Server-side uploads are required for Payload's Sharp transforms. With
+    // client uploads, the original reaches S3 before formatOptions runs and
+    // the transformed WebP buffer is not written back to storage.
+    clientUploads: false
   })
 ];

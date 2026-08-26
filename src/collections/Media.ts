@@ -22,37 +22,17 @@ export const Media: CollectionConfig = {
       }
     },
 
-    resizeOptions: {
-      width: 2400,
-      height: 2400,
-      fit: 'inside',
-      withoutEnlargement: true
-    },
+    // resizeOptions: {
+    //   width: 2400,
+    //   height: 2400,
+    //   fit: 'inside',
+    //   withoutEnlargement: true
+    // },
 
     crop: true,
     focalPoint: true,
 
-    adminThumbnail: 'thumbnail',
-
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 400,
-        height: 300,
-        fit: 'cover',
-        position: 'centre',
-        withoutEnlargement: true,
-        formatOptions: {
-          format: 'webp',
-          options: {
-            quality: 80,
-            effort: 5
-          }
-        }
-      }
-    ],
-
-    withMetadata: false
+    adminThumbnail: 'thumbnail'
   },
   fields: [
     {
