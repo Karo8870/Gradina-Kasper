@@ -13,7 +13,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
 }) => ({
   ...defaultConverters,
   heading({ node, nodesToJSX }) {
-    const content = nodesToJSX({ nodes: node.children }).join('');
+    const content = nodesToJSX({ nodes: node.children });
 
     if (node.tag === 'h1') {
       return (

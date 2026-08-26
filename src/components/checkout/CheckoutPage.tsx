@@ -109,10 +109,16 @@ export const CheckoutPage: React.FC<Props> = ({
   const deliveryMinimumNotMet =
     fulfillmentMethod === 'delivery' &&
     cartSubtotal < minimumDeliveryOrderAmount;
-  const tvaRate = 0.21;
-  const subtotalWithoutTVA = roundToCents(payableTotal / (1 + tvaRate));
-  const tvaAmount = roundToCents(
-    Math.max(0, payableTotal - subtotalWithoutTVA)
+  const productsSubtotalWithoutTVA = roundToCents(cartSubtotal / 1.11);
+  const productsTVA = roundToCents(
+    Math.max(0, cartSubtotal - productsSubtotalWithoutTVA)
+  );
+  const deliverySubtotalWithoutTVA = roundToCents(deliveryFeeValue / 1.21);
+  const deliveryTVA = roundToCents(
+    Math.max(0, deliveryFeeValue - deliverySubtotalWithoutTVA)
+  );
+  const subtotalWithoutTVA = roundToCents(
+    productsSubtotalWithoutTVA + deliverySubtotalWithoutTVA
   );
   const nextDeliveryDate = getNextDeliveryDate(deliveryPickupConfig);
   const selectedDeliveryAddress = billingAddressSameAsShipping
@@ -495,13 +501,13 @@ export const CheckoutPage: React.FC<Props> = ({
             if (typeof item.product === 'object' && item.product) {
               const {
                 product,
-                product: { meta, name, gallery },
+                product: { name, gallery },
                 quantity
               } = item;
 
               if (!quantity) return null;
 
-              let image = gallery?.[0]?.image || meta?.image;
+              const image = gallery?.[0]?.image;
               let price =
                 product?.hasDiscount && product?.discountedPrice
                   ? Number(product.discountedPrice)
@@ -514,7 +520,9 @@ export const CheckoutPage: React.FC<Props> = ({
                 >
                   <div className='flex h-16 w-16 shrink-0 items-stretch justify-stretch rounded-lg border'>
                     <RenderImage
+                      alt={name}
                       className='rounded-lg object-cover'
+                      fallbackSrc='/no-image.png'
                       src={image}
                     />
                   </div>
@@ -556,11 +564,17 @@ export const CheckoutPage: React.FC<Props> = ({
             <Price amount={subtotalWithoutTVA} currencyCode='RON' as='span' />
           </div>
           <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
-            <span>TVA (21%)</span>
-            <Price amount={tvaAmount} currencyCode='RON' as='span' />
+            <span>TVA produse (11%)</span>
+            <Price amount={productsTVA} currencyCode='RON' as='span' />
           </div>
+          {fulfillmentMethod === 'delivery' ? (
+            <div className='flex items-center justify-between gap-2 text-sm text-neutral-700'>
+              <span>TVA transport (21%)</span>
+              <Price amount={deliveryTVA} currencyCode='RON' as='span' />
+            </div>
+          ) : null}
           <p className='text-xs text-neutral-600'>
-            Subtotal fără TVA + TVA (21%) = Total
+            Subtotal fără TVA + TVA = Total
           </p>
           <div className='flex items-center justify-between gap-2'>
             <span className='text-sm font-medium uppercase text-neutral-700'>

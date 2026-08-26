@@ -21,6 +21,7 @@ type OrderItemRow = {
 
 type OrderRow = {
   id: number;
+  netopiaTransactionID: string;
   createdAt: string;
   status: string;
   customerName: string;
@@ -67,6 +68,7 @@ type SortKey =
 
 type ExportFieldKey =
   | 'id'
+  | 'netopiaTransactionID'
   | 'createdAt'
   | 'status'
   | 'customerName'
@@ -107,6 +109,7 @@ const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
 
 const EXPORT_FIELDS: Array<{ key: ExportFieldKey; label: string }> = [
   { key: 'id', label: 'ID comandă' },
+  { key: 'netopiaTransactionID', label: 'ID Netopia' },
   { key: 'createdAt', label: 'Ora comenzii' },
   { key: 'status', label: 'Status' },
   { key: 'customerName', label: 'Client' },
@@ -293,6 +296,7 @@ export const OrdersAdminPanel = () => {
       const createdAt = new Date(row.createdAt);
       const searchContent = [
         row.id,
+        row.netopiaTransactionID,
         row.createdAt,
         formatDateTime(row.createdAt),
         row.status,
@@ -861,6 +865,9 @@ export const OrdersAdminPanel = () => {
                     Comandă
                   </th>
                   <th className='px-4 py-3 text-xs font-semibold tracking-wide uppercase'>
+                    ID Netopia
+                  </th>
+                  <th className='px-4 py-3 text-xs font-semibold tracking-wide uppercase'>
                     Client
                   </th>
                   <th className='px-4 py-3 text-xs font-semibold tracking-wide uppercase'>
@@ -902,6 +909,9 @@ export const OrdersAdminPanel = () => {
                       <p className='text-xs text-neutral-500'>
                         {formatDateTime(order.createdAt)}
                       </p>
+                    </td>
+                    <td className='px-4 py-4 align-top text-sm text-neutral-700'>
+                      {order.netopiaTransactionID || '-'}
                     </td>
                     <td className='px-4 py-4 align-top'>
                       <p className='text-primary-900 text-sm font-semibold'>

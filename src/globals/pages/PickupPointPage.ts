@@ -23,7 +23,7 @@ export const PickupPointPage: GlobalConfig = {
               name: 'heroImage',
               type: 'upload',
               relationTo: 'media',
-              required: true
+              required: false
             },
             {
               name: 'title',

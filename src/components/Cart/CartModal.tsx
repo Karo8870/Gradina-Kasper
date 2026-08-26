@@ -146,18 +146,12 @@ export function CartModal({
                   )
                     return <React.Fragment key={i} />;
 
-                  const metaImage =
-                    product.meta?.image &&
-                    typeof product.meta?.image === 'object'
-                      ? product.meta.image
-                      : undefined;
-
                   const firstGalleryImage =
                     typeof product.gallery?.[0]?.image === 'object'
                       ? product.gallery?.[0]?.image
                       : undefined;
 
-                  let image = firstGalleryImage || metaImage;
+                  let image = firstGalleryImage;
                   const price = getItemPrice(item);
 
                   const isVariant =
@@ -203,15 +197,13 @@ export function CartModal({
                           href={`/products/${(item.product as Product)?.slug}`}
                         >
                           <div className='bg-secondary-100 relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-neutral-200'>
-                            {image?.url ? (
-                              <Image
-                                alt={image?.alt || product?.name || ''}
-                                className='h-full w-full object-cover'
-                                height={96}
-                                src={image.url}
-                                width={96}
-                              />
-                            ) : null}
+                            <Image
+                              alt={image?.alt || product?.name || ''}
+                              className='h-full w-full object-cover'
+                              height={96}
+                              src={image?.url || '/no-image.png'}
+                              width={96}
+                            />
                           </div>
 
                           <div className='min-w-0 flex-1'>

@@ -75,6 +75,15 @@ const getCustomerEmail = (order: Order) => {
   return order.customerEmail || transactionEmail || relatedUser?.email || '';
 };
 
+const getNetopiaTransactionID = (order: Order) => {
+  return (
+    getTransactions(order).find(
+      (transaction) =>
+        transaction.paymentMethod === 'netopia' && transaction.netopia?.ntpID
+    )?.netopia?.ntpID || ''
+  );
+};
+
 const formatDeliveryDate = (value: string) =>
   format(new Date(value), 'd MMMM yyyy', { locale: ro });
 
@@ -168,6 +177,7 @@ export async function GET() {
 
     return {
       id: order.id,
+      netopiaTransactionID: getNetopiaTransactionID(order),
       createdAt: order.createdAt,
       status: order.status || '',
       customerName,

@@ -31,7 +31,7 @@ export default async function () {
         className='prose-p:text-neutral-700 prose-headings:text-primary-900 prose-strong:text-primary-950 !mx-0 !px-0'
       />
 
-      <section className='mx-auto mt-12 max-w-5xl pt-8'>
+      {/* <section className='mx-auto mt-12 max-w-5xl pt-8'>
         <h2 className='text-primary-900 text-3xl font-semibold'>Echipa</h2>
 
         <ul className='mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -56,7 +56,7 @@ export default async function () {
             );
           })}
         </ul>
-      </section>
+      </section> */}
     </article>
   );
 }

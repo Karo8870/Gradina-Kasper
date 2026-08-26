@@ -2,6 +2,7 @@ import config from '@payload-config';
 import Section from '@/components/Section';
 import { generateGlobalMetadata } from '@/lib/metadataHelper';
 import { getPayload } from 'payload';
+import { Metadata } from 'next';
 
 export async function generateMetadata() {
   return generateGlobalMetadata('support-page');

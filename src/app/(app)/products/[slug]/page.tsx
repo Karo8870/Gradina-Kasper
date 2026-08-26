@@ -71,7 +71,14 @@ export default async function ProductPage({ params }: Args) {
             {Boolean(result.product.gallery?.length) ? (
               <Gallery gallery={result.product.gallery!} />
             ) : (
-              <div className='bg-secondary-100 relative aspect-square h-full max-h-[550px] w-full overflow-hidden' />
+              <div className='bg-secondary-100 relative aspect-square h-full max-h-[550px] w-full overflow-hidden'>
+                <RenderImage
+                  alt={result.product.name}
+                  className='h-full w-full object-cover'
+                  fallbackSrc='/no-image.png'
+                  src={undefined}
+                />
+              </div>
             )}
           </Suspense>
         </section>

@@ -18,10 +18,12 @@ export default async function PickupPointPage() {
 
   return (
     <main className='pt-24 mx-auto max-w-3xl'>
-      <RenderImage
-        className='mb-8 h-auto w-full rounded-2xl object-cover'
-        src={pickup.heroImage}
-      />
+      {pickup.heroImage ? (
+        <RenderImage
+          className='mb-8 h-auto w-full rounded-2xl object-cover'
+          src={pickup.heroImage}
+        />
+      ) : null}
 
       <Section
         className='!px-0 !pb-0'

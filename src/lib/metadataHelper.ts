@@ -43,5 +43,3 @@ export async function generateGlobalMetadata<T extends GlobalSlug>(slug: T) {
     title: doc?.meta?.title || doc?.title || 'Payload Ecommerce Template'
   };
 }
-
-const x = generateGlobalMetadata('home-page');

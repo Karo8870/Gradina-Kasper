@@ -4,16 +4,16 @@ import { Media } from '@/payload-types';
 export default function (
   props: Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
     src: number | Media | null | undefined;
+    fallbackSrc?: string;
   }
 ) {
-  if (
-    props.src === null ||
-    props.src === undefined ||
-    typeof props.src === 'number' ||
-    !props.src.url
-  ) {
+  const { fallbackSrc, src, ...imageProps } = props;
+  const resolvedSrc =
+    src && typeof src === 'object' && src.url ? src.url : fallbackSrc;
+
+  if (!resolvedSrc) {
     return <></>;
   }
 
-  return <img {...props} src={props.src.url} alt={props.alt} />;
+  return <img {...imageProps} src={resolvedSrc} alt={imageProps.alt} />;
 }

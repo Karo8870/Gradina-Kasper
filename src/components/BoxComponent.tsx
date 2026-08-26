@@ -22,6 +22,7 @@ export default function ({
   product: Product;
   deliveryPickupConfig?: DeliveryPickupConfig | null;
 }) {
+  console.log(product, 555);
   const isTemporarilyUnavailable = isProductTemporarilyUnavailable(product);
   const inventoryBadge = getInventoryBadge(product.inventory);
   const nextDeliveryDate = getNextDeliveryDate(deliveryPickupConfig);
@@ -37,11 +38,13 @@ export default function ({
     >
       <div className='relative min-h-72 md:min-h-0'>
         <RenderImage
+          alt={product.name}
           className={cn(
             'h-full w-full object-cover absolute top-0 left-0',
             isTemporarilyUnavailable && 'opacity-70 grayscale'
           )}
-          src={product.gallery![0].image}
+          fallbackSrc='/no-image.png'
+          src={product.gallery?.[0]?.image}
         />
       </div>
 

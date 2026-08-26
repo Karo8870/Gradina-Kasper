@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Section from '@/components/Section';
 import BoxComponent from '@/components/BoxComponent';
-import { Article, Product } from '@/payload-types';
+import { Article } from '@/payload-types';
 import { ArticleCard } from '@/components/ArticleBox';
 import { generateGlobalMetadata } from '@/lib/metadataHelper';
 
@@ -21,11 +21,13 @@ export default async function () {
     depth: 3
   });
 
+  console.log(home);
+
   const deliveryPickupConfig = await payload.findGlobal({
     slug: 'delivery-pickup-configuration' as any,
     depth: 0
   });
-  
+
   return (
     <>
       <section className='flex flex-col gap-7 px-4 pb-0 h-[100dvh] sm:pb-7 md:px-0 lg:px-0 mb-10'>
@@ -51,15 +53,17 @@ export default async function () {
           </div>
         </div>
       </section>
-      <Section
-        title={home.highlightBoxTitle}
-        description={home.highlightBoxContent}
-      >
-        <BoxComponent
-          product={home.featuredProduct as Product}
-          deliveryPickupConfig={deliveryPickupConfig}
-        />
-      </Section>
+      {home.featuredProduct && typeof home.featuredProduct === 'object' ? (
+        <Section
+          title={home.highlightBoxTitle}
+          description={home.highlightBoxContent}
+        >
+          <BoxComponent
+            product={home.featuredProduct}
+            deliveryPickupConfig={deliveryPickupConfig}
+          />
+        </Section>
+      ) : null}
       <Section
         title={home.highlightArticlesTitle}
         description={home.highlightArticlesContent}

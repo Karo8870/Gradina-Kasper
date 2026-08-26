@@ -278,7 +278,7 @@ export const initiateNetopiaPayment: NonNullable<PaymentAdapter>['initiatePaymen
               ),
               category: 'Produse',
               price: getUnitPrice(item, currency),
-              vat: 21
+              vat: 11
             })),
             ...(deliveryFee > 0
               ? [

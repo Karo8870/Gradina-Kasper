@@ -30,7 +30,9 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     <div className='h-full flex flex-col'>
       <div className='relative w-full grow basis-0 overflow-hidden mb-8 min-h-[300px] max-h-[600px]'>
         <RenderImage
+          alt='Imagine produs'
           className='w-full rounded-lg absolute top-0 left-0 h-full object-cover'
+          fallbackSrc='/no-image.png'
           src={gallery[current].image}
         />
       </div>

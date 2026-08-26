@@ -30,12 +30,17 @@ import { MailSettings } from '@/globals/MailSettings';
 import { BoxNotifications } from '@/collections/BoxNotifications';
 import { DeliveryPickupConfiguration } from '@/globals/DeliveryPickupConfiguration';
 
+import sharp from 'sharp';
+
 import 'dotenv/config';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+  graphQL: {
+    disable: true
+  },
   admin: {
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
@@ -98,7 +103,8 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts')
-  }
+  },
+  sharp
   // Sharp is now an optional dependency -
   // if you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.
