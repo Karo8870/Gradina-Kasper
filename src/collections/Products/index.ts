@@ -33,7 +33,7 @@ export const ProductsCollection: CollectionOverride = ({
   admin: {
     ...defaultCollection?.admin,
     defaultColumns: [
-      'title',
+      'name',
       'enableVariants',
       '_status',
       'variants.variants',
