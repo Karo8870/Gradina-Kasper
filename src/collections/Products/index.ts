@@ -15,7 +15,7 @@ function validatePrice(value: string | null | undefined | string[]) {
     return "Value isn't a valid number with 2 decimal places";
   }
 
-  if (value.match(/^([^0]\d+|0)\.\d{2}$/g)) {
+  if (value.match(/^([^0]\d*|0)\.\d{2}$/g)) {
     return true;
   }
 
@@ -33,7 +33,7 @@ export const ProductsCollection: CollectionOverride = ({
   admin: {
     ...defaultCollection?.admin,
     defaultColumns: [
-      'title',
+      'name',
       'enableVariants',
       '_status',
       'variants.variants',
