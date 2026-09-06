@@ -140,6 +140,8 @@ export async function NetopiaIPN(req: PayloadRequest) {
     req
   })) as any;
 
+  console.log('finalizing order', isPaidStatus(status));
+
   const finalizedOrder = isPaidStatus(status)
     ? await finalizeNetopiaOrder({
         req,

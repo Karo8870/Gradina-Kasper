@@ -74,6 +74,8 @@ export const finalizeNetopiaOrder = async ({
   req: PayloadRequest;
   transactionID: DefaultDocumentIDType;
 }) => {
+  console.log('Finalize netopia order');
+
   const transaction = (await req.payload.findByID({
     id: transactionID,
     collection: 'transactions' as any,

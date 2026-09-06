@@ -2,6 +2,7 @@ import type { Order, Product } from '@/payload-types';
 import { formatDateTime } from '@/utilities/formatDateTime';
 import { getServerSideURL } from '@/utilities/getURL';
 import type { Payload } from 'payload';
+import { generateInvoicePDF } from '@/lib/invoices';
 
 type EmailType =
   | 'orderCancelled'
@@ -351,6 +352,8 @@ export const sendOrderEmail = async ({
   type: EmailType;
 }) => {
   try {
+    console.log('Sending order email');
+
     const order = (await payload.findByID({
       id: orderID,
       collection: 'orders',
@@ -371,10 +374,13 @@ export const sendOrderEmail = async ({
       }
     })) as Order;
 
+    console.log('Fetched order');
+
     const params = await buildParams({ order, payload });
     const to = params.customerEmail;
 
     if (!to) {
+      console.log('Could not send ${type} email: order has no email.');
       payload.logger.warn(`Could not send ${type} email: order has no email.`);
       return;
     }
@@ -386,8 +392,30 @@ export const sendOrderEmail = async ({
     const template = settings?.[type] || fallbackTemplate;
     const subjectTemplate = template.subject || fallbackTemplate.subject || '';
     const bodyTemplate = template.body || fallbackTemplate.body || '';
+    const attachments =
+      type === 'orderPlaced'
+        ? [await generateInvoicePDF({ customerEmail: to, order, payload })]
+        : undefined;
+
+    console.log('Sending now');
 
     await payload.sendEmail({
+      attachments,
+      html: renderTemplate({
+        escapeValues: false,
+        params,
+        template: bodyTemplate
+      }),
+      subject: renderTemplate({
+        escapeValues: true,
+        params,
+        template: subjectTemplate
+      }),
+      to
+    });
+
+    console.log('Sent', {
+      attachments,
       html: renderTemplate({
         escapeValues: false,
         params,

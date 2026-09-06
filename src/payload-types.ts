@@ -79,6 +79,7 @@ export interface Config {
     articles: Article;
     vegetables: Vegetable;
     'box-notifications': BoxNotification;
+    invoices: Invoice;
     addresses: Address;
     products: Product;
     carts: Cart;
@@ -104,6 +105,7 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     vegetables: VegetablesSelect<false> | VegetablesSelect<true>;
     'box-notifications': BoxNotificationsSelect<false> | BoxNotificationsSelect<true>;
+    invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     carts: CartsSelect<false> | CartsSelect<true>;
@@ -617,6 +619,19 @@ export interface BoxNotification {
   createdAt: string;
 }
 /**
+ * ID-ul documentului este numărul facturii și se incrementează automat.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: number;
+  order: number | Order;
+  issuedAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -667,6 +682,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'box-notifications';
         value: number | BoxNotification;
+      } | null)
+    | ({
+        relationTo: 'invoices';
+        value: number | Invoice;
       } | null)
     | ({
         relationTo: 'addresses';
@@ -850,6 +869,16 @@ export interface BoxNotificationsSelect<T extends boolean = true> {
   user?: T;
   box?: T;
   sentAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices_select".
+ */
+export interface InvoicesSelect<T extends boolean = true> {
+  order?: T;
+  issuedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -29,6 +29,7 @@ import { CheckoutSettings } from '@/globals/CheckoutSettings';
 import { MailSettings } from '@/globals/MailSettings';
 import { BoxNotifications } from '@/collections/BoxNotifications';
 import { DeliveryPickupConfiguration } from '@/globals/DeliveryPickupConfiguration';
+import { Invoices } from '@/collections/Invoices';
 
 import sharp from 'sharp';
 
@@ -59,7 +60,8 @@ export default buildConfig({
     Media,
     Articles,
     Vegetables,
-    BoxNotifications
+    BoxNotifications,
+    Invoices
   ],
   db: postgresAdapter({
     pool: {

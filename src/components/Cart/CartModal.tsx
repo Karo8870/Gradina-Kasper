@@ -14,7 +14,6 @@ import {
   useCurrency
 } from '@payloadcms/plugin-ecommerce/client/react';
 import { ShoppingCart } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -197,7 +196,7 @@ export function CartModal({
                           href={`/products/${(item.product as Product)?.slug}`}
                         >
                           <div className='bg-secondary-100 relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-neutral-200'>
-                            <Image
+                            <img
                               alt={image?.alt || product?.name || ''}
                               className='h-full w-full object-cover'
                               height={96}
