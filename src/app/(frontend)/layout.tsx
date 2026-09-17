@@ -13,7 +13,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
     <html lang='en'>
-      <body>
+      <body className='dark'>
         <CookieConsent>
           <main>{children}</main>
         </CookieConsent>
