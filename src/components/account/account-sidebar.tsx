@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, UserRound } from 'lucide-react';
+import { LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -12,6 +12,11 @@ const navigationItems = [
     href: '/account',
     icon: UserRound,
     label: 'Contul meu'
+  },
+  {
+    href: '/account/security',
+    icon: ShieldCheck,
+    label: 'Securitate'
   }
 ] as const;
 

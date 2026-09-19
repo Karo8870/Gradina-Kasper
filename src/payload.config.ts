@@ -26,13 +26,14 @@ import {
   verificationEmailSubject
 } from './emails/auth/verification';
 import { betterAuthOptions } from './lib/auth/options';
+import { socialProviderConfig } from './lib/auth/social-providers.server';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
   cors: {
-    origins: ['http://localhost:3000']
+    origins: ['http://localhost:3000', 'http://192.168.1.19:3000']
   },
   graphQL: {
     disable: true
@@ -115,6 +116,7 @@ export default buildConfig({
               });
             }
           },
+          socialProviders: socialProviderConfig,
           secret: envConfig.BETTER_AUTH_SECRET,
           trustedOrigins: [envConfig.NEXT_PUBLIC_SERVER_URL]
         })

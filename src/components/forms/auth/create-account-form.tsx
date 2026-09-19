@@ -17,7 +17,9 @@ import {
   safeInternalRedirect,
   withFeedback
 } from '@/features/auth/utils';
+import { socialProviders } from '@/lib/auth/social-providers';
 
+import { SocialAuthButton } from './social-auth-button';
 import { emailSchema, passwordSchema } from './shared';
 
 const createAccountSchema = z
@@ -89,6 +91,13 @@ export function CreateAccountForm() {
       <FormSubmitButton isSubmitting={form.formState.isSubmitting}>
         Creează contul
       </FormSubmitButton>
+      {socialProviders.map((provider) => (
+        <SocialAuthButton
+          feedbackPath='/create-account'
+          key={provider.id}
+          provider={provider.id}
+        />
+      ))}
       <p className='text-muted-foreground text-sm'>
         Ai deja cont?{' '}
         <Link

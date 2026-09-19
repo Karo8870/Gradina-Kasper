@@ -10,6 +10,8 @@ export default cleanEnv(process.env, {
   }),
   PAYLOAD_SECRET: str(),
   BETTER_AUTH_SECRET: str(),
+  GOOGLE_CLIENT_ID: str(),
+  GOOGLE_CLIENT_SECRET: str(),
   DATABASE_URL: url(),
   NEXT_PUBLIC_SERVER_URL: url({
     default: 'http://localhost:3000'

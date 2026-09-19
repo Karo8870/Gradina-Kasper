@@ -17,7 +17,9 @@ import {
   safeInternalRedirect,
   withFeedback
 } from '@/features/auth/utils';
+import { socialProviders } from '@/lib/auth/social-providers';
 
+import { SocialAuthButton } from './social-auth-button';
 import { emailSchema } from './shared';
 
 const loginSchema = z.object({
@@ -83,6 +85,13 @@ export function LoginForm() {
       <FormSubmitButton isSubmitting={form.formState.isSubmitting}>
         Autentifică-te
       </FormSubmitButton>
+      {socialProviders.map((provider) => (
+        <SocialAuthButton
+          feedbackPath='/login'
+          key={provider.id}
+          provider={provider.id}
+        />
+      ))}
       <p className='text-muted-foreground text-sm'>
         Nu ai cont?{' '}
         <Link

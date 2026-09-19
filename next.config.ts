@@ -53,7 +53,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(dirname)
-  }
+  },
+  allowedDevOrigins: ['192.168.1.19', 'localhost']
 };
 
 export default withPayload(nextConfig, { devBundleServerPackages: false });
