@@ -1,19 +1,11 @@
 import type { CollectionConfig } from 'payload';
+import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
 
 import {
   adminOnly,
   adminOnlyField,
-  adminOrSelf,
-  publicAccess
+  adminOrSelf
 } from '@/access/users';
-import {
-  passwordResetEmailHTML,
-  passwordResetEmailSubject
-} from '@/emails/auth/password-reset';
-import {
-  verificationEmailHTML,
-  verificationEmailSubject
-} from '@/emails/auth/verification';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -22,39 +14,23 @@ export const Users: CollectionConfig = {
   },
   access: {
     admin: adminOnly,
-    create: publicAccess,
+    create: adminOnly,
     delete: adminOnly,
     read: adminOrSelf,
     unlock: adminOnly,
     update: adminOrSelf
   },
   auth: {
-    tokenExpiration: 60 * 60 * 24 * 14,
-    verify: {
-      generateEmailHTML: (args) => {
-        if (!args?.token || !args.user?.email) return '';
-        return verificationEmailHTML({
-          email: args.user.email,
-          token: args.token
-        });
-      },
-      generateEmailSubject: verificationEmailSubject
-    },
-    forgotPassword: {
-      expiration: 1000 * 60 * 15,
-      generateEmailHTML: (args) =>
-        args?.token ? passwordResetEmailHTML({ token: args.token }) : '',
-      generateEmailSubject: passwordResetEmailSubject
-    }
+    disableLocalStrategy: true,
+    strategies: [betterAuthStrategy()]
   },
   fields: [
     {
-      name: 'roles',
+      name: 'role',
       type: 'select',
-      hasMany: true,
       required: true,
       saveToJWT: true,
-      defaultValue: ['customer'],
+      defaultValue: 'customer',
       options: [
         {
           label: 'Admin',

@@ -1,8 +1,8 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
 import type { ComponentPropsWithoutRef } from 'react';
+import { useState } from 'react';
 import type { FieldError, UseFormRegisterReturn } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,7 @@ export function FormPasswordField({
         </Button>
       </div>
       {error?.message ? (
-        <p className='text-destructive text-sm' id={`${id}-error`}>
+        <p className='text-destructive !m-0 text-sm' id={`${id}-error`}>
           {error.message}
         </p>
       ) : null}

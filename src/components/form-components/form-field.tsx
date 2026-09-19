@@ -29,7 +29,7 @@ export function FormField({
         {...inputProps}
       />
       {error?.message ? (
-        <p className='text-destructive text-sm' id={`${id}-error`}>
+        <p className='text-destructive !m-0 text-sm' id={`${id}-error`}>
           {error.message}
         </p>
       ) : null}

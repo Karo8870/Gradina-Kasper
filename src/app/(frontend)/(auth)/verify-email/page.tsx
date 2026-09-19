@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getSearchParam, withFeedback } from '@/features/auth/utils';
+import { getBetterAuth } from '@/lib/auth/server';
 import { getCMS } from '@/lib/cms';
 import { staticMetadata } from '@/lib/static-metadata';
 
@@ -19,21 +20,25 @@ export default async function VerifyEmailPage({
     );
   }
 
+  let verified = false;
+
   try {
     const payload = await getCMS();
-    const verified = await payload.verifyEmail({ collection: 'users', token });
-
-    if (verified) {
-      redirect(
-        withFeedback(
-          '/login',
-          'success',
-          'Emailul a fost verificat. Te poți autentifica.'
-        )
-      );
-    }
+    const auth = getBetterAuth(payload);
+    const result = await auth.api.verifyEmail({ query: { token } });
+    verified = result?.status ?? false;
   } catch {
     // The login route gives a generic invalid-token response.
+  }
+
+  if (verified) {
+    redirect(
+      withFeedback(
+        '/login',
+        'success',
+        'Emailul a fost verificat. Te poți autentifica.'
+      )
+    );
   }
 
   redirect(

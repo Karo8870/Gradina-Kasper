@@ -45,9 +45,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
     router.replace(
       result.success
         ? withFeedback(
-            redirect ?? '/account',
+            '/login',
             'success',
-            'Parola a fost actualizată cu succes.'
+            'Parola a fost actualizată. Te poți autentifica.',
+            { redirect }
           )
         : withFeedback(
             '/confirm-password-reset',

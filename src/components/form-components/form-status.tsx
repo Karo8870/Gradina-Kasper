@@ -23,7 +23,7 @@ const statusConfig = {
   },
   warning: {
     icon: TriangleAlert,
-    title: 'Atentie',
+    title: 'Atenție',
     className: 'border-amber-500/40 text-amber-700 dark:text-amber-300'
   }
 } satisfies Record<

@@ -1,4 +1,4 @@
-import { bool, cleanEnv, num, str, url } from 'envalid';
+import { cleanEnv, num, str, url } from 'envalid';
 
 export default cleanEnv(process.env, {
   S3_BUCKET: str(),
@@ -9,6 +9,7 @@ export default cleanEnv(process.env, {
     default: 'auto'
   }),
   PAYLOAD_SECRET: str(),
+  BETTER_AUTH_SECRET: str(),
   DATABASE_URL: url(),
   NEXT_PUBLIC_SERVER_URL: url({
     default: 'http://localhost:3000'
@@ -20,8 +21,5 @@ export default cleanEnv(process.env, {
   SMTP_USER: str(),
   SMTP_PASS: str(),
   SMTP_FROM_NAME: str(),
-  SMTP_FROM_ADDRESS: str(),
-  SMTP_SECURE: bool({
-    default: false
-  })
+  SMTP_FROM_ADDRESS: str()
 });

@@ -1,14 +1,14 @@
 import type { Access, FieldAccess } from 'payload';
 
 type Role = 'admin' | 'customer';
-type RoleUser = { id?: number | string; roles?: Role[] };
+type RoleUser = { id?: number | string; role?: Role };
 
 function getRoleUser(user: unknown) {
   return user as RoleUser | null | undefined;
 }
 
 export function hasRole(user: unknown, role: Role) {
-  return getRoleUser(user)?.roles?.includes(role) ?? false;
+  return getRoleUser(user)?.role === role;
 }
 
 export const publicAccess: Access = () => true;
