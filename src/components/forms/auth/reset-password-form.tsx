@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
-import { resetPasswordAction } from '@/actions/auth';
+import { resetPasswordAction } from '@/actions/auth/auth';
 import {
   FormPasswordField,
   FormSubmitButton

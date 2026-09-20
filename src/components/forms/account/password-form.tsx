@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import {
   changePasswordAction,
   setPasswordAction
-} from '@/actions/account-security';
+} from '@/actions/auth/account-security';
 import {
   FormPasswordField,
   FormSubmitButton

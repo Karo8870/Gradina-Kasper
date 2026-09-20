@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import {
   sendTwoFactorOTPAction,
   verifyTwoFactorAction
-} from '@/actions/two-factor';
+} from '@/actions/auth/two-factor';
 import {
   FormCheckboxField,
   FormField,

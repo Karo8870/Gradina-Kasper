@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
-import { forgotPasswordAction } from '@/actions/auth';
+import { forgotPasswordAction } from '@/actions/auth/auth';
 import { FormField, FormSubmitButton } from '@/components/form-components';
 import { safeInternalRedirect, withFeedback } from '@/lib/auth/utils';
 

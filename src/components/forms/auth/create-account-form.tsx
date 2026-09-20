@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
-import { createAccountAction } from '@/actions/auth';
+import { createAccountAction } from '@/actions/auth/auth';
 import {
   FormField,
   FormPasswordField,

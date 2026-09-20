@@ -4,7 +4,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { socialLoginAction } from '@/actions/auth';
+import { socialLoginAction } from '@/actions/auth/auth';
 import { Button } from '@/components/ui/button';
 import {
   getSocialProvider,

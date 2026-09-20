@@ -12,7 +12,7 @@ import {
   enableTwoFactorAction,
   regenerateBackupCodesAction,
   verifyTOTPEnrollmentAction
-} from '@/actions/two-factor';
+} from '@/actions/auth/two-factor';
 import {
   FormCheckboxField,
   FormOTPField,

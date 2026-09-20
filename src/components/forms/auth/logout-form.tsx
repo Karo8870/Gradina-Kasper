@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { logoutAction } from '@/actions/auth';
+import { logoutAction } from '@/actions/auth/auth';
 import { FormStatus } from '@/components/form-components';
 import { withFeedback } from '@/lib/auth/utils';
 

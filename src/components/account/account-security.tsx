@@ -16,7 +16,7 @@ import {
   revokeAccountSessionAction,
   revokeOtherAccountSessionsAction,
   unlinkSocialAccountAction
-} from '@/actions/account-security';
+} from '@/actions/auth/account-security';
 import { Button } from '@/components/ui/button';
 import {
   Card,
