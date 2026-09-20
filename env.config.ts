@@ -1,4 +1,4 @@
-import { cleanEnv, num, str, url } from 'envalid';
+import { bool, cleanEnv, num, str, url } from 'envalid';
 
 export default cleanEnv(process.env, {
   S3_BUCKET: str(),
@@ -16,6 +16,12 @@ export default cleanEnv(process.env, {
   }),
   GOOGLE_CLIENT_ID: str(),
   GOOGLE_CLIENT_SECRET: str(),
+  MAPBOX_ENABLED: bool({
+    default: false
+  }),
+  MAPBOX_ACCESS_TOKEN: str({
+    default: ''
+  }),
   DATABASE_URL: url(),
   NEXT_PUBLIC_SERVER_URL: url({
     default: 'http://localhost:3000'

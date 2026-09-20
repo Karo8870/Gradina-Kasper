@@ -158,6 +158,7 @@ export default buildConfig({
         isDocumentOwner,
         publicAccess
       },
+      addresses: true,
       carts: {
         allowGuestCarts: true
       },
