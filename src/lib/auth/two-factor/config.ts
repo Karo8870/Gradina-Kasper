@@ -10,5 +10,4 @@ export const twoFactorCapabilities = {
   supportsBackupCodes: twoFactorMode === 'totp'
 } as const;
 
-export const TWO_FACTOR_CHALLENGE_MAX_AGE = 60 * 10;
 export const TRUSTED_DEVICE_MAX_AGE = 60 * 60 * 24 * 30;

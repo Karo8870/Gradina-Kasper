@@ -1,10 +1,6 @@
 'use server';
 
-import {
-  safeInternalRedirect,
-  withFeedback,
-  withSafeRedirect
-} from '@/features/auth/utils';
+import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
 import {
   applyBetterAuthCookies,
   getBetterAuthRequest
@@ -43,7 +39,7 @@ export async function socialLoginAction({
     const { auth, requestHeaders } = await getBetterAuthRequest();
     const { headers: responseHeaders, response } = await auth.api.signInSocial({
       body: {
-        callbackURL: withSafeRedirect('/sso-complete', safeRedirect),
+        callbackURL: safeRedirect,
         errorCallbackURL: withFeedback(
           safeFeedbackPath,
           'error',

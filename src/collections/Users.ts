@@ -1,3 +1,4 @@
+import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
 import type { CollectionConfig } from 'payload';
 
 import {
@@ -6,7 +7,6 @@ import {
   adminOrSelf,
   denyFieldAccess
 } from '@/access/users';
-import { twoFactorAwareBetterAuthStrategy } from '@/lib/auth/payload-strategy';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -23,7 +23,7 @@ export const Users: CollectionConfig = {
   },
   auth: {
     disableLocalStrategy: true,
-    strategies: [twoFactorAwareBetterAuthStrategy()]
+    strategies: [betterAuthStrategy()]
   },
   fields: [
     {

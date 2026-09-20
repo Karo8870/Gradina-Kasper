@@ -173,7 +173,6 @@ export interface Session {
   ipAddress?: string | null;
   userAgent?: string | null;
   user: number | User;
-  twoFactorPending?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -361,7 +360,6 @@ export interface SessionsSelect<T extends boolean = true> {
   ipAddress?: T;
   userAgent?: T;
   user?: T;
-  twoFactorPending?: T;
   updatedAt?: T;
   createdAt?: T;
 }

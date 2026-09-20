@@ -7,7 +7,6 @@ import {
 } from '@/emails/auth/two-factor-otp';
 
 import { twoFactorMode, TRUSTED_DEVICE_MAX_AGE } from './config';
-import { providerAgnosticTwoFactor } from './provider-bridge';
 
 export function getRuntimeTwoFactorPlugins(payload: BasePayload) {
   if (twoFactorMode === 'none') return [];
@@ -49,5 +48,5 @@ export function getRuntimeTwoFactorPlugins(payload: BasePayload) {
     twoFactorCookieMaxAge: 60 * 10
   });
 
-  return [factorPlugin, providerAgnosticTwoFactor(twoFactorMode)];
+  return [factorPlugin];
 }
