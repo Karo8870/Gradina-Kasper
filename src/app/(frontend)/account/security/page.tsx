@@ -6,6 +6,7 @@ import { getBetterAuth } from '@/lib/auth/server';
 import { formatSessionDevice } from '@/lib/auth/sessions';
 import { getCMS } from '@/lib/cms';
 import { socialProviders } from '@/lib/auth/social-providers';
+import { twoFactorMode } from '@/lib/auth/two-factor/config';
 import { staticMetadata } from '@/lib/static-metadata';
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -48,6 +49,14 @@ export default async function AccountSecurityPage({
           isCurrent: session.id === currentSession?.session.id,
           updatedAt: session.updatedAt.toISOString()
         }))}
+        twoFactor={
+          twoFactorMode === 'none'
+            ? undefined
+            : {
+                enabled: Boolean(currentSession?.user.twoFactorEnabled),
+                mode: twoFactorMode
+              }
+        }
       />
     </>
   );
