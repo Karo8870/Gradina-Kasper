@@ -1,24 +1,16 @@
 'use client';
 
-import { LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import {
+  accountNavigationItems,
+  logoutNavigationItem
+} from '@/components/account/account-navigation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-const navigationItems = [
-  {
-    href: '/account',
-    icon: UserRound,
-    label: 'Contul meu'
-  },
-  {
-    href: '/account/security',
-    icon: ShieldCheck,
-    label: 'Securitate'
-  }
-] as const;
+const LogoutIcon = logoutNavigationItem.icon;
 
 export function AccountSidebar({ email }: { email: string }) {
   const pathname = usePathname();
@@ -31,7 +23,7 @@ export function AccountSidebar({ email }: { email: string }) {
       </div>
       <Separator />
       <nav aria-label='Navigare cont' className='flex flex-col gap-1'>
-        {navigationItems.map(({ href, icon: Icon, label }) => {
+        {accountNavigationItems.map(({ href, icon: Icon, label }) => {
           const active = pathname === href;
 
           return (
@@ -53,11 +45,11 @@ export function AccountSidebar({ email }: { email: string }) {
         <Button
           className='w-full justify-start'
           nativeButton={false}
-          render={<Link href='/logout' />}
+          render={<Link href={logoutNavigationItem.href} />}
           variant='ghost'
         >
-          <LogOut data-icon='inline-start' />
-          Deconectare
+          <LogoutIcon data-icon='inline-start' />
+          {logoutNavigationItem.label}
         </Button>
       </div>
     </aside>

@@ -92,45 +92,35 @@ export const productsCollectionOverride: CollectionOverride = ({
         {
           label: 'Commerce',
           fields: [
+            priceField,
             {
-              type: 'row',
-              fields: [
-                priceField,
+              name: 'inventory',
+              type: 'number',
+              label: 'Inventory',
+              defaultValue: 0,
+              min: 0
+            },
+            {
+              name: 'visibility',
+              type: 'select',
+              label: 'Visibility',
+              defaultValue: 'public',
+              options: [
                 {
-                  name: 'inventory',
-                  type: 'number',
-                  label: 'Inventory',
-                  defaultValue: 0,
-                  min: 0
+                  label: 'Public',
+                  value: 'public'
+                },
+                {
+                  label: 'Hidden',
+                  value: 'hidden'
                 }
               ]
             },
             {
-              type: 'row',
-              fields: [
-                {
-                  name: 'visibility',
-                  type: 'select',
-                  label: 'Visibility',
-                  defaultValue: 'public',
-                  options: [
-                    {
-                      label: 'Public',
-                      value: 'public'
-                    },
-                    {
-                      label: 'Hidden',
-                      value: 'hidden'
-                    }
-                  ]
-                },
-                {
-                  name: 'disabled',
-                  type: 'checkbox',
-                  label: 'Disabled',
-                  defaultValue: false
-                }
-              ]
+              name: 'disabled',
+              type: 'checkbox',
+              label: 'Disabled',
+              defaultValue: false
             },
             {
               type: 'group',

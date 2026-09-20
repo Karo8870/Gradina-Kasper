@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 
+import { isProductExpired } from '@/commerce/products';
 import { getCMS } from '@/lib/cms';
 
 import envConfig from '../../env.config';
@@ -15,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     overrideAccess: false,
     pagination: false,
     select: {
+      availability: true,
       slug: true,
       updatedAt: true
     }
@@ -27,9 +29,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${baseURL}/products`
     },
-    ...products.map((product) => ({
-      lastModified: product.updatedAt,
-      url: `${baseURL}/products/${product.slug}`
-    }))
+    ...products
+      .filter((product) => !isProductExpired(product))
+      .map((product) => ({
+        lastModified: product.updatedAt,
+        url: `${baseURL}/products/${product.slug}`
+      }))
   ];
 }
