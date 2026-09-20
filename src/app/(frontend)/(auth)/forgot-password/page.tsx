@@ -1,6 +1,6 @@
 import { ForgotPasswordForm } from '@/components/forms/auth/forgot-password-form';
-import { AuthFeedback } from '@/features/auth/auth-feedback';
-import { AuthPage } from '@/features/auth/auth-page';
+import { AuthFeedback } from '@/components/auth/auth-feedback';
+import { AuthPage } from '@/components/auth/auth-page';
 import { staticMetadata } from '@/lib/static-metadata';
 
 type SearchParams = Record<string, string | string[] | undefined>;

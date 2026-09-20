@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { loginAction } from '@/actions/auth';
 import {
@@ -17,18 +16,11 @@ import {
   safeInternalRedirect,
   withFeedback,
   withSafeRedirect
-} from '@/features/auth/utils';
+} from '@/lib/auth/utils';
 import { socialProviders } from '@/lib/auth/social-providers';
 
+import { loginSchema, type LoginValues } from './login-form.schema';
 import { SocialAuthButton } from './social-auth-button';
-import { emailSchema } from './shared';
-
-const loginSchema = z.object({
-  email: emailSchema,
-  password: z.string().min(1, 'Parola este obligatorie.')
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();

@@ -10,7 +10,7 @@ import {
   getSocialProvider,
   type SocialProviderId
 } from '@/lib/auth/social-providers';
-import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
+import { safeInternalRedirect, withFeedback } from '@/lib/auth/utils';
 
 export function SocialAuthButton({
   feedbackPath,

@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 
 import { CreateAccountForm } from '@/components/forms/auth/create-account-form';
-import { AuthFeedback } from '@/features/auth/auth-feedback';
-import { AuthPage } from '@/features/auth/auth-page';
-import { getCurrentUser } from '@/features/auth/current-user';
-import { withFeedback } from '@/features/auth/utils';
+import { AuthFeedback } from '@/components/auth/auth-feedback';
+import { AuthPage } from '@/components/auth/auth-page';
+import { getCurrentUser } from '@/lib/auth/current-user';
+import { withFeedback } from '@/lib/auth/utils';
 import { staticMetadata } from '@/lib/static-metadata';
 
 type SearchParams = Record<string, string | string[] | undefined>;

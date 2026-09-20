@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 
 import { ResetPasswordForm } from '@/components/forms/auth/reset-password-form';
-import { AuthFeedback } from '@/features/auth/auth-feedback';
-import { AuthPage } from '@/features/auth/auth-page';
-import { getSearchParam, withFeedback } from '@/features/auth/utils';
+import { AuthFeedback } from '@/components/auth/auth-feedback';
+import { AuthPage } from '@/components/auth/auth-page';
+import { getSearchParam, withFeedback } from '@/lib/auth/utils';
 import { staticMetadata } from '@/lib/static-metadata';
 
 type SearchParams = Record<string, string | string[] | undefined>;

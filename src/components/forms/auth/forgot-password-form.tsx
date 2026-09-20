@@ -3,19 +3,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { forgotPasswordAction } from '@/actions/auth';
 import { FormField, FormSubmitButton } from '@/components/form-components';
-import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
+import { safeInternalRedirect, withFeedback } from '@/lib/auth/utils';
 
-import { emailSchema } from './shared';
-
-const forgotPasswordSchema = z.object({
-  email: emailSchema
-});
-
-type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordValues
+} from './forgot-password-form.schema';
 
 export function ForgotPasswordForm() {
   const router = useRouter();

@@ -1,6 +1,6 @@
 'use server';
 
-import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
+import { safeInternalRedirect, withFeedback } from '@/lib/auth/utils';
 import {
   applyBetterAuthCookies,
   getBetterAuthRequest
@@ -9,6 +9,22 @@ import {
   getSocialProvider,
   type SocialProviderId
 } from '@/lib/auth/social-providers';
+import {
+  createAccountSchema,
+  type CreateAccountValues
+} from '@/components/forms/auth/create-account-form.schema';
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordValues
+} from '@/components/forms/auth/forgot-password-form.schema';
+import {
+  loginSchema,
+  type LoginValues
+} from '@/components/forms/auth/login-form.schema';
+import {
+  resetPasswordActionSchema,
+  type ResetPasswordActionValues
+} from '@/components/forms/auth/reset-password-form.schema';
 
 type ActionResult = { success: boolean };
 export type LoginActionResult =
@@ -62,19 +78,16 @@ export async function socialLoginAction({
   }
 }
 
-export async function createAccountAction({
-  email,
-  password,
-  passwordConfirm
-}: {
-  email: string;
-  password: string;
-  passwordConfirm: string;
-}): Promise<ActionResult> {
-  if (password !== passwordConfirm) return { success: false };
+export async function createAccountAction(
+  input: CreateAccountValues
+): Promise<ActionResult> {
+  const parsed = createAccountSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
+    const { email, password } = parsed.data;
 
     await auth.api.signUpEmail({
       body: {
@@ -91,16 +104,18 @@ export async function createAccountAction({
   }
 }
 
-export async function forgotPasswordAction({
-  email
-}: {
-  email: string;
-}): Promise<ActionResult> {
+export async function forgotPasswordAction(
+  input: ForgotPasswordValues
+): Promise<ActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(input);
+
+  if (!parsed.success) return { success: true };
+
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
 
     await auth.api.requestPasswordReset({
-      body: { email },
+      body: { email: parsed.data.email },
       headers: requestHeaders
     });
   } catch {
@@ -110,17 +125,17 @@ export async function forgotPasswordAction({
   return { success: true };
 }
 
-export async function loginAction({
-  email,
-  password
-}: {
-  email: string;
-  password: string;
-}): Promise<LoginActionResult> {
+export async function loginAction(
+  input: LoginValues
+): Promise<LoginActionResult> {
+  const parsed = loginSchema.safeParse(input);
+
+  if (!parsed.success) return { status: 'error' };
+
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
     const { headers: responseHeaders, response } = await auth.api.signInEmail({
-      body: { email, password },
+      body: parsed.data,
       headers: requestHeaders,
       returnHeaders: true
     });
@@ -151,24 +166,20 @@ export async function logoutAction(): Promise<ActionResult> {
   }
 }
 
-export async function resetPasswordAction({
-  password,
-  passwordConfirm,
-  token
-}: {
-  password: string;
-  passwordConfirm: string;
-  token: string;
-}): Promise<ActionResult> {
-  if (password !== passwordConfirm) return { success: false };
+export async function resetPasswordAction(
+  input: ResetPasswordActionValues
+): Promise<ActionResult> {
+  const parsed = resetPasswordActionSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
 
     await auth.api.resetPassword({
       body: {
-        newPassword: password,
-        token
+        newPassword: parsed.data.password,
+        token: parsed.data.token
       },
       headers: requestHeaders
     });

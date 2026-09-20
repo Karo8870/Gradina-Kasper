@@ -5,7 +5,6 @@ import { LoaderCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import {
   sendTwoFactorOTPAction,
@@ -19,21 +18,13 @@ import {
   FormSubmitButton
 } from '@/components/form-components';
 import { Button } from '@/components/ui/button';
-import { safeInternalRedirect } from '@/features/auth/utils';
+import { safeInternalRedirect } from '@/lib/auth/utils';
 import type { TwoFactorMode } from '@/lib/auth/two-factor/config';
 
-const challengeSchema = z.object({
-  code: z
-    .string()
-    .refine(
-      (value) =>
-        /^\d{6}$/.test(value) || /^[A-Za-z0-9]{5}-[A-Za-z0-9]{5}$/.test(value),
-      'Introdu un cod valid.'
-    ),
-  trustDevice: z.boolean()
-});
-
-type ChallengeValues = z.infer<typeof challengeSchema>;
+import {
+  twoFactorChallengeSchema,
+  type TwoFactorChallengeValues
+} from './two-factor-challenge-form.schema';
 
 export function TwoFactorChallengeForm({
   mode
@@ -44,9 +35,9 @@ export function TwoFactorChallengeForm({
   const searchParams = useSearchParams();
   const destination =
     safeInternalRedirect(searchParams.get('redirect')) ?? '/account';
-  const form = useForm<ChallengeValues>({
+  const form = useForm<TwoFactorChallengeValues>({
     defaultValues: { code: '', trustDevice: false },
-    resolver: zodResolver(challengeSchema)
+    resolver: zodResolver(twoFactorChallengeSchema)
   });
   const sentInitialCode = useRef(false);
   const [useBackupCode, setUseBackupCode] = useState(false);
@@ -92,7 +83,7 @@ export function TwoFactorChallengeForm({
     });
   }
 
-  async function onSubmit(values: ChallengeValues) {
+  async function onSubmit(values: TwoFactorChallengeValues) {
     const method = useBackupCode ? 'backup' : mode;
     const result = await verifyTwoFactorAction({
       ...values,

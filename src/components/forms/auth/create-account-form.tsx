@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { createAccountAction } from '@/actions/auth';
 import {
@@ -16,24 +15,14 @@ import {
   redirectQuery,
   safeInternalRedirect,
   withFeedback
-} from '@/features/auth/utils';
+} from '@/lib/auth/utils';
 import { socialProviders } from '@/lib/auth/social-providers';
 
+import {
+  createAccountSchema,
+  type CreateAccountValues
+} from './create-account-form.schema';
 import { SocialAuthButton } from './social-auth-button';
-import { emailSchema, passwordSchema } from './shared';
-
-const createAccountSchema = z
-  .object({
-    email: emailSchema,
-    password: passwordSchema,
-    passwordConfirm: z.string().min(1, 'Confirmă parola.')
-  })
-  .refine(({ password, passwordConfirm }) => password === passwordConfirm, {
-    message: 'Parolele nu coincid.',
-    path: ['passwordConfirm']
-  });
-
-type CreateAccountValues = z.infer<typeof createAccountSchema>;
 
 export function CreateAccountForm() {
   const router = useRouter();

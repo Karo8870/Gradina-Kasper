@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { getSearchParam, withFeedback } from '@/features/auth/utils';
+import { getSearchParam, withFeedback } from '@/lib/auth/utils';
 import { getBetterAuth } from '@/lib/auth/server';
 import { getCMS } from '@/lib/cms';
 import { staticMetadata } from '@/lib/static-metadata';

@@ -6,7 +6,7 @@ import {
   getSearchParam,
   safeInternalRedirect,
   withSafeRedirect
-} from '@/features/auth/utils';
+} from '@/lib/auth/utils';
 
 export function AdminLoginRedirect({ searchParams }: AdminViewServerProps) {
   const requestedPath = safeInternalRedirect(

@@ -19,10 +19,18 @@ After you click the `Deploy` button above, you'll want to have standalone copy o
 1. First [clone the repo](#clone) if you have not done so already
 2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
+3. `bun install && bun run dev` to install dependencies and start the dev server
 4. open `http://localhost:3000` to open the app in your browser
 
 That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+
+## Project conventions
+
+- Use Bun for installing dependencies and running scripts. `bun.lock` is the only dependency lockfile.
+- Keep routes in `src/app`, reusable UI in `src/components`, server actions in `src/actions`, and application utilities in `src/lib`.
+- Keep each form's Zod schema in a colocated `*.schema.ts` file and use the same schema in React Hook Form and its server action.
+- Use Shadcn's Base Nova registry for UI primitives. Base UI provides component behavior and Tailwind provides their generated styling.
+- Regenerate files in `src/components/ui` with the Shadcn CLI; do not edit those generated components by hand.
 
 #### Docker (Optional)
 

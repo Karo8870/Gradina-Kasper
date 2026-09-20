@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { logoutAction } from '@/actions/auth';
 import { FormStatus } from '@/components/form-components';
-import { withFeedback } from '@/features/auth/utils';
+import { withFeedback } from '@/lib/auth/utils';
 
 export function LogoutForm() {
   const didStart = useRef(false);

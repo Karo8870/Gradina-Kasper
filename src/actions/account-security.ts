@@ -1,6 +1,14 @@
 'use server';
 
-import { withFeedback } from '@/features/auth/utils';
+import { z } from 'zod';
+
+import {
+  changePasswordSchema,
+  passwordSetupSchema,
+  type ChangePasswordValues,
+  type PasswordSetupValues
+} from '@/components/forms/account/password-form.schema';
+import { withFeedback } from '@/lib/auth/utils';
 import {
   applyBetterAuthCookies,
   getBetterAuthRequest
@@ -14,16 +22,23 @@ type ActionResult = { success: boolean };
 type SocialLinkResult =
   { success: true; url: string } | { success: false; url?: never };
 
-function hasValidPassword(password: string, passwordConfirm: string) {
-  return password === passwordConfirm && password.length >= 8;
-}
+const socialProviderInputSchema = z.object({
+  provider: z.string().min(1)
+});
+const socialAccountInputSchema = socialProviderInputSchema.extend({
+  accountId: z.string().min(1)
+});
+const sessionInputSchema = z.object({
+  sessionId: z.string().min(1)
+});
 
-export async function linkSocialAccountAction({
-  provider: providerId
-}: {
+export async function linkSocialAccountAction(input: {
   provider: SocialProviderId;
 }): Promise<SocialLinkResult> {
-  const provider = getSocialProvider(providerId);
+  const parsed = socialProviderInputSchema.safeParse(input);
+  const provider = parsed.success
+    ? getSocialProvider(parsed.data.provider)
+    : undefined;
 
   if (!provider) return { success: false };
 
@@ -58,16 +73,16 @@ export async function linkSocialAccountAction({
   }
 }
 
-export async function unlinkSocialAccountAction({
-  accountId,
-  provider: providerId
-}: {
+export async function unlinkSocialAccountAction(input: {
   accountId: string;
   provider: SocialProviderId;
 }): Promise<ActionResult> {
-  const provider = getSocialProvider(providerId);
+  const parsed = socialAccountInputSchema.safeParse(input);
+  const provider = parsed.success
+    ? getSocialProvider(parsed.data.provider)
+    : undefined;
 
-  if (!provider) return { success: false };
+  if (!parsed.success || !provider) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
@@ -76,7 +91,8 @@ export async function unlinkSocialAccountAction({
     });
     const socialAccount = accounts.find(
       (account) =>
-        account.id === accountId && account.providerId === provider.id
+        account.id === parsed.data.accountId &&
+        account.providerId === provider.id
     );
 
     if (!socialAccount) return { success: false };
@@ -92,14 +108,12 @@ export async function unlinkSocialAccountAction({
   }
 }
 
-export async function setPasswordAction({
-  password,
-  passwordConfirm
-}: {
-  password: string;
-  passwordConfirm: string;
-}): Promise<ActionResult> {
-  if (!hasValidPassword(password, passwordConfirm)) return { success: false };
+export async function setPasswordAction(
+  input: PasswordSetupValues
+): Promise<ActionResult> {
+  const parsed = passwordSetupSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
@@ -112,7 +126,7 @@ export async function setPasswordAction({
     }
 
     await auth.api.setPassword({
-      body: { newPassword: password },
+      body: { newPassword: parsed.data.password },
       headers: requestHeaders
     });
 
@@ -122,25 +136,19 @@ export async function setPasswordAction({
   }
 }
 
-export async function changePasswordAction({
-  currentPassword,
-  password,
-  passwordConfirm
-}: {
-  currentPassword: string;
-  password: string;
-  passwordConfirm: string;
-}): Promise<ActionResult> {
-  if (!currentPassword || !hasValidPassword(password, passwordConfirm)) {
-    return { success: false };
-  }
+export async function changePasswordAction(
+  input: ChangePasswordValues
+): Promise<ActionResult> {
+  const parsed = changePasswordSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
     const { headers: responseHeaders } = await auth.api.changePassword({
       body: {
-        currentPassword,
-        newPassword: password,
+        currentPassword: parsed.data.currentPassword,
+        newPassword: parsed.data.password,
         revokeOtherSessions: true
       },
       headers: requestHeaders,
@@ -155,12 +163,12 @@ export async function changePasswordAction({
   }
 }
 
-export async function revokeAccountSessionAction({
-  sessionId
-}: {
+export async function revokeAccountSessionAction(input: {
   sessionId: string;
 }): Promise<ActionResult> {
-  if (!sessionId) return { success: false };
+  const parsed = sessionInputSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
 
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
@@ -169,11 +177,14 @@ export async function revokeAccountSessionAction({
       auth.api.listSessions({ headers: requestHeaders })
     ]);
 
-    if (!currentSession?.session || currentSession.session.id === sessionId) {
+    if (
+      !currentSession?.session ||
+      currentSession.session.id === parsed.data.sessionId
+    ) {
       return { success: false };
     }
 
-    const session = sessions.find((item) => item.id === sessionId);
+    const session = sessions.find((item) => item.id === parsed.data.sessionId);
 
     if (!session) return { success: false };
 

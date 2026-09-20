@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 
 import { FormStatus, type FormStatusKind } from '@/components/form-components';
-
-import { getSearchParam } from './utils';
+import { getSearchParam } from '@/lib/auth/utils';
 
 const feedbackOrder = ['error', 'warning', 'success', 'message'] as const;
 

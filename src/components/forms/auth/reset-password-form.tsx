@@ -3,28 +3,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { resetPasswordAction } from '@/actions/auth';
 import {
   FormPasswordField,
   FormSubmitButton
 } from '@/components/form-components';
-import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
+import { safeInternalRedirect, withFeedback } from '@/lib/auth/utils';
 
-import { passwordSchema } from './shared';
-
-const resetPasswordSchema = z
-  .object({
-    password: passwordSchema,
-    passwordConfirm: z.string().min(1, 'Confirmă parola.')
-  })
-  .refine(({ password, passwordConfirm }) => password === passwordConfirm, {
-    message: 'Parolele nu coincid.',
-    path: ['passwordConfirm']
-  });
-
-type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
+import {
+  resetPasswordSchema,
+  type ResetPasswordValues
+} from './reset-password-form.schema';
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();

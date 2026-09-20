@@ -1,5 +1,5 @@
 import { LogoutForm } from '@/components/forms/auth/logout-form';
-import { AuthPage } from '@/features/auth/auth-page';
+import { AuthPage } from '@/components/auth/auth-page';
 import { staticMetadata } from '@/lib/static-metadata';
 
 export default function LogoutPage() {

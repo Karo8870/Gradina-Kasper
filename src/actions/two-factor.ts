@@ -1,6 +1,16 @@
 'use server';
 
 import {
+  totpVerificationSchema,
+  twoFactorPasswordSchema,
+  type TOTPVerificationValues,
+  type TwoFactorPasswordValues
+} from '@/components/forms/account/two-factor-settings.schema';
+import {
+  verifyTwoFactorActionSchema,
+  type VerifyTwoFactorActionValues
+} from '@/components/forms/auth/two-factor-challenge-form.schema';
+import {
   securityNotificationEmailHTML,
   securityNotificationEmailSubject,
   type SecurityNotification
@@ -41,12 +51,14 @@ async function sendSecurityNotification(
   }
 }
 
-export async function enableTwoFactorAction({
-  password
-}: {
-  password: string;
-}): Promise<EnableResult> {
-  if (twoFactorMode === 'none' || !password) return { success: false };
+export async function enableTwoFactorAction(
+  input: TwoFactorPasswordValues
+): Promise<EnableResult> {
+  const parsed = twoFactorPasswordSchema.safeParse(input);
+
+  if (twoFactorMode === 'none' || !parsed.success) {
+    return { success: false };
+  }
 
   try {
     const { auth, payload, requestHeaders } = await getBetterAuthRequest();
@@ -59,7 +71,7 @@ export async function enableTwoFactorAction({
     const { headers, response } = await auth.api.enableTwoFactor({
       body: {
         method: twoFactorMode,
-        password
+        password: parsed.data.password
       },
       headers: requestHeaders,
       returnHeaders: true
@@ -88,12 +100,12 @@ export async function enableTwoFactorAction({
   }
 }
 
-export async function verifyTOTPEnrollmentAction({
-  code
-}: {
-  code: string;
-}): Promise<ActionResult> {
-  if (twoFactorMode !== 'totp' || !/^\d{6}$/.test(code)) {
+export async function verifyTOTPEnrollmentAction(
+  input: TOTPVerificationValues
+): Promise<ActionResult> {
+  const parsed = totpVerificationSchema.safeParse(input);
+
+  if (twoFactorMode !== 'totp' || !parsed.success) {
     return { success: false };
   }
 
@@ -104,7 +116,7 @@ export async function verifyTOTPEnrollmentAction({
     if (!session?.user) return { success: false };
 
     const { headers } = await auth.api.verifyTOTP({
-      body: { code },
+      body: { code: parsed.data.code },
       headers: requestHeaders,
       returnHeaders: true
     });
@@ -135,15 +147,15 @@ export async function sendTwoFactorOTPAction(): Promise<ActionResult> {
   }
 }
 
-export async function verifyTwoFactorAction({
-  code,
-  method,
-  trustDevice
-}: {
-  code: string;
-  method: 'backup' | 'otp' | 'totp';
-  trustDevice: boolean;
-}): Promise<ActionResult> {
+export async function verifyTwoFactorAction(
+  input: VerifyTwoFactorActionValues
+): Promise<ActionResult> {
+  const parsed = verifyTwoFactorActionSchema.safeParse(input);
+
+  if (!parsed.success) return { success: false };
+
+  const { code, method, trustDevice } = parsed.data;
+
   if (
     twoFactorMode === 'none' ||
     (method === 'otp' && twoFactorMode !== 'otp') ||
@@ -180,12 +192,14 @@ export async function verifyTwoFactorAction({
   }
 }
 
-export async function disableTwoFactorAction({
-  password
-}: {
-  password: string;
-}): Promise<ActionResult> {
-  if (twoFactorMode === 'none' || !password) return { success: false };
+export async function disableTwoFactorAction(
+  input: TwoFactorPasswordValues
+): Promise<ActionResult> {
+  const parsed = twoFactorPasswordSchema.safeParse(input);
+
+  if (twoFactorMode === 'none' || !parsed.success) {
+    return { success: false };
+  }
 
   try {
     const { auth, payload, requestHeaders } = await getBetterAuthRequest();
@@ -194,7 +208,7 @@ export async function disableTwoFactorAction({
     if (!session?.user?.twoFactorEnabled) return { success: false };
 
     const { headers } = await auth.api.disableTwoFactor({
-      body: { password },
+      body: { password: parsed.data.password },
       headers: requestHeaders,
       returnHeaders: true
     });
@@ -212,15 +226,17 @@ export async function disableTwoFactorAction({
   }
 }
 
-export async function regenerateBackupCodesAction({
-  password
-}: {
-  password: string;
-}): Promise<
+export async function regenerateBackupCodesAction(
+  input: TwoFactorPasswordValues
+): Promise<
   | { backupCodes: string[]; success: true }
   | { backupCodes?: never; success: false }
 > {
-  if (twoFactorMode !== 'totp' || !password) return { success: false };
+  const parsed = twoFactorPasswordSchema.safeParse(input);
+
+  if (twoFactorMode !== 'totp' || !parsed.success) {
+    return { success: false };
+  }
 
   try {
     const { auth, payload, requestHeaders } = await getBetterAuthRequest();
@@ -229,7 +245,7 @@ export async function regenerateBackupCodesAction({
     if (!session?.user?.twoFactorEnabled) return { success: false };
 
     const response = await auth.api.generateBackupCodes({
-      body: { password },
+      body: { password: parsed.data.password },
       headers: requestHeaders
     });
 

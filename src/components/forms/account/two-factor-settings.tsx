@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import {
   disableTwoFactorAction,
@@ -28,26 +27,17 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { withFeedback } from '@/features/auth/utils';
+import { withFeedback } from '@/lib/auth/utils';
 import type { TwoFactorMode } from '@/lib/auth/two-factor/config';
 
-const passwordSchema = z.object({
-  password: z.string().min(1, 'Parola este obligatorie.')
-});
-
-const totpVerificationSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, 'Introdu codul format din 6 cifre.')
-});
-
-const backupAcknowledgementSchema = z.object({
-  acknowledged: z.boolean().refine(Boolean, {
-    message: 'Confirmă că ai salvat codurile de rezervă.'
-  })
-});
-
-type PasswordValues = z.infer<typeof passwordSchema>;
-type TOTPVerificationValues = z.infer<typeof totpVerificationSchema>;
-type BackupAcknowledgementValues = z.infer<typeof backupAcknowledgementSchema>;
+import {
+  backupAcknowledgementSchema,
+  totpVerificationSchema,
+  twoFactorPasswordSchema,
+  type BackupAcknowledgementValues,
+  type TOTPVerificationValues,
+  type TwoFactorPasswordValues
+} from './two-factor-settings.schema';
 
 type TOTPSetup = {
   backupCodes: string[];
@@ -138,21 +128,21 @@ export function TwoFactorSettings({
   mode: Exclude<TwoFactorMode, 'none'>;
 }) {
   const router = useRouter();
-  const enableForm = useForm<PasswordValues>({
+  const enableForm = useForm<TwoFactorPasswordValues>({
     defaultValues: { password: '' },
-    resolver: zodResolver(passwordSchema)
+    resolver: zodResolver(twoFactorPasswordSchema)
   });
   const verifyForm = useForm<TOTPVerificationValues>({
     defaultValues: { code: '' },
     resolver: zodResolver(totpVerificationSchema)
   });
-  const disableForm = useForm<PasswordValues>({
+  const disableForm = useForm<TwoFactorPasswordValues>({
     defaultValues: { password: '' },
-    resolver: zodResolver(passwordSchema)
+    resolver: zodResolver(twoFactorPasswordSchema)
   });
-  const recoveryForm = useForm<PasswordValues>({
+  const recoveryForm = useForm<TwoFactorPasswordValues>({
     defaultValues: { password: '' },
-    resolver: zodResolver(passwordSchema)
+    resolver: zodResolver(twoFactorPasswordSchema)
   });
   const [setup, setSetup] = useState<TOTPSetup>();
   const [regeneratedCodes, setRegeneratedCodes] = useState<string[]>();
@@ -172,7 +162,7 @@ export function TwoFactorSettings({
     router.refresh();
   }
 
-  async function enable(values: PasswordValues) {
+  async function enable(values: TwoFactorPasswordValues) {
     const result = await enableTwoFactorAction(values).catch(() => ({
       success: false as const
     }));
@@ -209,7 +199,7 @@ export function TwoFactorSettings({
     setSetup((current) => (current ? { ...current, verified: true } : current));
   }
 
-  async function disable(values: PasswordValues) {
+  async function disable(values: TwoFactorPasswordValues) {
     const result = await disableTwoFactorAction(values).catch(() => ({
       success: false
     }));
@@ -224,7 +214,7 @@ export function TwoFactorSettings({
     showFeedback(true, 'Autentificarea în doi pași a fost dezactivată.', '');
   }
 
-  async function regenerate(values: PasswordValues) {
+  async function regenerate(values: TwoFactorPasswordValues) {
     const result = await regenerateBackupCodesAction(values).catch(() => ({
       success: false as const
     }));

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 
 import { AccountSidebar } from '@/components/account/account-sidebar';
-import { getCurrentUser } from '@/features/auth/current-user';
-import { withFeedback } from '@/features/auth/utils';
+import { getCurrentUser } from '@/lib/auth/current-user';
+import { withFeedback } from '@/lib/auth/utils';
 
 export default async function AccountLayout({
   children

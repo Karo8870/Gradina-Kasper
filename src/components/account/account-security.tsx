@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { withFeedback } from '@/features/auth/utils';
+import { withFeedback } from '@/lib/auth/utils';
 import {
   socialProviders,
   type SocialProviderId

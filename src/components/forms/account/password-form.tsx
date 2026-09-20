@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import {
   changePasswordAction,
@@ -13,32 +12,20 @@ import {
   FormPasswordField,
   FormSubmitButton
 } from '@/components/form-components';
-import { withFeedback } from '@/features/auth/utils';
+import { withFeedback } from '@/lib/auth/utils';
 
-import { passwordSchema } from '../auth/shared';
-
-const passwordConfirmationSchema = z
-  .object({
-    password: passwordSchema,
-    passwordConfirm: z.string().min(1, 'Confirmă parola.')
-  })
-  .refine(({ password, passwordConfirm }) => password === passwordConfirm, {
-    message: 'Parolele nu coincid.',
-    path: ['passwordConfirm']
-  });
-
-const changePasswordSchema = passwordConfirmationSchema.extend({
-  currentPassword: z.string().min(1, 'Parola curentă este obligatorie.')
-});
-
-type PasswordSetupValues = z.infer<typeof passwordConfirmationSchema>;
-type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
+import {
+  changePasswordSchema,
+  passwordSetupSchema,
+  type ChangePasswordValues,
+  type PasswordSetupValues
+} from './password-form.schema';
 
 export function PasswordSetupForm() {
   const router = useRouter();
   const form = useForm<PasswordSetupValues>({
     defaultValues: { password: '', passwordConfirm: '' },
-    resolver: zodResolver(passwordConfirmationSchema)
+    resolver: zodResolver(passwordSetupSchema)
   });
 
   async function onSubmit(values: PasswordSetupValues) {

@@ -2,9 +2,9 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { TwoFactorChallengeForm } from '@/components/forms/auth/two-factor-challenge-form';
-import { AuthPage } from '@/features/auth/auth-page';
-import { getCurrentUser } from '@/features/auth/current-user';
-import { withFeedback } from '@/features/auth/utils';
+import { AuthPage } from '@/components/auth/auth-page';
+import { getCurrentUser } from '@/lib/auth/current-user';
+import { withFeedback } from '@/lib/auth/utils';
 import { staticMetadata } from '@/lib/static-metadata';
 import { twoFactorMode } from '@/lib/auth/two-factor/config';
 

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { getCurrentUser } from '@/features/auth/current-user';
+import { getCurrentUser } from '@/lib/auth/current-user';
 import { staticMetadata } from '@/lib/static-metadata';
 
 export default async function AccountPage() {

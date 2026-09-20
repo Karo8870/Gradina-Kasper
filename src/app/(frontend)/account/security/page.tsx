@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 
 import { AccountSecurity } from '@/components/account/account-security';
-import { AuthFeedback } from '@/features/auth/auth-feedback';
+import { AuthFeedback } from '@/components/auth/auth-feedback';
 import { getBetterAuth } from '@/lib/auth/server';
 import { formatSessionDevice } from '@/lib/auth/sessions';
 import { getCMS } from '@/lib/cms';
