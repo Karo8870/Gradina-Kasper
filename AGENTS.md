@@ -1,5 +1,8 @@
 # Agents
 
+This project uses the code conventions skill at `.agents/skills/project-code-guidelines/`.
+Read `.agents/skills/project-code-guidelines/SKILL.md` before writing or reviewing application code.
+
 This project uses the Payload CMS skill at `.agents/skills/payload/`.
 Start with `.agents/skills/payload/SKILL.md` for a quick reference, then see `.agents/skills/payload/reference/` for detailed docs.
 

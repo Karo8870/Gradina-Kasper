@@ -2,6 +2,7 @@ import { withPayload } from '@payloadcms/next/withPayload';
 import type { NextConfig } from 'next';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import envConfig from './env.config';
 
 const __filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(__filename);
@@ -54,7 +55,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname)
   },
-  allowedDevOrigins: ['192.168.1.19', 'localhost']
+  allowedDevOrigins: [envConfig.NEXT_PUBLIC_SERVER_URL]
 };
 
 export default withPayload(nextConfig, { devBundleServerPackages: false });

@@ -34,7 +34,7 @@ const dirname = path.dirname(filename);
 
 export default buildConfig({
   cors: {
-    origins: ['http://localhost:3000', 'http://192.168.1.19:3000']
+    origins: [envConfig.NEXT_PUBLIC_SERVER_URL]
   },
   graphQL: {
     disable: true
