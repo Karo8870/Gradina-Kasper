@@ -1,5 +1,6 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { postgresAdapter } from '@payloadcms/db-postgres';
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { s3Storage } from '@payloadcms/storage-s3';
@@ -15,8 +16,19 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
 import envConfig from '../env.config';
+import {
+  adminOnly,
+  adminOnlyField,
+  adminOrPublishedProduct,
+  isAuthenticated,
+  isCustomer,
+  isDocumentOwner,
+  publicAccess
+} from './access/users';
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
+import { productsCollectionOverride } from './collections/Products';
+import { commerceCurrencies } from './commerce/currencies';
 import {
   passwordResetEmailHTML,
   passwordResetEmailSubject
@@ -135,6 +147,29 @@ export default buildConfig({
     }),
     seoPlugin({
       collections: []
+    }),
+    ecommercePlugin({
+      access: {
+        adminOnlyFieldAccess: adminOnlyField,
+        adminOrPublishedStatus: adminOrPublishedProduct,
+        isAdmin: adminOnly,
+        isAuthenticated,
+        isCustomer,
+        isDocumentOwner,
+        publicAccess
+      },
+      carts: {
+        allowGuestCarts: true
+      },
+      currencies: commerceCurrencies,
+      customers: {
+        slug: Users.slug
+      },
+      inventory: true,
+      products: {
+        productsCollectionOverride,
+        variants: false
+      }
     }),
     s3Storage({
       collections: {

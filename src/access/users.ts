@@ -1,4 +1,4 @@
-import type { Access, FieldAccess } from 'payload';
+import type { Access, FieldAccess, Where } from 'payload';
 
 type Role = 'admin' | 'customer';
 type RoleUser = { id?: number | string; role?: Role };
@@ -27,3 +27,36 @@ export const adminOrSelf: Access = ({ req }) => {
 
 export const adminOnlyField: FieldAccess = ({ req }) =>
   hasRole(req.user, 'admin');
+
+export const isAuthenticated: Access = ({ req }) => Boolean(req.user);
+
+export const isCustomer: FieldAccess = ({ req }) =>
+  hasRole(req.user, 'customer');
+
+export const isDocumentOwner: Access = ({ req }) => {
+  if (hasRole(req.user, 'admin')) return true;
+
+  const user = getRoleUser(req.user);
+  return user?.id ? { customer: { equals: user.id } } : false;
+};
+
+export const adminOrPublishedProduct: Access = ({ req }) => {
+  if (hasRole(req.user, 'admin')) return true;
+
+  const publicProductWhere: Where = {
+    and: [
+      {
+        _status: {
+          equals: 'published'
+        }
+      },
+      {
+        visibility: {
+          equals: 'public'
+        }
+      }
+    ]
+  };
+
+  return publicProductWhere;
+};
