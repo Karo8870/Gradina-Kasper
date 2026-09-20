@@ -1,6 +1,10 @@
 'use server';
 
-import { safeInternalRedirect, withFeedback } from '@/features/auth/utils';
+import {
+  safeInternalRedirect,
+  withFeedback,
+  withSafeRedirect
+} from '@/features/auth/utils';
 import {
   applyBetterAuthCookies,
   getBetterAuthRequest
@@ -11,6 +15,8 @@ import {
 } from '@/lib/auth/social-providers';
 
 type ActionResult = { success: boolean };
+export type LoginActionResult =
+  { status: 'error' } | { status: 'success' } | { status: 'two-factor' };
 type SocialAuthResult =
   { success: true; url: string } | { success: false; url?: never };
 
@@ -37,7 +43,7 @@ export async function socialLoginAction({
     const { auth, requestHeaders } = await getBetterAuthRequest();
     const { headers: responseHeaders, response } = await auth.api.signInSocial({
       body: {
-        callbackURL: safeRedirect,
+        callbackURL: withSafeRedirect('/sso-complete', safeRedirect),
         errorCallbackURL: withFeedback(
           safeFeedbackPath,
           'error',
@@ -114,19 +120,23 @@ export async function loginAction({
 }: {
   email: string;
   password: string;
-}): Promise<ActionResult> {
+}): Promise<LoginActionResult> {
   try {
     const { auth, requestHeaders } = await getBetterAuthRequest();
-    const { headers: responseHeaders } = await auth.api.signInEmail({
+    const { headers: responseHeaders, response } = await auth.api.signInEmail({
       body: { email, password },
       headers: requestHeaders,
       returnHeaders: true
     });
 
     await applyBetterAuthCookies(responseHeaders);
-    return { success: true };
+    return response &&
+      'twoFactorRedirect' in response &&
+      response.twoFactorRedirect
+      ? { status: 'two-factor' }
+      : { status: 'success' };
   } catch {
-    return { success: false };
+    return { status: 'error' };
   }
 }
 

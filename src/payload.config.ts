@@ -27,6 +27,7 @@ import {
 } from './emails/auth/verification';
 import { betterAuthOptions } from './lib/auth/options';
 import { socialProviderConfig } from './lib/auth/social-providers.server';
+import { getRuntimeTwoFactorPlugins } from './lib/auth/two-factor/runtime';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -42,6 +43,15 @@ export default buildConfig({
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname)
+    },
+    components: {
+      views: {
+        login: {
+          Component:
+            '/components/admin/admin-login-redirect#AdminLoginRedirect',
+          path: '/login'
+        }
+      }
     }
   },
   collections: [Users, Media],
@@ -79,9 +89,10 @@ export default buildConfig({
     }),
     createBetterAuthPlugin({
       admin: {
-        login: {
-          enableSignUp: false
-        }
+        betterAuthOptions,
+        disableBeforeLogin: true,
+        disableLoginView: true,
+        enableManagementUI: false
       },
       createAuth: (payload) =>
         betterAuth({
@@ -116,6 +127,7 @@ export default buildConfig({
               });
             }
           },
+          plugins: getRuntimeTwoFactorPlugins(payload),
           socialProviders: socialProviderConfig,
           secret: envConfig.BETTER_AUTH_SECRET,
           trustedOrigins: [envConfig.NEXT_PUBLIC_SERVER_URL]

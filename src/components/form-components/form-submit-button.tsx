@@ -15,7 +15,7 @@ type FormSubmitButtonProps = Omit<
 export function FormSubmitButton({
   children,
   isSubmitting,
-  pendingLabel = 'Se crează contul...',
+  pendingLabel = 'Se creează contul...',
   ...buttonProps
 }: FormSubmitButtonProps) {
   return (

@@ -24,10 +24,10 @@ export function authEmailDocument({
   heading,
   url
 }: {
-  actionLabel: string;
+  actionLabel?: string;
   body: string;
   heading: string;
-  url: string;
+  url?: string;
 }) {
   return `<!doctype html>
 <html lang="ro">
@@ -36,7 +36,7 @@ export function authEmailDocument({
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border-radius:8px"><tr><td style="padding:36px">
         <h1 style="margin:0 0 20px;font-size:24px">${heading}</h1>
         ${body}
-        <p style="margin:28px 0"><a href="${url}" style="display:inline-block;border-radius:6px;background:#111827;padding:12px 20px;color:#fff;text-decoration:none;font-weight:600">${actionLabel}</a></p>
+        ${actionLabel && url ? `<p style="margin:28px 0"><a href="${url}" style="display:inline-block;border-radius:6px;background:#111827;padding:12px 20px;color:#fff;text-decoration:none;font-weight:600">${actionLabel}</a></p>` : ''}
       </td></tr></table>
     </td></tr></table>
   </body>

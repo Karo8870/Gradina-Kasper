@@ -10,6 +10,10 @@ export default cleanEnv(process.env, {
   }),
   PAYLOAD_SECRET: str(),
   BETTER_AUTH_SECRET: str(),
+  TFA_MODE: str({
+    choices: ['none', 'otp', 'totp'],
+    default: 'none'
+  }),
   GOOGLE_CLIENT_ID: str(),
   GOOGLE_CLIENT_SECRET: str(),
   DATABASE_URL: url(),

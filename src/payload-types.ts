@@ -72,6 +72,7 @@ export interface Config {
     sessions: Session;
     accounts: Account;
     verifications: Verification;
+    twoFactors: TwoFactor;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     sessions: SessionsSelect<false> | SessionsSelect<true>;
     accounts: AccountsSelect<false> | AccountsSelect<true>;
     verifications: VerificationsSelect<false> | VerificationsSelect<true>;
+    twoFactors: TwoFactorsSelect<false> | TwoFactorsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -146,6 +148,10 @@ export interface User {
    * Auto-added by Better Auth (image)
    */
   image?: string | null;
+  /**
+   * Auto-added by Better Auth (twoFactorEnabled)
+   */
+  twoFactorEnabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
   collection: 'users';
@@ -182,6 +188,7 @@ export interface Session {
   ipAddress?: string | null;
   userAgent?: string | null;
   user: number | User;
+  twoFactorPending?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -217,6 +224,23 @@ export interface Verification {
   identifier: string;
   value: string;
   expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Auto-generated from Better Auth schema (twoFactor)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "twoFactors".
+ */
+export interface TwoFactor {
+  id: number;
+  secret: string;
+  backupCodes: string;
+  user: number | User;
+  verified?: boolean | null;
+  failedVerificationCount?: number | null;
+  lockedUntil?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -263,6 +287,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'verifications';
         value: number | Verification;
+      } | null)
+    | ({
+        relationTo: 'twoFactors';
+        value: number | TwoFactor;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -316,6 +344,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   emailVerified?: T;
   image?: T;
+  twoFactorEnabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -347,6 +376,7 @@ export interface SessionsSelect<T extends boolean = true> {
   ipAddress?: T;
   userAgent?: T;
   user?: T;
+  twoFactorPending?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -376,6 +406,20 @@ export interface VerificationsSelect<T extends boolean = true> {
   identifier?: T;
   value?: T;
   expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "twoFactors_select".
+ */
+export interface TwoFactorsSelect<T extends boolean = true> {
+  secret?: T;
+  backupCodes?: T;
+  user?: T;
+  verified?: T;
+  failedVerificationCount?: T;
+  lockedUntil?: T;
   updatedAt?: T;
   createdAt?: T;
 }

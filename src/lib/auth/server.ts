@@ -20,8 +20,15 @@ export async function getBetterAuthRequest() {
 
   return {
     auth: getBetterAuth(payload),
+    payload,
     requestHeaders
   };
+}
+
+export function copyBetterAuthCookies(source: Headers, target: Headers) {
+  for (const setCookie of source.getSetCookie()) {
+    target.append('set-cookie', setCookie);
+  }
 }
 
 export async function applyBetterAuthCookies(responseHeaders: Headers) {

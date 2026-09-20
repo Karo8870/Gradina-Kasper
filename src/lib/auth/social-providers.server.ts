@@ -1,5 +1,3 @@
-import 'server-only';
-
 import type { BetterAuthOptions } from 'better-auth';
 
 import envConfig from '../../../env.config';

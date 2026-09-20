@@ -35,11 +35,14 @@ import {
   ChangePasswordForm,
   PasswordSetupForm
 } from '../forms/account/password-form';
+import { TwoFactorSettings } from '../forms/account/two-factor-settings';
+import type { TwoFactorMode } from '@/lib/auth/two-factor/config';
 
 export function AccountSecurity({
   hasPassword,
   socialAccountIds,
-  sessions
+  sessions,
+  twoFactor
 }: {
   hasPassword: boolean;
   socialAccountIds: Partial<Record<SocialProviderId, string>>;
@@ -49,6 +52,10 @@ export function AccountSecurity({
     isCurrent: boolean;
     updatedAt: string;
   }>;
+  twoFactor?: {
+    enabled: boolean;
+    mode: Exclude<TwoFactorMode, 'none'>;
+  };
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -265,6 +272,14 @@ export function AccountSecurity({
         </CardContent>
       </Card>
 
+      {twoFactor ? (
+        <TwoFactorSettings
+          enabled={twoFactor.enabled}
+          hasPassword={hasPassword}
+          mode={twoFactor.mode}
+        />
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Sesiuni active</CardTitle>
@@ -277,21 +292,32 @@ export function AccountSecurity({
             const isDisconnecting = disconnectingSessionId === session.id;
 
             return (
-              <div className='flex flex-col gap-4 border-t pt-5' key={session.id}>
+              <div
+                className='flex flex-col gap-4 border-t pt-5'
+                key={session.id}
+              >
                 <div className='flex items-center justify-between gap-4'>
                   <div className='flex min-w-0 items-center gap-3'>
-                    <MonitorSmartphone aria-hidden='true' className='size-5 shrink-0' />
+                    <MonitorSmartphone
+                      aria-hidden='true'
+                      className='size-5 shrink-0'
+                    />
                     <div>
                       <p className='font-medium'>
-                        {session.isCurrent ? 'Acest dispozitiv' : session.device}
+                        {session.isCurrent
+                          ? 'Acest dispozitiv'
+                          : session.device}
                       </p>
                       <p className='text-muted-foreground text-sm'>
                         {session.isCurrent
                           ? `${session.device}, activ acum`
-                          : `Ultima activitate: ${new Intl.DateTimeFormat('ro-RO', {
-                              dateStyle: 'medium',
-                              timeStyle: 'short'
-                            }).format(new Date(session.updatedAt))}`}
+                          : `Ultima activitate: ${new Intl.DateTimeFormat(
+                              'ro-RO',
+                              {
+                                dateStyle: 'medium',
+                                timeStyle: 'short'
+                              }
+                            ).format(new Date(session.updatedAt))}`}
                       </p>
                     </div>
                   </div>
@@ -329,7 +355,9 @@ export function AccountSecurity({
                         type='button'
                         variant='destructive'
                       >
-                        {isPending ? <LoaderCircle className='animate-spin' /> : null}
+                        {isPending ? (
+                          <LoaderCircle className='animate-spin' />
+                        ) : null}
                         Confirmă deconectarea
                       </Button>
                     </div>
@@ -361,7 +389,9 @@ export function AccountSecurity({
                       type='button'
                       variant='destructive'
                     >
-                      {isPending ? <LoaderCircle className='animate-spin' /> : null}
+                      {isPending ? (
+                        <LoaderCircle className='animate-spin' />
+                      ) : null}
                       Confirmă deconectarea
                     </Button>
                   </div>

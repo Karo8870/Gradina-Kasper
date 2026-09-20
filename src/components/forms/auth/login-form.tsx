@@ -15,7 +15,8 @@ import {
 import {
   redirectQuery,
   safeInternalRedirect,
-  withFeedback
+  withFeedback,
+  withSafeRedirect
 } from '@/features/auth/utils';
 import { socialProviders } from '@/lib/auth/social-providers';
 
@@ -40,11 +41,18 @@ export function LoginForm() {
   const query = redirectQuery(searchParams);
 
   async function onSubmit(values: LoginValues) {
-    const result = await loginAction(values).catch(() => ({ success: false }));
+    const result = await loginAction(values).catch(() => ({
+      status: 'error' as const
+    }));
 
-    if (result.success) {
+    if (result.status === 'success') {
       router.replace(redirect ?? '/account');
       router.refresh();
+      return;
+    }
+
+    if (result.status === 'two-factor') {
+      router.replace(withSafeRedirect('/two-factor', redirect));
       return;
     }
 

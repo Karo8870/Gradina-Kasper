@@ -41,7 +41,7 @@ export function FormPasswordField({
           {...inputProps}
         />
         <Button
-          aria-label={visible ? 'Ascunde parola' : 'Arata parola'}
+          aria-label={visible ? 'Ascunde parola' : 'Arată parola'}
           className='absolute top-0 right-0'
           onClick={() => setVisible((current) => !current)}
           size='icon'
