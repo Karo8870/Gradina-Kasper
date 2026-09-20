@@ -13,6 +13,8 @@ export function hasRole(user: unknown, role: Role) {
 
 export const publicAccess: Access = () => true;
 
+export const denyFieldAccess: FieldAccess = () => false;
+
 export const adminOnly = ({ req }: { req: { user?: unknown } }) =>
   hasRole(req.user, 'admin');
 

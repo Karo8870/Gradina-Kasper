@@ -69,3 +69,17 @@ export function redirectQuery(searchParams: ReadonlyURLSearchParams) {
   const redirect = safeInternalRedirect(searchParams.get('redirect'));
   return redirect ? `?${new URLSearchParams({ redirect }).toString()}` : '';
 }
+
+export function withSafeRedirect(
+  pathname: string,
+  redirect: string | null | undefined
+) {
+  const path = parseInternalPath(pathname);
+
+  if (!path) throw new Error('Redirect paths must be internal.');
+
+  const safeRedirect = safeInternalRedirect(redirect);
+  if (safeRedirect) path.searchParams.set('redirect', safeRedirect);
+
+  return formatInternalPath(path);
+}

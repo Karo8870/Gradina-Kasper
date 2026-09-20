@@ -1,4 +1,22 @@
 import type { BetterAuthOptions } from 'better-auth';
+import { twoFactor } from 'better-auth/plugins';
+
+import { providerAgnosticTwoFactor } from './two-factor/provider-bridge';
+
+const schemaTwoFactorPlugin = twoFactor({
+  backupCodeOptions: {
+    amount: 10,
+    storeBackupCodes: 'encrypted'
+  },
+  otpOptions: {
+    storeOTP: 'encrypted',
+    sendOTP: async () => undefined
+  },
+  totpOptions: {
+    digits: 6,
+    period: 30
+  }
+});
 
 export const betterAuthOptions = {
   user: {
@@ -11,6 +29,14 @@ export const betterAuthOptions = {
     }
   },
   session: {
+    additionalFields: {
+      twoFactorPending: {
+        type: 'boolean',
+        defaultValue: false,
+        input: false,
+        returned: true
+      }
+    },
     expiresIn: 60 * 60 * 24 * 14,
     updateAge: 60 * 60 * 24
   },
@@ -24,5 +50,6 @@ export const betterAuthOptions = {
   emailVerification: {
     autoSignInAfterVerification: false,
     sendOnSignUp: true
-  }
+  },
+  plugins: [schemaTwoFactorPlugin, providerAgnosticTwoFactor('totp')]
 } satisfies BetterAuthOptions;

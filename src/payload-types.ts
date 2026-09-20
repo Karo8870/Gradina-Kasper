@@ -131,27 +131,12 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  role: 'admin' | 'customer';
-  /**
-   * Auto-added by Better Auth (name)
-   */
   name: string;
-  /**
-   * Auto-added by Better Auth (email)
-   */
   email: string;
-  /**
-   * Auto-added by Better Auth (emailVerified)
-   */
   emailVerified: boolean;
-  /**
-   * Auto-added by Better Auth (image)
-   */
   image?: string | null;
-  /**
-   * Auto-added by Better Auth (twoFactorEnabled)
-   */
   twoFactorEnabled?: boolean | null;
+  role: 'admin' | 'customer';
   updatedAt: string;
   createdAt: string;
   collection: 'users';
@@ -339,12 +324,12 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  role?: T;
   name?: T;
   email?: T;
   emailVerified?: T;
   image?: T;
   twoFactorEnabled?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
 }
