@@ -27,8 +27,11 @@ import {
 } from './access/users';
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
+import { ordersCollectionOverride } from './collections/Orders';
 import { productsCollectionOverride } from './collections/Products';
+import { transactionsCollectionOverride } from './collections/Transactions';
 import { commerceCurrencies } from './commerce/currencies';
+import { validateCartProduct } from './commerce/product-validation';
 import {
   passwordResetEmailHTML,
   passwordResetEmailSubject
@@ -40,6 +43,9 @@ import {
 import { betterAuthOptions } from './lib/auth/options';
 import { socialProviderConfig } from './lib/auth/social-providers.server';
 import { getRuntimeTwoFactorPlugins } from './lib/auth/two-factor/runtime';
+import { CheckoutSettings } from './globals/CheckoutSettings';
+import { FulfillmentSchedule } from './globals/FulfillmentSchedule';
+import { netopiaPaymentAdapter } from './payments/netopia/adapter';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -67,6 +73,7 @@ export default buildConfig({
     }
   },
   collections: [Users, Media],
+  globals: [CheckoutSettings, FulfillmentSchedule],
   email: nodemailerAdapter({
     defaultFromAddress: envConfig.SMTP_FROM_ADDRESS,
     defaultFromName: envConfig.SMTP_FROM_NAME,
@@ -167,9 +174,19 @@ export default buildConfig({
         slug: Users.slug
       },
       inventory: true,
+      orders: {
+        ordersCollectionOverride
+      },
+      payments: {
+        paymentMethods: [netopiaPaymentAdapter]
+      },
       products: {
         productsCollectionOverride,
+        validation: validateCartProduct,
         variants: false
+      },
+      transactions: {
+        transactionsCollectionOverride
       }
     }),
     s3Storage({

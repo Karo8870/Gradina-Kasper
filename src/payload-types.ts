@@ -110,8 +110,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'checkout-settings': CheckoutSetting;
+    'fulfillment-schedule': FulfillmentSchedule;
+  };
+  globalsSelect: {
+    'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
+    'fulfillment-schedule': FulfillmentScheduleSelect<false> | FulfillmentScheduleSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -422,6 +428,18 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'RON' | null;
+  paymentReference?: string | null;
+  fulfillmentMethod?: ('delivery' | 'pickup') | null;
+  fulfillmentDate?: string | null;
+  checkoutSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -438,6 +456,21 @@ export interface Transaction {
         id?: string | null;
       }[]
     | null;
+  paymentMethod?: 'netopia' | null;
+  netopia?: {
+    merchantOrderID?: string | null;
+    ntpID?: string | null;
+    paymentURL?: string | null;
+    checkoutSnapshot?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   billingAddress?: {
     title?: string | null;
     firstName?: string | null;
@@ -765,6 +798,10 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  paymentReference?: T;
+  fulfillmentMethod?: T;
+  fulfillmentDate?: T;
+  checkoutSnapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -779,6 +816,15 @@ export interface TransactionsSelect<T extends boolean = true> {
         product?: T;
         quantity?: T;
         id?: T;
+      };
+  paymentMethod?: T;
+  netopia?:
+    | T
+    | {
+        merchantOrderID?: T;
+        ntpID?: T;
+        paymentURL?: T;
+        checkoutSnapshot?: T;
       };
   billingAddress?:
     | T
@@ -844,6 +890,75 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings".
+ */
+export interface CheckoutSetting {
+  id: number;
+  /**
+   * Added only to delivery orders.
+   */
+  deliveryFee: number;
+  /**
+   * Required product subtotal before a delivery order can proceed.
+   */
+  minimumDeliverySubtotal: number;
+  productVATRate: number;
+  deliveryVATRate: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillment-schedule".
+ */
+export interface FulfillmentSchedule {
+  id: number;
+  allowedWeekdays: ('1' | '2' | '3' | '4' | '5' | '6' | '7')[];
+  /**
+   * The week starts on Monday. Leave allowed weekdays empty to disable fulfillment for that week.
+   */
+  weekOverrides?:
+    | {
+        weekStart: string;
+        allowedWeekdays?: ('1' | '2' | '3' | '4' | '5' | '6' | '7')[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkout-settings_select".
+ */
+export interface CheckoutSettingsSelect<T extends boolean = true> {
+  deliveryFee?: T;
+  minimumDeliverySubtotal?: T;
+  productVATRate?: T;
+  deliveryVATRate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillment-schedule_select".
+ */
+export interface FulfillmentScheduleSelect<T extends boolean = true> {
+  allowedWeekdays?: T;
+  weekOverrides?:
+    | T
+    | {
+        weekStart?: T;
+        allowedWeekdays?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

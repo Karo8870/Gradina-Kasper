@@ -4,6 +4,7 @@ import { EcommerceProvider as PayloadEcommerceProvider } from '@payloadcms/plugi
 import type { ReactNode } from 'react';
 
 import { commerceCurrencies, storeCurrency } from '@/commerce/currencies';
+import { netopiaPaymentAdapterClient } from '@/payments/netopia/client-adapter';
 
 const priceField = `priceIn${storeCurrency.code.toUpperCase()}`;
 
@@ -27,6 +28,7 @@ export function EcommerceProvider({ children }: { children: ReactNode }) {
         }
       }}
       currenciesConfig={commerceCurrencies}
+      paymentMethods={[netopiaPaymentAdapterClient]}
     >
       {children}
     </PayloadEcommerceProvider>

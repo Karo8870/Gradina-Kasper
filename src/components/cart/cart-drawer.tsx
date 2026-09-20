@@ -5,6 +5,7 @@ import {
   useCurrency
 } from '@payloadcms/plugin-ecommerce/client/react';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -167,6 +168,14 @@ export function CartDrawer() {
                   {formatCurrency(cart?.subtotal ?? 0, { locale: 'ro-RO' })}
                 </span>
               </div>
+              <Button
+                className='mt-4 w-full'
+                nativeButton={false}
+                render={<Link href='/checkout' />}
+                size='lg'
+              >
+                Continuă către checkout
+              </Button>
             </div>
           </div>
         )}

@@ -22,6 +22,16 @@ export default cleanEnv(process.env, {
   MAPBOX_ACCESS_TOKEN: str({
     default: ''
   }),
+  NETOPIA_ENVIRONMENT: str({
+    choices: ['sandbox', 'production'],
+    default: 'sandbox'
+  }),
+  NETOPIA_API_KEY: str({
+    default: ''
+  }),
+  NETOPIA_POS_SIGNATURE: str({
+    default: ''
+  }),
   DATABASE_URL: url(),
   NEXT_PUBLIC_SERVER_URL: url({
     default: 'http://localhost:3000'
