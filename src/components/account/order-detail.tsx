@@ -1,6 +1,13 @@
-import { ArrowLeft, CreditCard, MapPin, PackageCheck } from 'lucide-react';
+import {
+  ArrowLeft,
+  Clock3,
+  CreditCard,
+  MapPin,
+  PackageCheck
+} from 'lucide-react';
 import Link from 'next/link';
 
+import { canCancelOrder } from '@/commerce/order-activity';
 import {
   formatOrderDate,
   formatOrderMoney,
@@ -9,6 +16,7 @@ import {
   transactionStatusLabels,
   type CheckoutSnapshot
 } from '@/commerce/order-display';
+import { CancelOrderButton } from '@/components/account/cancel-order-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -65,6 +73,16 @@ export function AccountOrderDetail({
   transactions: Transaction[];
 }) {
   const snapshot = parseCheckoutSnapshot(order.checkoutSnapshot);
+  const activity = order.activity?.length
+    ? order.activity
+    : [
+        {
+          occurredAt: order.createdAt,
+          source: 'system' as const,
+          toStatus: 'processing' as const,
+          type: 'order_placed' as const
+        }
+      ];
 
   return (
     <div className='flex max-w-3xl flex-col gap-6'>
@@ -89,6 +107,11 @@ export function AccountOrderDetail({
         <p className='text-muted-foreground text-sm'>
           Plasată la {formatOrderDate(order.createdAt)}
         </p>
+        {canCancelOrder(order) ? (
+          <div className='mt-2'>
+            <CancelOrderButton orderID={order.id} />
+          </div>
+        ) : null}
       </header>
 
       {snapshot ? (
@@ -215,6 +238,43 @@ export function AccountOrderDetail({
               Nu există tranzacții asociate.
             </p>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className='flex items-center gap-2'>
+            <Clock3 className='size-5' /> Istoricul comenzii
+          </CardTitle>
+          <CardDescription>
+            Evenimentele și schimbările de stare ale comenzii.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='flex flex-col gap-4'>
+          {activity.map((event, index) => (
+            <div
+              className='grid grid-cols-[auto_1fr] gap-3'
+              key={`${event.occurredAt}-${event.type}-${index}`}
+            >
+              <span className='bg-primary mt-1.5 size-2 rounded-full' />
+              <div>
+                <p className='font-medium'>
+                  {event.type === 'order_placed'
+                    ? 'Comandă plasată'
+                    : event.type === 'cancellation_requested'
+                      ? 'Anulare solicitată'
+                      : `Stare schimbată în ${
+                          event.toStatus
+                            ? orderStatusLabels[event.toStatus]
+                            : '—'
+                        }`}
+                </p>
+                <p className='text-muted-foreground text-sm'>
+                  {formatOrderDate(event.occurredAt)}
+                </p>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

@@ -64,6 +64,9 @@ export default buildConfig({
       baseDir: path.resolve(dirname)
     },
     components: {
+      afterNavLinks: [
+        '/components/admin/order-dashboard-nav-link#OrderDashboardNavLink'
+      ],
       views: {
         login: {
           Component:

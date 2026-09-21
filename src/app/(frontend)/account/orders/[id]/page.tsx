@@ -1,17 +1,22 @@
 import { notFound } from 'next/navigation';
 
 import { AccountOrderDetail } from '@/components/account/order-detail';
+import { FormStatus } from '@/components/form-components';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { getSearchParam } from '@/lib/auth/utils';
 import { getCMS } from '@/lib/cms';
 import { staticMetadata } from '@/lib/static-metadata';
 
 export default async function AccountOrderPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [{ id }, payload, user] = await Promise.all([
+  const [{ id }, query, payload, user] = await Promise.all([
     params,
+    searchParams,
     getCMS(),
     getCurrentUser()
   ]);
@@ -44,7 +49,14 @@ export default async function AccountOrderPage({
     }
   });
 
-  return <AccountOrderDetail order={order} transactions={transactions} />;
+  const success = getSearchParam(query, 'success');
+
+  return (
+    <div className='flex flex-col gap-6'>
+      {success ? <FormStatus kind='success'>{success}</FormStatus> : null}
+      <AccountOrderDetail order={order} transactions={transactions} />
+    </div>
+  );
 }
 
 export const metadata = staticMetadata(

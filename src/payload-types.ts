@@ -440,6 +440,17 @@ export interface Order {
     | number
     | boolean
     | null;
+  activity?:
+    | {
+        type: 'order_placed' | 'status_changed' | 'cancellation_requested';
+        occurredAt: string;
+        source: 'system' | 'customer' | 'admin';
+        fromStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
+        toStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -802,6 +813,17 @@ export interface OrdersSelect<T extends boolean = true> {
   fulfillmentMethod?: T;
   fulfillmentDate?: T;
   checkoutSnapshot?: T;
+  activity?:
+    | T
+    | {
+        type?: T;
+        occurredAt?: T;
+        source?: T;
+        fromStatus?: T;
+        toStatus?: T;
+        description?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
