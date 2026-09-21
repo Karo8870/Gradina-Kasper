@@ -24,7 +24,9 @@ export function AccountSidebar({ email }: { email: string }) {
       <Separator />
       <nav aria-label='Navigare cont' className='flex flex-col gap-1'>
         {accountNavigationItems.map(({ href, icon: Icon, label }) => {
-          const active = pathname === href;
+          const active =
+            pathname === href ||
+            (href !== '/account' && pathname.startsWith(`${href}/`));
 
           return (
             <Button

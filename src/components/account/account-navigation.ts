@@ -1,4 +1,10 @@
-import { LogOut, MapPin, ShieldCheck, UserRound } from 'lucide-react';
+import {
+  LogOut,
+  MapPin,
+  ReceiptText,
+  ShieldCheck,
+  UserRound
+} from 'lucide-react';
 
 export const accountNavigationItems = [
   {
@@ -15,6 +21,11 @@ export const accountNavigationItems = [
     href: '/account/addresses',
     icon: MapPin,
     label: 'Adrese'
+  },
+  {
+    href: '/account/orders',
+    icon: ReceiptText,
+    label: 'Comenzi'
   }
 ] as const;
 

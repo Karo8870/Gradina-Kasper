@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   netopiaPaymentState,
+  netopiaStartFailureMessage,
   netopiaStartResponseSchema,
   netopiaStatusResponseSchema
 } from './schemas';
@@ -28,6 +29,37 @@ describe('NETOPIA schemas', () => {
     ).toBe('99003322');
   });
 
+  test('treats redirect code 101 as an instruction when a payment URL exists', () => {
+    const response = netopiaStartResponseSchema.parse({
+      customerAction: {},
+      error: { code: '101', message: 'Redirect user to payment page' },
+      payment: {
+        amount: 60,
+        currency: 'RON',
+        ntpID: '3028326',
+        paymentURL:
+          'https://secure-sandbox.netopia-payments.com/ui/card?p=example',
+        status: 1
+      }
+    });
+
+    expect(netopiaStartFailureMessage(response)).toBeNull();
+  });
+
+  test('still treats a rejected payment as a failure', () => {
+    const response = netopiaStartResponseSchema.parse({
+      error: { code: '12', message: 'Payment rejected' },
+      payment: {
+        amount: 60,
+        currency: 'RON',
+        ntpID: '3028326',
+        status: 12
+      }
+    });
+
+    expect(netopiaStartFailureMessage(response)).toBe('Payment rejected');
+  });
+
   test('rejects malformed monetary status data', () => {
     expect(() =>
       netopiaStatusResponseSchema.parse({
@@ -42,4 +74,3 @@ describe('NETOPIA schemas', () => {
     ).toThrow();
   });
 });
-
