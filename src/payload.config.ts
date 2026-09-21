@@ -28,6 +28,7 @@ import {
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
 import { ordersCollectionOverride } from './collections/Orders';
+import { cartsCollectionOverride } from './collections/Carts';
 import { productsCollectionOverride } from './collections/Products';
 import { transactionsCollectionOverride } from './collections/Transactions';
 import { commerceCurrencies } from './commerce/currencies';
@@ -167,7 +168,8 @@ export default buildConfig({
       },
       addresses: true,
       carts: {
-        allowGuestCarts: true
+        allowGuestCarts: true,
+        cartsCollectionOverride
       },
       currencies: commerceCurrencies,
       customers: {
