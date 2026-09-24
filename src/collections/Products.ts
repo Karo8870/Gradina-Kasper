@@ -86,6 +86,14 @@ export const productsCollectionOverride: CollectionOverride = ({
                   required: true
                 }
               ]
+            },
+            {
+              name: 'possibleVegetables',
+              type: 'relationship',
+              label: 'Possible vegetables',
+              relationTo: 'vegetables',
+              defaultValue: [],
+              hasMany: true
             }
           ]
         },

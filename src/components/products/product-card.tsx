@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { storeCurrency } from '@/commerce/currencies';
 import { getProductAvailability } from '@/commerce/products';
 import { ProductCartControls } from '@/components/products/product-cart-controls';
+import { ProductVegetables } from '@/components/products/product-vegetables';
 import { RenderMedia } from '@/components/render-media';
 import type { Media, Product } from '@/payload-types';
 
@@ -50,6 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
             {description}
           </p>
         ) : null}
+        <ProductVegetables possibleVegetables={product.possibleVegetables} />
         <div className='relative z-10 mt-auto'>
           <ProductCartControls
             availabilityNotice={availability.notice}

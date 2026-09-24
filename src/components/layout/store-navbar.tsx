@@ -1,13 +1,16 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
+import { Menu, UserRound } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import {
   accountNavigationItems,
   logoutNavigationItem
 } from '@/components/account/account-navigation';
 import { CartDrawer } from '@/components/cart/cart-drawer';
+import { RenderMedia } from '@/components/render-media';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +21,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
+import type { Media } from '@/payload-types';
 
 export type NavbarUser = {
   email: string;
@@ -25,23 +37,59 @@ export type NavbarUser = {
   name: string;
 };
 
+export type NavbarContent = {
+  image: Media | null;
+  links: Array<{
+    label: string;
+    url: string;
+  }>;
+};
+
 const LogoutIcon = logoutNavigationItem.icon;
 
-export function StoreNavbar({ user }: { user: NavbarUser | null }) {
+export function StoreNavbar({
+  content,
+  user
+}: {
+  content: NavbarContent;
+  user: NavbarUser | null;
+}) {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => setMobileOpen(false), [pathname]);
+
   return (
     <header className='bg-background/95 sticky top-0 z-40 border-b backdrop-blur'>
       <div className='mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6'>
-        <Link className='text-lg font-semibold' href='/'>
-          Magazin
+        <Link
+          className='flex shrink-0 items-center text-lg font-semibold'
+          href='/'
+        >
+          {content.image ? (
+            <RenderMedia
+              alt={content.image.alt || 'Grădina Kasper'}
+              className='h-10 w-auto object-contain'
+              src={content.image}
+            />
+          ) : (
+            'Magazin'
+          )}
         </Link>
-        <nav aria-label='Navigare principală' className='ml-4'>
-          <Button
-            nativeButton={false}
-            render={<Link href='/products' />}
-            variant='ghost'
-          >
-            Produse
-          </Button>
+        <nav
+          aria-label='Navigare principală'
+          className='ml-4 hidden items-center md:flex'
+        >
+          {content.links.map((link) => (
+            <Button
+              key={`${link.label}-${link.url}`}
+              nativeButton={false}
+              render={<Link href={link.url} />}
+              variant='ghost'
+            >
+              {link.label}
+            </Button>
+          ))}
         </nav>
         <div className='ml-auto flex items-center gap-1'>
           <CartDrawer />
@@ -92,16 +140,92 @@ export function StoreNavbar({ user }: { user: NavbarUser | null }) {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button
-              aria-label='Autentificare'
-              nativeButton={false}
-              render={<Link href='/login' />}
-              size='icon-lg'
-              variant='ghost'
-            >
-              <UserRound />
-            </Button>
+            <div className='hidden items-center gap-2 md:flex'>
+              <Button
+                nativeButton={false}
+                render={<Link href='/login' />}
+                variant='ghost'
+              >
+                Conectare
+              </Button>
+              <Button
+                nativeButton={false}
+                render={<Link href='/create-account' />}
+              >
+                Creează cont
+              </Button>
+            </div>
           )}
+
+          <Sheet onOpenChange={setMobileOpen} open={mobileOpen}>
+            <SheetTrigger
+              render={
+                <Button
+                  aria-label='Deschide navigarea'
+                  className='md:hidden'
+                  size='icon-lg'
+                  variant='ghost'
+                />
+              }
+            >
+              <Menu />
+            </SheetTrigger>
+            <SheetContent className='w-full sm:max-w-sm'>
+              <SheetHeader>
+                <SheetTitle>Navigare</SheetTitle>
+                <SheetDescription>
+                  Accesează paginile magazinului.
+                </SheetDescription>
+              </SheetHeader>
+              <nav
+                aria-label='Navigare mobilă'
+                className='flex flex-col gap-1 px-4'
+              >
+                {content.links.map((link) => (
+                  <Button
+                    className='justify-start'
+                    key={`${link.label}-${link.url}`}
+                    nativeButton={false}
+                    render={<Link href={link.url} />}
+                    variant='ghost'
+                  >
+                    {link.label}
+                  </Button>
+                ))}
+                {user ? (
+                  accountNavigationItems.map(({ href, icon: Icon, label }) => (
+                    <Button
+                      className='justify-start'
+                      key={href}
+                      nativeButton={false}
+                      render={<Link href={href} />}
+                      variant='ghost'
+                    >
+                      <Icon />
+                      {label}
+                    </Button>
+                  ))
+                ) : (
+                  <>
+                    <Button
+                      className='mt-4'
+                      nativeButton={false}
+                      render={<Link href='/login' />}
+                      variant='outline'
+                    >
+                      Conectare
+                    </Button>
+                    <Button
+                      nativeButton={false}
+                      render={<Link href='/create-account' />}
+                    >
+                      Creează cont
+                    </Button>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

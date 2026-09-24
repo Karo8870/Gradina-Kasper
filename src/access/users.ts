@@ -60,3 +60,13 @@ export const adminOrPublishedProduct: Access = ({ req }) => {
 
   return publicProductWhere;
 };
+
+export const adminOrPublishedContent: Access = ({ req }) => {
+  if (hasRole(req.user, 'admin')) return true;
+
+  return {
+    _status: {
+      equals: 'published'
+    }
+  };
+};

@@ -10,8 +10,10 @@ import { storeCurrency } from '@/commerce/currencies';
 import { getProductAvailability, isProductExpired } from '@/commerce/products';
 import { ProductCartControls } from '@/components/products/product-cart-controls';
 import { ProductGallery } from '@/components/products/product-gallery';
+import { ProductVegetables } from '@/components/products/product-vegetables';
 import { Button } from '@/components/ui/button';
 import { getCMS } from '@/lib/cms';
+import { generateDocumentMetadata } from '@/lib/generate-metadata';
 import { staticMetadata } from '@/lib/static-metadata';
 import type { Media } from '@/payload-types';
 
@@ -55,7 +57,12 @@ export async function generateMetadata({
     ? convertLexicalToPlaintext({ data: product.description }).slice(0, 160)
     : `Descoperă ${product.name}.`;
 
-  return staticMetadata(product.name, description, `/products/${product.slug}`);
+  return generateDocumentMetadata({
+    doc: product,
+    fallbackDescription: description,
+    fallbackTitle: product.name,
+    pathname: `/products/${product.slug}`
+  });
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -107,6 +114,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               data={product.description}
             />
           ) : null}
+
+          <ProductVegetables possibleVegetables={product.possibleVegetables} />
 
           <div className='mt-auto pt-3'>
             <ProductCartControls

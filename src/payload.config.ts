@@ -25,12 +25,15 @@ import {
   isDocumentOwner,
   publicAccess
 } from './access/users';
+import { Articles } from './collections/Articles';
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
+import { Pages } from './collections/Pages';
 import { ordersCollectionOverride } from './collections/Orders';
 import { cartsCollectionOverride } from './collections/Carts';
 import { productsCollectionOverride } from './collections/Products';
 import { transactionsCollectionOverride } from './collections/Transactions';
+import { Vegetables } from './collections/Vegetables';
 import { commerceCurrencies } from './commerce/currencies';
 import { validateCartProduct } from './commerce/product-validation';
 import {
@@ -44,8 +47,17 @@ import {
 import { betterAuthOptions } from './lib/auth/options';
 import { socialProviderConfig } from './lib/auth/social-providers.server';
 import { getRuntimeTwoFactorPlugins } from './lib/auth/two-factor/runtime';
+import { AboutPage } from './globals/AboutPage';
 import { CheckoutSettings } from './globals/CheckoutSettings';
+import { DidYouKnowPage } from './globals/DidYouKnowPage';
+import { FAQPage } from './globals/FAQPage';
+import { Footer } from './globals/Footer';
 import { FulfillmentSchedule } from './globals/FulfillmentSchedule';
+import { Header } from './globals/Header';
+import { HomePage } from './globals/HomePage';
+import { PickupPointPage } from './globals/PickupPointPage';
+import { ProductsPage } from './globals/ProductsPage';
+import { SupportPage } from './globals/SupportPage';
 import { netopiaPaymentAdapter } from './payments/netopia/adapter';
 
 const filename = fileURLToPath(import.meta.url);
@@ -76,8 +88,20 @@ export default buildConfig({
       }
     }
   },
-  collections: [Users, Media],
-  globals: [CheckoutSettings, FulfillmentSchedule],
+  collections: [Users, Media, Pages, Articles, Vegetables],
+  globals: [
+    Header,
+    Footer,
+    HomePage,
+    ProductsPage,
+    AboutPage,
+    FAQPage,
+    DidYouKnowPage,
+    PickupPointPage,
+    SupportPage,
+    CheckoutSettings,
+    FulfillmentSchedule
+  ],
   email: nodemailerAdapter({
     defaultFromAddress: envConfig.SMTP_FROM_ADDRESS,
     defaultFromName: envConfig.SMTP_FROM_NAME,
@@ -156,9 +180,6 @@ export default buildConfig({
           trustedOrigins: [envConfig.NEXT_PUBLIC_SERVER_URL]
         })
     }),
-    seoPlugin({
-      collections: []
-    }),
     ecommercePlugin({
       access: {
         adminOnlyFieldAccess: adminOnlyField,
@@ -193,6 +214,19 @@ export default buildConfig({
       transactions: {
         transactionsCollectionOverride
       }
+    }),
+    seoPlugin({
+      collections: ['pages', 'articles', 'products'],
+      globals: [
+        'home-page',
+        'products-page',
+        'about-page',
+        'faq-page',
+        'did-you-know-page',
+        'pickup-point-page',
+        'support-page'
+      ],
+      uploadsCollection: 'media'
     }),
     s3Storage({
       collections: {

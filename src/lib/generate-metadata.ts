@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { GlobalSlug } from 'payload';
 
 import type { Media } from '@/payload-types';
@@ -7,42 +8,74 @@ import { getCMS } from './cms';
 
 const defaultTitle = '';
 const defaultDescription = '';
-const defaultImage = '';
 
-export async function generateGlobalMetadata<T extends GlobalSlug>(slug: T) {
-  const payload = await getCMS();
-
-  const doc = (await payload.findGlobal({
-    slug
-  })) as {
-    meta?: {
-      title?: string | null;
-      image?: (number | null) | Media;
-      description?: string | null;
-    };
+type MetadataDocument = {
+  meta?: {
+    title?: string | null;
+    image?: (number | null) | Media;
+    description?: string | null;
   };
+};
 
-  const title = doc?.meta?.title ?? defaultTitle;
-  const description = doc?.meta?.description ?? defaultDescription;
+function absoluteURL(pathname: string) {
+  return new URL(pathname, envConfig.NEXT_PUBLIC_SERVER_URL).toString();
+}
+
+export function generateDocumentMetadata({
+  doc,
+  fallbackDescription = defaultDescription,
+  fallbackTitle = defaultTitle,
+  pathname
+}: {
+  doc?: MetadataDocument | null;
+  fallbackDescription?: string;
+  fallbackTitle?: string;
+  pathname: string;
+}): Metadata {
+  const title = doc?.meta?.title || fallbackTitle;
+  const description = doc?.meta?.description || fallbackDescription;
+  const canonicalURL = absoluteURL(pathname);
   const image =
-    typeof doc?.meta?.image === 'object' && doc.meta.image
-      ? (doc.meta.image.url ?? defaultImage)
-      : defaultImage;
+    typeof doc?.meta?.image === 'object' && doc.meta.image?.url
+      ? absoluteURL(doc.meta.image.url)
+      : undefined;
 
   return {
-    description,
     title,
+    description,
+    alternates: {
+      canonical: canonicalURL
+    },
     openGraph: {
       title,
       description,
-      url: envConfig.NEXT_PUBLIC_SERVER_URL,
-      images: [image]
+      images: image ? [image] : undefined,
+      url: canonicalURL
     },
     twitter: {
       title,
       description,
-      card: 'summary_large_image',
-      images: [image]
+      card: image ? 'summary_large_image' : 'summary',
+      images: image ? [image] : undefined
     }
   };
+}
+
+export async function generateGlobalMetadata<T extends GlobalSlug>(
+  slug: T,
+  options: {
+    fallbackDescription?: string;
+    fallbackTitle?: string;
+    pathname: string;
+  }
+) {
+  const payload = await getCMS();
+
+  const doc = (await payload.findGlobal({
+    slug,
+    depth: 1,
+    overrideAccess: false
+  })) as MetadataDocument;
+
+  return generateDocumentMetadata({ doc, ...options });
 }
