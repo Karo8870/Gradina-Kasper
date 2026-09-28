@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-import { canCancelOrder } from '@/commerce/order-activity';
 import {
   formatOrderDate,
   formatOrderMoney,
@@ -16,7 +15,6 @@ import {
   transactionStatusLabels,
   type CheckoutSnapshot
 } from '@/commerce/order-display';
-import { CancelOrderButton } from '@/components/account/cancel-order-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -107,11 +105,12 @@ export function AccountOrderDetail({
         <p className='text-muted-foreground text-sm'>
           Plasată la {formatOrderDate(order.createdAt)}
         </p>
+        {/* Customer order cancellation is disabled.
         {canCancelOrder(order) ? (
           <div className='mt-2'>
             <CancelOrderButton orderID={order.id} />
           </div>
-        ) : null}
+        ) : null} */}
       </header>
 
       {snapshot ? (

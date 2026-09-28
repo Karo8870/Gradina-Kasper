@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { hasRole } from '@/access/users';
-import { canCancelOrder, orderStatuses } from '@/commerce/order-activity';
+import { orderStatuses } from '@/commerce/order-activity';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { getCMS } from '@/lib/cms';
 
@@ -17,7 +17,8 @@ const bulkUpdateStatusSchema = z.object({
   orderIDs: z.array(orderIDSchema).min(1),
   status: z.enum(orderStatuses)
 });
-const cancelOrderSchema = z.object({ orderID: orderIDSchema });
+// Customer order cancellation is disabled.
+// const cancelOrderSchema = z.object({ orderID: orderIDSchema });
 
 export type OrderActionResult =
   { success: true } | { message: string; success: false };
@@ -169,6 +170,7 @@ export async function bulkUpdateOrderStatus(input: {
   };
 }
 
+/* Customer order cancellation is disabled; admins can still update order statuses.
 export async function cancelOrder(input: {
   orderID: number;
 }): Promise<OrderActionResult> {
@@ -247,3 +249,4 @@ export async function cancelOrder(input: {
 
   return { success: true };
 }
+*/

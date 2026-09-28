@@ -1,3 +1,4 @@
+/* Customer order cancellation is disabled.
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -77,3 +78,4 @@ export function CancelOrderButton({ orderID }: { orderID: number }) {
     </Dialog>
   );
 }
+*/
