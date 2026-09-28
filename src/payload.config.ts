@@ -1,6 +1,7 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { ecommercePlugin } from '@payloadcms/plugin-ecommerce';
+import { mcpPlugin } from '@payloadcms/plugin-mcp';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { s3Storage } from '@payloadcms/storage-s3';
@@ -26,6 +27,7 @@ import {
   publicAccess
 } from './access/users';
 import { Articles } from './collections/Articles';
+import { Invoices } from './collections/Invoices';
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
 import { Pages } from './collections/Pages';
@@ -55,6 +57,7 @@ import { Footer } from './globals/Footer';
 import { FulfillmentSchedule } from './globals/FulfillmentSchedule';
 import { Header } from './globals/Header';
 import { HomePage } from './globals/HomePage';
+import { MailSettings } from './globals/MailSettings';
 import { PickupPointPage } from './globals/PickupPointPage';
 import { ProductsPage } from './globals/ProductsPage';
 import { SupportPage } from './globals/SupportPage';
@@ -88,7 +91,7 @@ export default buildConfig({
       }
     }
   },
-  collections: [Users, Media, Pages, Articles, Vegetables],
+  collections: [Users, Media, Pages, Articles, Vegetables, Invoices],
   globals: [
     Header,
     Footer,
@@ -100,7 +103,8 @@ export default buildConfig({
     PickupPointPage,
     SupportPage,
     CheckoutSettings,
-    FulfillmentSchedule
+    FulfillmentSchedule,
+    MailSettings
   ],
   email: nodemailerAdapter({
     defaultFromAddress: envConfig.SMTP_FROM_ADDRESS,
@@ -215,6 +219,109 @@ export default buildConfig({
         transactionsCollectionOverride
       }
     }),
+    mcpPlugin({
+      collections: {
+        articles: {
+          description:
+            'Editorial articles with draft and published versions, thumbnails, related articles, and rich-text content.',
+          enabled: true
+        },
+        media: {
+          description:
+            'The public media library. Use it to inspect or update media metadata; upload files through Payload Admin.',
+          enabled: {
+            delete: true,
+            find: true,
+            update: true
+          }
+        },
+        pages: {
+          description:
+            'Reusable CMS pages with draft and published versions and rich-text content.',
+          enabled: true
+        },
+        products: {
+          description:
+            'Store products, including pricing, inventory, visibility, images, and vegetable relationships.',
+          enabled: true
+        },
+        vegetables: {
+          description:
+            'Vegetable catalog entries referenced by products and displayed on the storefront.',
+          enabled: true
+        }
+      },
+      globals: {
+        'about-page': {
+          description: 'Content and SEO settings for the About page.',
+          enabled: true
+        },
+        'checkout-settings': {
+          description: 'Checkout behavior and order settings.',
+          enabled: true
+        },
+        'did-you-know-page': {
+          description: 'Content and SEO settings for the Did You Know page.',
+          enabled: true
+        },
+        'faq-page': {
+          description: 'Content and SEO settings for the FAQ page.',
+          enabled: true
+        },
+        footer: {
+          description: 'Storefront footer content and navigation.',
+          enabled: true
+        },
+        'fulfillment-schedule': {
+          description: 'Store fulfillment schedule and availability.',
+          enabled: true
+        },
+        header: {
+          description: 'Storefront header content and navigation.',
+          enabled: true
+        },
+        'home-page': {
+          description:
+            'Homepage content, featured products, articles, and SEO settings.',
+          enabled: true
+        },
+        'pickup-point-page': {
+          description: 'Content and SEO settings for the pickup-point page.',
+          enabled: true
+        },
+        'products-page': {
+          description: 'Content and SEO settings for the product listing page.',
+          enabled: true
+        },
+        'support-page': {
+          description: 'Content and SEO settings for the support page.',
+          enabled: true
+        }
+      },
+      mcp: {
+        serverOptions: {
+          instructions:
+            'Manage storefront content and catalog data. Inspect existing documents before mutating them, preserve unrelated fields, use drafts for editorial work, and never assume access to customer or transactional data.',
+          serverInfo: {
+            name: 'Storefront Payload CMS',
+            version: '1.0.0'
+          }
+        }
+      },
+      overrideApiKeyCollection: (collection) => ({
+        ...collection,
+        access: {
+          ...collection.access,
+          admin: adminOnly,
+          create: adminOnly,
+          delete: adminOnly,
+          read: adminOnly,
+          unlock: adminOnly,
+          update: adminOnly
+        }
+      }),
+      userCollection: 'users'
+    }),
     seoPlugin({
       collections: ['pages', 'articles', 'products'],
       globals: [
@@ -226,6 +333,7 @@ export default buildConfig({
         'pickup-point-page',
         'support-page'
       ],
+      tabbedUI: true,
       uploadsCollection: 'media'
     }),
     s3Storage({
@@ -235,7 +343,7 @@ export default buildConfig({
           generateFileURL({ filename, prefix }) {
             const key = prefix ? `${prefix}/${filename}` : filename;
 
-            return `${envConfig.S3_BUCKET_PUBLIC_ENDPOINT}/${key}`;
+            return `${envConfig.R2_PUBLIC_ENDPOINT}/${key}`;
           }
         }
       },

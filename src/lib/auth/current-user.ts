@@ -9,5 +9,5 @@ export const getCurrentUser = cache(async () => {
   const [payload, requestHeaders] = await Promise.all([getCMS(), headers()]);
   const { user } = await payload.auth({ headers: requestHeaders });
 
-  return user;
+  return user?.collection === 'users' ? user : null;
 });

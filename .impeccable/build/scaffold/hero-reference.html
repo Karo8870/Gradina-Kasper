@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scaffold reference: homepage-a.webp</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One:wght@400&display=swap">
+  <link rel="stylesheet" href="layout.css">
+  <style>html,body{margin:0}body{background:#f3f7f2}.region{box-sizing:border-box}.region.text p{white-space:pre-wrap}</style>
+</head>
+<body>
+<!-- Reference only. Every region sits at its measured box inside a comp-aspect frame. Take the boxes (layout.css), keep your own semantic structure. -->
+<main class="comp-frame" style="max-width:1536px">
+  <div class="r-site-header region chrome" data-region="site-header"><!-- Compact white navigation with the real Grădina Kasper logo, current routes, account, and cart controls --></div>
+  <figure class="r-hero-photo region plate" data-region="hero-photo"><img src="../../../assets/plates/hero-photo.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+  <div class="r-hero-headline region text" data-region="hero-headline"><!-- Large friendly rounded-grotesk homepage headline --><p style="font-size:var(--r-hero-headline-font);font-family:var(--r-hero-headline-family),sans-serif;font-weight:var(--r-hero-headline-weight);line-height:1.05;margin:0">hero-headline</p></div>
+  <div class="r-hero-intro region text" data-region="hero-intro"><!-- Two-line supporting copy with relaxed line-height and strong contrast --><p style="font-size:var(--r-hero-intro-font);line-height:1.05;margin:0">hero-intro</p></div>
+  <div class="r-featured-product-surface region chrome" data-region="featured-product-surface"><!-- Single pale green featured-product plane with generous rounding and no visible outline --></div>
+  <figure class="r-featured-product-photo region plate" data-region="featured-product-photo"><img src="../../../assets/plates/featured-product-photo.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+  <div class="r-featured-title region text" data-region="featured-title"><!-- Featured product title, visually prominent but secondary to the hero headline --><p style="line-height:1.05;margin:0">featured-title</p></div>
+  <div class="r-featured-price-meta region text" data-region="featured-price-meta"><!-- Price and weight metadata on one compact row --><p style="font-size:var(--r-featured-price-meta-font);line-height:1.05;margin:0">featured-price-meta</p></div>
+  <div class="r-delivery-date region text" data-region="delivery-date"><!-- Next available delivery date; informational, not a recurring planner control --><p style="line-height:1.05;margin:0">delivery-date</p></div>
+  <div class="r-add-to-cart region control" data-region="add-to-cart"><!-- Full-width primary green add-to-cart action using existing cart behavior: rebuild the control's chrome from the crop (comp-spec.mjs --crop add-to-cart); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-all-products-link region control" data-region="all-products-link"><!-- Restrained underlined link to the existing products route: rebuild the control's chrome from the crop (comp-spec.mjs --crop all-products-link); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-articles-heading region text" data-region="articles-heading"><!-- Start of the recommended-articles section at the fold --><p style="font-size:var(--r-articles-heading-font);line-height:1.05;margin:0">articles-heading</p></div>
+  <div class="r-all-articles-link region control" data-region="all-articles-link"><!-- Link to the existing articles route: rebuild the control's chrome from the crop (comp-spec.mjs --crop all-articles-link); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <figure class="r-article-image-one region plate" data-region="article-image-one"><img src="../../../assets/plates/article-image-one.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+  <figure class="r-article-image-two region plate" data-region="article-image-two"><img src="../../../assets/plates/article-image-two.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+  <figure class="r-article-image-three region plate" data-region="article-image-three"><img src="../../../assets/plates/article-image-three.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+</main>
+</body>
+</html>

@@ -8,6 +8,7 @@ export default cleanEnv(process.env, {
   S3_REGION: str({
     default: 'auto'
   }),
+  R2_PUBLIC_ENDPOINT: str(),
   PAYLOAD_SECRET: str(),
   BETTER_AUTH_SECRET: str(),
   TFA_MODE: str({

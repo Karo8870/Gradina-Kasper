@@ -1,0 +1,104 @@
+{
+  "regions": [
+    {
+      "id": "site-header",
+      "kind": "chrome",
+      "grid": "A0:J0",
+      "note": "Compact white navigation with the real Grădina Kasper logo, current routes, account, and cart controls"
+    },
+    {
+      "id": "hero-photo",
+      "kind": "image",
+      "grid": "A1:F7",
+      "note": "Use the existing real CMS greenhouse hero photograph; the person and produce shown in the comp are compositional placeholders, not shipping assets"
+    },
+    {
+      "id": "hero-headline",
+      "kind": "text",
+      "grid": "A1:D2",
+      "note": "Large friendly rounded-grotesk homepage headline",
+      "codeDrawn": true
+    },
+    {
+      "id": "hero-intro",
+      "kind": "text",
+      "grid": "A3:D3",
+      "note": "Two-line supporting copy with relaxed line-height and strong contrast"
+    },
+    {
+      "id": "featured-product-surface",
+      "kind": "chrome",
+      "grid": "G1:J7",
+      "note": "Single pale green featured-product plane with generous rounding and no visible outline",
+      "container": true
+    },
+    {
+      "id": "featured-product-photo",
+      "kind": "image",
+      "grid": "G1:J4",
+      "note": "Use the existing real featured product gallery image from Payload; the comp box is only a layout placeholder"
+    },
+    {
+      "id": "featured-title",
+      "kind": "text",
+      "grid": "H4:J4",
+      "note": "Featured product title, visually prominent but secondary to the hero headline"
+    },
+    {
+      "id": "featured-price-meta",
+      "kind": "text",
+      "grid": "H5:J5",
+      "note": "Price and weight metadata on one compact row"
+    },
+    {
+      "id": "delivery-date",
+      "kind": "text",
+      "grid": "G5:J6",
+      "note": "Next available delivery date; informational, not a recurring planner control"
+    },
+    {
+      "id": "add-to-cart",
+      "kind": "control",
+      "grid": "G6:J6",
+      "note": "Full-width primary green add-to-cart action using existing cart behavior"
+    },
+    {
+      "id": "all-products-link",
+      "kind": "control",
+      "grid": "H7:J7",
+      "note": "Restrained underlined link to the existing products route"
+    },
+    {
+      "id": "articles-heading",
+      "kind": "text",
+      "grid": "A8:D8",
+      "note": "Start of the recommended-articles section at the fold"
+    },
+    {
+      "id": "all-articles-link",
+      "kind": "control",
+      "grid": "H8:J8",
+      "note": "Link to the existing articles route"
+    },
+    {
+      "id": "article-image-one",
+      "kind": "image",
+      "grid": "A9:D9",
+      "note": "Use the first real article thumbnail from Payload",
+      "bleed": true
+    },
+    {
+      "id": "article-image-two",
+      "kind": "image",
+      "grid": "D9:G9",
+      "note": "Use the second real article thumbnail from Payload"
+    },
+    {
+      "id": "article-image-three",
+      "kind": "image",
+      "grid": "G9:J9",
+      "note": "Use the third real article thumbnail from Payload",
+      "bleed": true
+    }
+  ]
+}

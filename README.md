@@ -32,6 +32,32 @@ That's it! Changes made in `./src` will be reflected in your app. Follow the on-
 - Use Shadcn's Base Nova registry for UI primitives. Base UI provides component behavior and Tailwind provides their generated styling.
 - Regenerate files in `src/components/ui` with the Shadcn CLI; do not edit those generated components by hand.
 
+## Payload MCP
+
+The official Payload MCP plugin exposes the configured editorial collections and globals at `POST /api/mcp`. Customer, user, cart, order, and transaction collections are not exposed.
+
+To connect an MCP client:
+
+1. Sign in to Payload Admin as an admin.
+2. Open **MCP → Payload MCP API Keys**, create a key, and enable only the operations the client needs.
+3. Copy the generated API key and configure the client to send it as a bearer token:
+
+```json
+{
+  "mcpServers": {
+    "Storefront Payload CMS": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+MCP keys can only be managed by admins. Tool calls run as the admin associated with the key and continue to enforce Payload collection and global access control.
+
 #### Docker (Optional)
 
 If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.

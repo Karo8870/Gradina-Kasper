@@ -8,6 +8,7 @@ import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { cn } from 'cn';
 
 import { RenderMedia } from '@/components/render-media';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,11 @@ function populatedProduct(item: CartItem) {
   return typeof item.product === 'object' && item.product ? item.product : null;
 }
 
-export function CartDrawer() {
+export function CartDrawer({
+  triggerClassName
+}: {
+  triggerClassName?: string;
+} = {}) {
   const cartState = useCart();
   const cart = cartState.cart as Cart | undefined;
   const { decrementItem, incrementItem, isLoading, removeItem } = cartState;
@@ -48,7 +53,7 @@ export function CartDrawer() {
         render={
           <Button
             aria-label='Deschide coșul'
-            className='relative'
+            className={cn('relative', triggerClassName)}
             size='icon-lg'
             variant='ghost'
           />

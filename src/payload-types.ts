@@ -69,6 +69,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -77,6 +78,7 @@ export interface Config {
     pages: Page;
     articles: Article;
     vegetables: Vegetable;
+    invoices: Invoice;
     sessions: Session;
     accounts: Account;
     verifications: Verification;
@@ -86,6 +88,7 @@ export interface Config {
     carts: Cart;
     orders: Order;
     transactions: Transaction;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +101,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     vegetables: VegetablesSelect<false> | VegetablesSelect<true>;
+    invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     sessions: SessionsSelect<false> | SessionsSelect<true>;
     accounts: AccountsSelect<false> | AccountsSelect<true>;
     verifications: VerificationsSelect<false> | VerificationsSelect<true>;
@@ -107,6 +111,7 @@ export interface Config {
     carts: CartsSelect<false> | CartsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     transactions: TransactionsSelect<false> | TransactionsSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -128,6 +133,7 @@ export interface Config {
     'support-page': SupportPage;
     'checkout-settings': CheckoutSetting;
     'fulfillment-schedule': FulfillmentSchedule;
+    'mail-settings': MailSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -141,12 +147,13 @@ export interface Config {
     'support-page': SupportPageSelect<false> | SupportPageSelect<true>;
     'checkout-settings': CheckoutSettingsSelect<false> | CheckoutSettingsSelect<true>;
     'fulfillment-schedule': FulfillmentScheduleSelect<false> | FulfillmentScheduleSelect<true>;
+    'mail-settings': MailSettingsSelect<false> | MailSettingsSelect<true>;
   };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -166,6 +173,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -313,6 +338,215 @@ export interface Vegetable {
   createdAt: string;
 }
 /**
+ * The document ID is the invoice number. Invoices are issued automatically when a paid order is created.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: number;
+  order: number | Order;
+  issuedAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  shippingAddress?: {
+    title?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    company?: string | null;
+    addressLine1?: string | null;
+    addressLine2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+  };
+  customer?: (number | null) | User;
+  customerEmail?: string | null;
+  transactions?: (number | Transaction)[] | null;
+  status?: OrderStatus;
+  amount?: number | null;
+  currency?: 'RON' | null;
+  paymentReference?: string | null;
+  fulfillmentMethod?: ('delivery' | 'pickup') | null;
+  fulfillmentDate?: string | null;
+  checkoutSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  activity?:
+    | {
+        type: 'order_placed' | 'status_changed' | 'cancellation_requested';
+        occurredAt: string;
+        source: 'system' | 'customer' | 'admin';
+        fromStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
+        toStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  name: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  possibleVegetables?: (number | Vegetable)[] | null;
+  /**
+   * Enter a price with up to two decimal places. VAT is included.
+   */
+  priceInRON?: number | null;
+  hasDiscount?: boolean | null;
+  /**
+   * Enter the price before the discount, with up to two decimal places.
+   */
+  originalPriceInRON?: number | null;
+  inventory?: number | null;
+  visibility?: ('public' | 'hidden') | null;
+  disabled?: boolean | null;
+  availability?: {
+    enableFrom?: boolean | null;
+    from?: string | null;
+    enableUntil?: boolean | null;
+    until?: string | null;
+  };
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transactions".
+ */
+export interface Transaction {
+  id: number;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  paymentMethod?: 'netopia' | null;
+  netopia?: {
+    merchantOrderID?: string | null;
+    ntpID?: string | null;
+    paymentURL?: string | null;
+    checkoutSnapshot?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  billingAddress?: {
+    title?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    company?: string | null;
+    addressLine1?: string | null;
+    addressLine2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+  };
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
+  customer?: (number | null) | User;
+  customerEmail?: string | null;
+  order?: (number | null) | Order;
+  cart?: (number | null) | Cart;
+  amount?: number | null;
+  currency?: 'RON' | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts".
+ */
+export interface Cart {
+  id: number;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  secret?: string | null;
+  customer?: (number | null) | User;
+  purchasedAt?: string | null;
+  status?: ('active' | 'purchased' | 'abandoned') | null;
+  subtotal?: number | null;
+  currency?: 'RON' | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Auto-generated from Better Auth schema (session)
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -442,195 +676,227 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
+ * via the `definition` "payload-mcp-api-keys".
  */
-export interface Product {
+export interface PayloadMcpApiKey {
   id: number;
-  name: string;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  gallery?:
-    | {
-        image: number | Media;
-        id?: string | null;
-      }[]
-    | null;
-  possibleVegetables?: (number | Vegetable)[] | null;
   /**
-   * Enter a price with up to two decimal places. VAT is included.
+   * The user that the API key is associated with.
    */
-  priceInRON?: number | null;
-  inventory?: number | null;
-  visibility?: ('public' | 'hidden') | null;
-  disabled?: boolean | null;
-  availability?: {
-    enableFrom?: boolean | null;
-    from?: string | null;
-    enableUntil?: boolean | null;
-    until?: string | null;
-  };
+  user: number | User;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   * A useful label for the API key.
    */
-  generateSlug?: boolean | null;
-  slug: string;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  articles?: {
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Allow clients to find articles.
      */
-    image?: (number | null) | Media;
+    find?: boolean | null;
+    /**
+     * Allow clients to create articles.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update articles.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete articles.
+     */
+    delete?: boolean | null;
+  };
+  media?: {
+    /**
+     * Allow clients to find media.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete media.
+     */
+    delete?: boolean | null;
+  };
+  pages?: {
+    /**
+     * Allow clients to find pages.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create pages.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update pages.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete pages.
+     */
+    delete?: boolean | null;
+  };
+  products?: {
+    /**
+     * Allow clients to find products.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create products.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update products.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete products.
+     */
+    delete?: boolean | null;
+  };
+  vegetables?: {
+    /**
+     * Allow clients to find vegetables.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create vegetables.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update vegetables.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete vegetables.
+     */
+    delete?: boolean | null;
+  };
+  aboutPage?: {
+    /**
+     * Allow clients to find about-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update about-page global.
+     */
+    update?: boolean | null;
+  };
+  checkoutSettings?: {
+    /**
+     * Allow clients to find checkout-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update checkout-settings global.
+     */
+    update?: boolean | null;
+  };
+  didYouKnowPage?: {
+    /**
+     * Allow clients to find did-you-know-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update did-you-know-page global.
+     */
+    update?: boolean | null;
+  };
+  faqPage?: {
+    /**
+     * Allow clients to find faq-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update faq-page global.
+     */
+    update?: boolean | null;
+  };
+  footer?: {
+    /**
+     * Allow clients to find footer global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update footer global.
+     */
+    update?: boolean | null;
+  };
+  fulfillmentSchedule?: {
+    /**
+     * Allow clients to find fulfillment-schedule global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update fulfillment-schedule global.
+     */
+    update?: boolean | null;
+  };
+  header?: {
+    /**
+     * Allow clients to find header global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update header global.
+     */
+    update?: boolean | null;
+  };
+  homePage?: {
+    /**
+     * Allow clients to find home-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update home-page global.
+     */
+    update?: boolean | null;
+  };
+  pickupPointPage?: {
+    /**
+     * Allow clients to find pickup-point-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update pickup-point-page global.
+     */
+    update?: boolean | null;
+  };
+  productsPage?: {
+    /**
+     * Allow clients to find products-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update products-page global.
+     */
+    update?: boolean | null;
+  };
+  supportPage?: {
+    /**
+     * Allow clients to find support-page global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update support-page global.
+     */
+    update?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "carts".
- */
-export interface Cart {
-  id: number;
-  items?:
-    | {
-        product?: (number | null) | Product;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  secret?: string | null;
-  customer?: (number | null) | User;
-  purchasedAt?: string | null;
-  status?: ('active' | 'purchased' | 'abandoned') | null;
-  subtotal?: number | null;
-  currency?: 'RON' | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: number;
-  items?:
-    | {
-        product?: (number | null) | Product;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  shippingAddress?: {
-    title?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    company?: string | null;
-    addressLine1?: string | null;
-    addressLine2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    postalCode?: string | null;
-    country?: string | null;
-    phone?: string | null;
-  };
-  customer?: (number | null) | User;
-  customerEmail?: string | null;
-  transactions?: (number | Transaction)[] | null;
-  status?: OrderStatus;
-  amount?: number | null;
-  currency?: 'RON' | null;
-  paymentReference?: string | null;
-  fulfillmentMethod?: ('delivery' | 'pickup') | null;
-  fulfillmentDate?: string | null;
-  checkoutSnapshot?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  activity?:
-    | {
-        type: 'order_placed' | 'status_changed' | 'cancellation_requested';
-        occurredAt: string;
-        source: 'system' | 'customer' | 'admin';
-        fromStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
-        toStatus?: ('processing' | 'completed' | 'cancelled' | 'refunded') | null;
-        description: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transactions".
- */
-export interface Transaction {
-  id: number;
-  items?:
-    | {
-        product?: (number | null) | Product;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  paymentMethod?: 'netopia' | null;
-  netopia?: {
-    merchantOrderID?: string | null;
-    ntpID?: string | null;
-    paymentURL?: string | null;
-    checkoutSnapshot?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  billingAddress?: {
-    title?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    company?: string | null;
-    addressLine1?: string | null;
-    addressLine2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    postalCode?: string | null;
-    country?: string | null;
-    phone?: string | null;
-  };
-  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
-  customer?: (number | null) | User;
-  customerEmail?: string | null;
-  order?: (number | null) | Order;
-  cart?: (number | null) | Cart;
-  amount?: number | null;
-  currency?: 'RON' | null;
-  updatedAt: string;
-  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -677,6 +943,10 @@ export interface PayloadLockedDocument {
         value: number | Vegetable;
       } | null)
     | ({
+        relationTo: 'invoices';
+        value: number | Invoice;
+      } | null)
+    | ({
         relationTo: 'sessions';
         value: number | Session;
       } | null)
@@ -711,12 +981,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'transactions';
         value: number | Transaction;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -726,10 +1005,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -843,6 +1127,16 @@ export interface VegetablesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices_select".
+ */
+export interface InvoicesSelect<T extends boolean = true> {
+  order?: T;
+  issuedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sessions_select".
  */
 export interface SessionsSelect<T extends boolean = true> {
@@ -932,6 +1226,8 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   possibleVegetables?: T;
   priceInRON?: T;
+  hasDiscount?: T;
+  originalPriceInRON?: T;
   inventory?: T;
   visibility?: T;
   disabled?: T;
@@ -943,8 +1239,6 @@ export interface ProductsSelect<T extends boolean = true> {
         enableUntil?: T;
         until?: T;
       };
-  generateSlug?: T;
-  slug?: T;
   meta?:
     | T
     | {
@@ -952,6 +1246,8 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  generateSlug?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1074,6 +1370,125 @@ export interface TransactionsSelect<T extends boolean = true> {
   currency?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  articles?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  media?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+        delete?: T;
+      };
+  pages?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  products?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  vegetables?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  aboutPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  checkoutSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  didYouKnowPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  faqPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  footer?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  fulfillmentSchedule?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  header?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  homePage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  pickupPointPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  productsPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  supportPage?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1231,6 +1646,10 @@ export interface ProductsPage {
     };
     [k: string]: unknown;
   };
+  /**
+   * Selected boxes appear as the larger product panels at the top of this page. Their order here is preserved on the page.
+   */
+  featuredProducts?: (number | Product)[] | null;
   howItWorksTitle: string;
   howItWorksContent: {
     root: {
@@ -1513,10 +1932,26 @@ export interface CheckoutSetting {
  */
 export interface FulfillmentSchedule {
   id: number;
-  allowedWeekdays: ('1' | '2' | '3' | '4' | '5' | '6' | '7')[];
+  monday?: boolean | null;
+  tuesday?: boolean | null;
+  wednesday?: boolean | null;
+  thursday?: boolean | null;
+  friday?: boolean | null;
+  saturday?: boolean | null;
+  sunday?: boolean | null;
+  allowedWeekdays?: ('1' | '2' | '3' | '4' | '5' | '6' | '7')[] | null;
   /**
-   * The week starts on Monday. Leave allowed weekdays empty to disable fulfillment for that week.
+   * Choose a week, then toggle its delivery or pickup days. An empty week disables fulfillment for that week.
    */
+  weeklyOverrides?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   weekOverrides?:
     | {
         weekStart: string;
@@ -1524,6 +1959,77 @@ export interface FulfillmentSchedule {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mail-settings".
+ */
+export interface MailSetting {
+  id: number;
+  orderPlaced: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
+  orderProcessing: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
+  orderCancelled: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
+  orderDelivered: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
+  orderPickedUp: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
+  orderRefunded: {
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    subject: string;
+    /**
+     * Use HTML in the body and double curly braces for values. Available placeholders: {{orderID}}, {{orderDate}}, {{fulfillmentDate}}, {{fulfillmentMethod}}, {{status}}, {{total}}, {{currency}}, {{customerEmail}}, {{orderURL}}, {{itemsText}}, {{itemsHTML}}, {{itemsTable}}, {{shippingAddress}}
+     */
+    body: string;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1607,6 +2113,7 @@ export interface HomePageSelect<T extends boolean = true> {
 export interface ProductsPageSelect<T extends boolean = true> {
   boxesSectionTitle?: T;
   boxesSectionContent?: T;
+  featuredProducts?: T;
   howItWorksTitle?: T;
   howItWorksContent?: T;
   step1?:
@@ -1775,13 +2282,66 @@ export interface CheckoutSettingsSelect<T extends boolean = true> {
  * via the `definition` "fulfillment-schedule_select".
  */
 export interface FulfillmentScheduleSelect<T extends boolean = true> {
+  monday?: T;
+  tuesday?: T;
+  wednesday?: T;
+  thursday?: T;
+  friday?: T;
+  saturday?: T;
+  sunday?: T;
   allowedWeekdays?: T;
+  weeklyOverrides?: T;
   weekOverrides?:
     | T
     | {
         weekStart?: T;
         allowedWeekdays?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mail-settings_select".
+ */
+export interface MailSettingsSelect<T extends boolean = true> {
+  orderPlaced?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderProcessing?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderCancelled?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderDelivered?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderPickedUp?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
+      };
+  orderRefunded?:
+    | T
+    | {
+        subject?: T;
+        body?: T;
       };
   updatedAt?: T;
   createdAt?: T;

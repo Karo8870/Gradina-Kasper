@@ -4,6 +4,10 @@ import {
   getNextFulfillmentDate,
   type FulfillmentScheduleDTO
 } from '@/commerce/checkout';
+import {
+  getDefaultAllowedWeekdays,
+  normalizeWeekOverrides
+} from '@/commerce/fulfillment-admin';
 import { CheckoutPage } from '@/components/checkout/checkout-page';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { withFeedback } from '@/lib/auth/utils';
@@ -50,15 +54,16 @@ export default async function CheckoutRoute() {
       })
     ]);
   const schedule: FulfillmentScheduleDTO = {
-    allowedWeekdays: (fulfillmentSchedule.allowedWeekdays ?? ['2', '5']).map(
-      Number
+    allowedWeekdays: getDefaultAllowedWeekdays(
+      fulfillmentSchedule,
+      fulfillmentSchedule.allowedWeekdays ?? undefined
     ),
-    weekOverrides: (fulfillmentSchedule.weekOverrides ?? []).map(
-      (override) => ({
-        allowedWeekdays: (override.allowedWeekdays ?? []).map(Number),
-        weekStart: override.weekStart.slice(0, 10)
-      })
-    )
+    weekOverrides: normalizeWeekOverrides(
+      fulfillmentSchedule.weeklyOverrides ?? fulfillmentSchedule.weekOverrides
+    ).map((override) => ({
+      allowedWeekdays: (override.allowedWeekdays ?? []).map(Number),
+      weekStart: override.weekStart.slice(0, 10)
+    }))
   };
 
   return (

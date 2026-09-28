@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Clock3, Download, RefreshCw } from 'lucide-react';
 
-import { updateOrderStatus } from '@/actions/orders';
+import { bulkUpdateOrderStatus, updateOrderStatus } from '@/actions/orders';
 import { orderStatuses } from '@/commerce/order-activity';
 import { Button } from '@/components/ui/button';
 import {
@@ -531,6 +531,14 @@ export function OrderAdminDashboard({
   const [fulfillmentDate, setFulfillmentDate] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
   const [selected, setSelected] = useState<AdminOrder | null>(null);
+  const [selectedOrderIDs, setSelectedOrderIDs] = useState<Set<number>>(
+    () => new Set()
+  );
+  const [bulkStatus, setBulkStatus] =
+    useState<(typeof orderStatuses)[number]>('processing');
+  const [bulkConfirmationOpen, setBulkConfirmationOpen] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState('');
+  const [bulkPending, startBulkTransition] = useTransition();
   const [columns, setColumns] = useState<Record<ExportKey, boolean>>(
     () =>
       Object.fromEntries(
@@ -604,6 +612,68 @@ export function OrderAdminDashboard({
     start,
     status
   ]);
+  const selectedVisibleOrderIDs = orders
+    .filter((order) => selectedOrderIDs.has(order.id))
+    .map((order) => order.id);
+  const allVisibleSelected =
+    orders.length > 0 && selectedVisibleOrderIDs.length === orders.length;
+
+  function changeFilter(setter: (value: string) => void, value: string) {
+    setSelectedOrderIDs(new Set());
+    setBulkMessage('');
+    setter(value);
+  }
+
+  function toggleOrderSelection(orderID: number, checked: boolean) {
+    setSelectedOrderIDs((current) => {
+      const next = new Set(current);
+      if (checked) next.add(orderID);
+      else next.delete(orderID);
+      return next;
+    });
+    setBulkMessage('');
+  }
+
+  function toggleVisibleOrders(checked: boolean) {
+    setSelectedOrderIDs((current) => {
+      const next = new Set(current);
+      orders.forEach((order) => {
+        if (checked) next.add(order.id);
+        else next.delete(order.id);
+      });
+      return next;
+    });
+    setBulkMessage('');
+  }
+
+  function confirmBulkUpdate() {
+    const orderIDs = selectedVisibleOrderIDs;
+    setBulkMessage('');
+    startBulkTransition(async () => {
+      try {
+        const result = await bulkUpdateOrderStatus({
+          orderIDs,
+          status: bulkStatus
+        });
+        const summary = `${result.updated} updated, ${result.unchanged} already ${statusLabels[bulkStatus].toLowerCase()}`;
+        setBulkMessage(
+          result.message
+            ? result.updated || result.unchanged
+              ? `${summary}; ${result.message}`
+              : result.message
+            : `${summary}.`
+        );
+        setBulkConfirmationOpen(false);
+        if (result.success) setSelectedOrderIDs(new Set());
+        if (result.updated) router.refresh();
+      } catch {
+        setBulkConfirmationOpen(false);
+        setBulkMessage(
+          'The update could not be confirmed. Refresh the page before retrying.'
+        );
+      }
+    });
+  }
 
   const products = useMemo(() => {
     const groups = new Map<
@@ -636,6 +706,8 @@ export function OrderAdminDashboard({
   }, [orders]);
 
   function reset() {
+    setSelectedOrderIDs(new Set());
+    setBulkMessage('');
     setSearch('');
     setStart('');
     setEnd('');
@@ -769,7 +841,9 @@ export function OrderAdminDashboard({
               <Label htmlFor='search'>Search</Label>
               <Input
                 id='search'
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) =>
+                  changeFilter(setSearch, event.target.value)
+                }
                 placeholder='Customer, email, product, order or transaction ID…'
                 value={search}
               />
@@ -778,7 +852,7 @@ export function OrderAdminDashboard({
               <Label htmlFor='from'>From</Label>
               <Input
                 id='from'
-                onChange={(event) => setStart(event.target.value)}
+                onChange={(event) => changeFilter(setStart, event.target.value)}
                 type='date'
                 value={start}
               />
@@ -787,14 +861,14 @@ export function OrderAdminDashboard({
               <Label htmlFor='until'>Until</Label>
               <Input
                 id='until'
-                onChange={(event) => setEnd(event.target.value)}
+                onChange={(event) => changeFilter(setEnd, event.target.value)}
                 type='date'
                 value={end}
               />
             </div>
             <FilterSelect
               label='Fulfillment date'
-              onChange={setFulfillmentDate}
+              onChange={(value) => changeFilter(setFulfillmentDate, value)}
               options={[
                 { label: 'All dates', value: 'all' },
                 ...dates.map((value) => ({ label: date(value), value }))
@@ -803,7 +877,7 @@ export function OrderAdminDashboard({
             />
             <FilterSelect
               label='Status'
-              onChange={setStatus}
+              onChange={(value) => changeFilter(setStatus, value)}
               options={[
                 { label: 'All statuses', value: 'all' },
                 ...['processing', 'completed', 'cancelled', 'refunded'].map(
@@ -814,7 +888,7 @@ export function OrderAdminDashboard({
             />
             <FilterSelect
               label='Fulfillment'
-              onChange={setMethod}
+              onChange={(value) => changeFilter(setMethod, value)}
               options={[
                 { label: 'Delivery and pickup', value: 'all' },
                 { label: 'Delivery', value: 'delivery' },
@@ -827,13 +901,21 @@ export function OrderAdminDashboard({
           <div className='flex flex-col justify-between gap-3 lg:flex-row lg:items-end'>
             <div className='flex gap-2'>
               <Button
-                onClick={() => setView('orders')}
+                onClick={() => {
+                  setSelectedOrderIDs(new Set());
+                  setBulkMessage('');
+                  setView('orders');
+                }}
                 variant={view === 'orders' ? 'default' : 'outline'}
               >
                 All orders
               </Button>
               <Button
-                onClick={() => setView('products')}
+                onClick={() => {
+                  setSelectedOrderIDs(new Set());
+                  setBulkMessage('');
+                  setView('products');
+                }}
                 variant={view === 'products' ? 'default' : 'outline'}
               >
                 Product summary
@@ -912,12 +994,109 @@ export function OrderAdminDashboard({
           ? `${orders.length} orders`
           : `${products.length} products`}
       </p>
+      {view === 'orders' ? (
+        <div className='flex flex-wrap items-end justify-between gap-4'>
+          <div className='flex items-center gap-2'>
+            <p className='text-muted-foreground text-sm'>
+              {selectedVisibleOrderIDs.length} of {orders.length} filtered
+              orders selected
+            </p>
+            {selectedVisibleOrderIDs.length ? (
+              <Button
+                disabled={bulkPending}
+                onClick={() => setSelectedOrderIDs(new Set())}
+                size='sm'
+                variant='ghost'
+              >
+                Clear selection
+              </Button>
+            ) : null}
+          </div>
+          <div className='flex flex-wrap items-end gap-3'>
+            <div className='flex flex-col gap-2'>
+              <Label htmlFor='bulk-order-status'>New status</Label>
+              <Select
+                disabled={bulkPending}
+                onValueChange={(value) =>
+                  setBulkStatus(value as (typeof orderStatuses)[number])
+                }
+                value={bulkStatus}
+              >
+                <SelectTrigger className='w-40' id='bulk-order-status'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {orderStatuses.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {statusLabels[value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Dialog
+              onOpenChange={(open) => {
+                if (!bulkPending) setBulkConfirmationOpen(open);
+              }}
+              open={bulkConfirmationOpen}
+            >
+              <DialogTrigger
+                disabled={!selectedVisibleOrderIDs.length || bulkPending}
+                render={<Button />}
+              >
+                Update selected
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Confirm bulk status change</DialogTitle>
+                  <DialogDescription>
+                    Change {selectedVisibleOrderIDs.length} selected, filtered
+                    {selectedVisibleOrderIDs.length === 1
+                      ? ' order'
+                      : ' orders'}
+                    to {statusLabels[bulkStatus]}? Customers whose status
+                    changes will be emailed. This does not issue NETOPIA refunds
+                    or adjust inventory.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className='flex justify-end gap-2'>
+                  <DialogClose
+                    render={<Button disabled={bulkPending} variant='outline' />}
+                  >
+                    Keep current statuses
+                  </DialogClose>
+                  <Button disabled={bulkPending} onClick={confirmBulkUpdate}>
+                    {bulkPending ? 'Updating…' : 'Confirm change'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      ) : null}
+      {bulkMessage && view === 'orders' ? (
+        <p className='text-sm' role='status'>
+          {bulkMessage}
+        </p>
+      ) : null}
       <Card className='py-0'>
         <CardContent className='overflow-x-auto px-0'>
           {view === 'orders' ? (
             <table className='w-full min-w-[1250px] text-sm'>
               <thead>
                 <tr className='bg-muted/50 text-muted-foreground border-b text-left text-xs uppercase'>
+                  <th className='px-4 py-3' scope='col'>
+                    <Checkbox
+                      aria-label='Select all filtered orders'
+                      checked={allVisibleSelected}
+                      disabled={!orders.length || bulkPending}
+                      indeterminate={
+                        selectedVisibleOrderIDs.length > 0 &&
+                        !allVisibleSelected
+                      }
+                      onCheckedChange={toggleVisibleOrders}
+                    />
+                  </th>
                   {[
                     'Order',
                     'Customer',
@@ -946,6 +1125,16 @@ export function OrderAdminDashboard({
                     }
                     key={order.id}
                   >
+                    <td className='px-4 py-4 align-top'>
+                      <Checkbox
+                        aria-label={`Select order #${order.id}`}
+                        checked={selectedOrderIDs.has(order.id)}
+                        disabled={bulkPending}
+                        onCheckedChange={(checked) =>
+                          toggleOrderSelection(order.id, checked)
+                        }
+                      />
+                    </td>
                     <td className='px-4 py-4 align-top'>
                       <strong>#{order.id}</strong>
                       <p className='text-muted-foreground text-xs'>

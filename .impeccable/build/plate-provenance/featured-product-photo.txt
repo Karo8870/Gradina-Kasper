@@ -1,0 +1,1 @@
+Sourced from the existing real Grădina Kasper production media at https://gradinakasper.ro/api/media/file/kasper-garden_produce-27_4x5.webp on 2026-09-25. Center-cropped to the approved featured-product-photo region and resized to 614×410 pixels. This is real client photography, not generated imagery.

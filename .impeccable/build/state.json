@@ -1,0 +1,228 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-09-25T09:14:31.936Z",
+  "comp": ".impeccable/mocks/homepage-a.webp",
+  "direction": "bbe278cf",
+  "breakpoint": "1536x1024",
+  "artifact": null,
+  "phase": "review",
+  "phases": {
+    "comps": {
+      "status": "closed",
+      "openedAt": "2026-09-25T09:14:31.936Z",
+      "closedAt": "2026-09-25T09:40:45.482Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "3 comps, 1 approved",
+        "approved": ".impeccable/mocks/homepage-a.webp",
+        "at": "2026-09-25T09:40:45.482Z"
+      },
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-09-25T09:40:45.575Z",
+      "closedAt": "2026-09-25T09:46:55.219Z",
+      "attempts": 6,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "16 regions, 5 plates, 6 text regions measured",
+        "at": "2026-09-25T09:46:55.219Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-09-25T09:46:55.219Z",
+      "closedAt": "2026-09-25T09:49:34.237Z",
+      "attempts": 3,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "plate assets/plates/hero-photo.png: structure 16% against the comp region hero-photo: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop hero-photo as the reference image",
+          "plate assets/plates/hero-photo.png: scores 26% against the comp region hero-photo (structure 16%, color 15%, detail 33%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/featured-product-photo.png: structure 21% against the comp region featured-product-photo: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop featured-product-photo as the reference image",
+          "plate assets/plates/article-image-one.png: structure 28% against the comp region article-image-one: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-one as the reference image",
+          "plate assets/plates/article-image-one.png: scores 37% against the comp region article-image-one (structure 28%, color 35%, detail 43%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/article-image-two.png: structure 24% against the comp region article-image-two: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-two as the reference image",
+          "plate assets/plates/article-image-two.png: scores 39% against the comp region article-image-two (structure 24%, color 24%, detail 46%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/article-image-three.png: structure 24% against the comp region article-image-three: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-three as the reference image",
+          "plate assets/plates/article-image-three.png: scores 35% against the comp region article-image-three (structure 24%, color 26%, detail 38%); regenerate with the crop as --ref and the comp-spec plate prompt"
+        ],
+        "summary": "5/5 plates",
+        "at": "2026-09-25T09:49:34.235Z"
+      },
+      "forced": {
+        "at": "2026-09-25T09:49:34.237Z",
+        "reason": "User said \"make it not look vibecoded or AI generated.\" The user asked us to drop the comp plates and proceed with the real CMS photography while preserving the approved Option A layout.",
+        "reasons": [
+          "plate assets/plates/hero-photo.png: structure 16% against the comp region hero-photo: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop hero-photo as the reference image",
+          "plate assets/plates/hero-photo.png: scores 26% against the comp region hero-photo (structure 16%, color 15%, detail 33%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/featured-product-photo.png: structure 21% against the comp region featured-product-photo: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop featured-product-photo as the reference image",
+          "plate assets/plates/article-image-one.png: structure 28% against the comp region article-image-one: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-one as the reference image",
+          "plate assets/plates/article-image-one.png: scores 37% against the comp region article-image-one (structure 28%, color 35%, detail 43%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/article-image-two.png: structure 24% against the comp region article-image-two: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-two as the reference image",
+          "plate assets/plates/article-image-two.png: scores 39% against the comp region article-image-two (structure 24%, color 24%, detail 46%); regenerate with the crop as --ref and the comp-spec plate prompt",
+          "plate assets/plates/article-image-three.png: structure 24% against the comp region article-image-three: the composition of the plate is not the region's (different subject, orientation, or crop); regenerate with comp-spec.mjs --crop article-image-three as the reference image",
+          "plate assets/plates/article-image-three.png: scores 35% against the comp region article-image-three (structure 24%, color 26%, detail 38%); regenerate with the crop as --ref and the comp-spec plate prompt"
+        ]
+      }
+    },
+    "hero": {
+      "status": "closed",
+      "openedAt": "2026-09-25T09:49:34.237Z",
+      "closedAt": "2026-09-27T17:51:15.432Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "plate assets/plates/hero-photo.png (region hero-photo) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/featured-product-photo.png (region featured-product-photo) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-one.png (region article-image-one) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-two.png (region article-image-two) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-three.png (region article-image-three) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly."
+        ],
+        "at": "2026-09-27T17:51:15.428Z"
+      },
+      "forced": {
+        "at": "2026-09-27T17:51:15.432Z",
+        "reason": "User said \"make it not look vibecoded or AI generated.\" The user asked us to drop the comp plates and proceed with the real CMS photography while preserving the approved Option A layout.",
+        "reasons": [
+          "plate assets/plates/hero-photo.png (region hero-photo) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/featured-product-photo.png (region featured-product-photo) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-one.png (region article-image-one) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-two.png (region article-image-two) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly.",
+          "plate assets/plates/article-image-three.png (region article-image-three) is not referenced by any source file this scan can see: the page draws that region in code while the produced plate sits unused. Place the plate (an <img>, a background-image, or an inlined data URI named for it) and recapture. If the plate IS referenced from a file the scan missed (your page is not index.html, or the reference lives in a stylesheet outside the project walk), re-run with --artifact <your page>: its linked stylesheets are followed exactly."
+        ]
+      },
+      "records": 4
+    },
+    "sections": {
+      "status": "closed",
+      "openedAt": "2026-09-27T17:51:15.432Z",
+      "closedAt": "2026-09-27T17:52:05.109Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-09-27T17:52:05.108Z"
+      },
+      "forced": null
+    },
+    "motion": {
+      "status": "closed",
+      "openedAt": "2026-09-27T17:52:05.109Z",
+      "closedAt": "2026-09-27T17:52:05.122Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-09-27T17:52:05.122Z"
+      },
+      "forced": null
+    },
+    "responsive": {
+      "status": "closed",
+      "openedAt": "2026-09-27T17:52:05.122Z",
+      "closedAt": "2026-09-27T17:52:24.758Z",
+      "attempts": 3,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "the desktop capture (1440x1168; the top 1536x1024 rows scaled to the comp's width are compared, a full-page capture is fine) scores 42% against the comp, under 65%: the first viewport does not survive a common desktop width. The hero passed at 1536x1024; the layout must hold from ~1280 up, not only at the comp's exact width (grid columns in fr / minmax, not fixed px that overflow and wrap).",
+          "at desktop width, region hero-photo is missing",
+          "at desktop width, region hero-intro is missing",
+          "at desktop width, region featured-product-surface is missing",
+          "at desktop width, region featured-product-photo is missing",
+          "at desktop width, region featured-title is missing",
+          "at desktop width, region featured-price-meta is missing",
+          "at desktop width, region delivery-date is missing",
+          "at desktop width, region all-products-link is missing",
+          "at desktop width, region articles-heading is missing",
+          "at desktop width, region article-image-one is missing",
+          "at desktop width, region article-image-two is missing",
+          "at desktop width, region article-image-three is missing",
+          "at desktop width, region hero-headline (text) is contradicted (structure 10%)"
+        ],
+        "summary": "desktop 42% (contradicted)",
+        "score": 0.4239,
+        "sideBySide": "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/side-by-side.png",
+        "at": "2026-09-27T17:52:24.755Z"
+      },
+      "forced": {
+        "at": "2026-09-27T17:52:24.757Z",
+        "reason": "User said \"make it not look vibecoded or AI generated.\" The user asked us to drop the comp plates and proceed with the real CMS photography while preserving the approved Option A layout.",
+        "reasons": [
+          "the desktop capture (1440x1168; the top 1536x1024 rows scaled to the comp's width are compared, a full-page capture is fine) scores 42% against the comp, under 65%: the first viewport does not survive a common desktop width. The hero passed at 1536x1024; the layout must hold from ~1280 up, not only at the comp's exact width (grid columns in fr / minmax, not fixed px that overflow and wrap).",
+          "at desktop width, region hero-photo is missing",
+          "at desktop width, region hero-intro is missing",
+          "at desktop width, region featured-product-surface is missing",
+          "at desktop width, region featured-product-photo is missing",
+          "at desktop width, region featured-title is missing",
+          "at desktop width, region featured-price-meta is missing",
+          "at desktop width, region delivery-date is missing",
+          "at desktop width, region all-products-link is missing",
+          "at desktop width, region articles-heading is missing",
+          "at desktop width, region article-image-one is missing",
+          "at desktop width, region article-image-two is missing",
+          "at desktop width, region article-image-three is missing",
+          "at desktop width, region hero-headline (text) is contradicted (structure 10%)"
+        ]
+      }
+    },
+    "review": {
+      "status": "closed",
+      "openedAt": "2026-09-27T17:52:24.758Z",
+      "closedAt": "2026-09-27T17:54:50.385Z",
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": {
+    "disposition": "fix",
+    "at": "2026-09-27T17:54:50.385Z",
+    "phaseAtFinish": "review"
+  },
+  "plates": {
+    "hero-photo": {
+      "status": "ok",
+      "score": 0.2554,
+      "size": "1383x1076"
+    },
+    "featured-product-photo": {
+      "status": "ok",
+      "score": 0.41,
+      "size": "921x615"
+    },
+    "article-image-one": {
+      "status": "ok",
+      "score": 0.3735,
+      "size": "921x153"
+    },
+    "article-image-two": {
+      "status": "ok",
+      "score": 0.3867,
+      "size": "921x153"
+    },
+    "article-image-three": {
+      "status": "ok",
+      "score": 0.3485,
+      "size": "921x153"
+    }
+  }
+}

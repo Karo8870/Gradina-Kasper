@@ -1,0 +1,43 @@
+{
+  "title": "Choose the homepage composition",
+  "question": "The identity, palette, content structure, and minimal-border rule are fixed. Which hierarchy should the implementation follow?",
+  "options": [
+    {
+      "id": "homepage-a",
+      "label": "Balanced Split",
+      "kicker": "OPTION A",
+      "lineage": "the selected direction, refined to the approved green palette",
+      "thesis": "The people growing the vegetables and the box being sold share the first viewport equally.",
+      "palette": ["#005621", "#072718", "#eefbf2", "#d6f5de", "#c6dc9a"],
+      "materials": ["real greenhouse photography", "broad tonal fields", "rounded display typography"],
+      "viewport": "A large human greenhouse panel sits beside an equally strong featured-box purchase panel, with highlighted articles beginning at the fold.",
+      "risk": "Two equal focal areas require careful spacing so the page still has one clear reading order.",
+      "comp": ".impeccable/mocks/homepage-a.webp"
+    },
+    {
+      "id": "homepage-b",
+      "label": "Product Spotlight",
+      "kicker": "OPTION B",
+      "lineage": "the same identity with the featured box as the dominant weekly choice",
+      "thesis": "One featured box becomes the unmistakable purchase decision without losing the greenhouse proof behind it.",
+      "palette": ["#005621", "#072718", "#eefbf2", "#d6f5de", "#7ca33f"],
+      "materials": ["immersive greenhouse photography", "one oversized product field", "quiet article previews"],
+      "viewport": "The greenhouse fills the opening while one large pale-green product module overlaps the edge and keeps every buying detail visible.",
+      "risk": "The product panel can feel detached if its overlap is too heavy or too card-like.",
+      "comp": ".impeccable/mocks/homepage-b.webp"
+    },
+    {
+      "id": "homepage-c",
+      "label": "Greenhouse Ribbon",
+      "kicker": "OPTION C",
+      "lineage": "the same identity with the human greenhouse story leading",
+      "thesis": "A continuous greenhouse scene earns trust first, then hands the eye directly to the featured box action.",
+      "palette": ["#005621", "#072718", "#eefbf2", "#f5f9ec", "#c6dc9a"],
+      "materials": ["continuous greenhouse photography", "stacked tonal content", "image-led articles"],
+      "viewport": "A broad greenhouse ribbon occupies two-thirds of the screen while a compact vertical product stack contains the headline and purchase action.",
+      "risk": "The right-hand stack needs responsive care so the headline and product controls never feel compressed.",
+      "comp": ".impeccable/mocks/homepage-c.webp"
+    }
+  ],
+  "steer": true
+}

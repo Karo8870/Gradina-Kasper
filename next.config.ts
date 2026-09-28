@@ -27,6 +27,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    '/api/*': ['./src/fonts/invoices/**/*']
+  },
   async headers() {
     return [
       {

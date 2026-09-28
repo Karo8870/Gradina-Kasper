@@ -13,6 +13,10 @@ const updateStatusSchema = z.object({
   orderID: orderIDSchema,
   status: z.enum(orderStatuses)
 });
+const bulkUpdateStatusSchema = z.object({
+  orderIDs: z.array(orderIDSchema).min(1),
+  status: z.enum(orderStatuses)
+});
 const cancelOrderSchema = z.object({ orderID: orderIDSchema });
 
 export type OrderActionResult =
@@ -70,6 +74,99 @@ export async function updateOrderStatus(input: {
   revalidatePath('/account/orders');
 
   return { success: true };
+}
+
+export async function bulkUpdateOrderStatus(input: {
+  orderIDs: number[];
+  status: (typeof orderStatuses)[number];
+}): Promise<{
+  failed: number;
+  message?: string;
+  success: boolean;
+  unchanged: number;
+  updated: number;
+}> {
+  const parsed = bulkUpdateStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      failed: 0,
+      message: 'Select at least one order and a valid status.',
+      success: false,
+      unchanged: 0,
+      updated: 0
+    };
+  }
+
+  const [payload, user] = await Promise.all([getCMS(), getCurrentUser()]);
+  if (!user || !hasRole(user, 'admin')) {
+    return {
+      failed: 0,
+      message: 'You are not allowed to update orders.',
+      success: false,
+      unchanged: 0,
+      updated: 0
+    };
+  }
+
+  const orderIDs = [...new Set(parsed.data.orderIDs)];
+  let updated = 0;
+  let unchanged = 0;
+  let failed = 0;
+
+  for (const orderID of orderIDs) {
+    const order = await payload
+      .findByID({
+        collection: 'orders',
+        depth: 0,
+        id: orderID,
+        overrideAccess: false,
+        user
+      })
+      .catch(() => null);
+
+    if (!order) {
+      failed++;
+      continue;
+    }
+    if (order.status === parsed.data.status) {
+      unchanged++;
+      continue;
+    }
+
+    try {
+      await payload.update({
+        collection: 'orders',
+        context: { orderActivitySource: 'admin' },
+        data: { status: parsed.data.status },
+        id: orderID,
+        overrideAccess: false,
+        user
+      });
+      updated++;
+      revalidatePath(`/account/orders/${orderID}`);
+    } catch (error) {
+      failed++;
+      payload.logger.error({
+        err: error,
+        msg: `Failed to bulk update order ${orderID} status.`
+      });
+    }
+  }
+
+  if (updated) {
+    revalidatePath('/admin/orders');
+    revalidatePath('/account/orders');
+  }
+
+  return {
+    failed,
+    message: failed
+      ? `${failed} ${failed === 1 ? 'order could' : 'orders could'} not be updated.`
+      : undefined,
+    success: failed === 0,
+    unchanged,
+    updated
+  };
 }
 
 export async function cancelOrder(input: {

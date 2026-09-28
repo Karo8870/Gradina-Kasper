@@ -1,0 +1,637 @@
+{
+  "tool": "comp-diff",
+  "version": 1,
+  "createdAt": "2026-09-27T17:52:24.754Z",
+  "label": "desktop",
+  "comp": ".impeccable/mocks/homepage-a.webp",
+  "build": ".impeccable/review/desktop.png",
+  "spec": ".impeccable/build/spec.json",
+  "compSize": "1536x1024",
+  "buildSize": "1440x1168",
+  "align": "top",
+  "overall": 0.4239,
+  "verdict": "contradicted",
+  "scores": {
+    "overall": 0.4239,
+    "structure": 0.3199,
+    "color": 0.5865,
+    "colorIntersection": 0.3197,
+    "paletteMatch": 0.7301,
+    "detail": 0.1815,
+    "detailRaw": 0.2075,
+    "detailAdded": 0.0521,
+    "bands": 0.8
+  },
+  "palette": {
+    "comp": [
+      {
+        "hex": "#f3f7f2",
+        "coverage": 0.6772
+      },
+      {
+        "hex": "#bc8e64",
+        "coverage": 0.0983
+      },
+      {
+        "hex": "#e3eecd",
+        "coverage": 0.0677
+      },
+      {
+        "hex": "#1d2221",
+        "coverage": 0.066
+      },
+      {
+        "hex": "#3d5718",
+        "coverage": 0.0539
+      },
+      {
+        "hex": "#bbbd70",
+        "coverage": 0.0368
+      }
+    ],
+    "build": [
+      {
+        "hex": "#f4f8f4",
+        "coverage": 0.5272
+      },
+      {
+        "hex": "#08441c",
+        "coverage": 0.4401
+      },
+      {
+        "hex": "#082818",
+        "coverage": 0.0267
+      },
+      {
+        "hex": "#085818",
+        "coverage": 0.0028
+      },
+      {
+        "hex": "#688f78",
+        "coverage": 0.0022
+      },
+      {
+        "hex": "#98b898",
+        "coverage": 0.001
+      }
+    ]
+  },
+  "regions": [
+    {
+      "id": "site-header",
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.1,
+      "kind": "chrome",
+      "score": {
+        "overall": 0.5992,
+        "structure": 0.7746,
+        "color": 0.7664,
+        "colorIntersection": 0.4731,
+        "paletteMatch": 0.9243,
+        "detail": 0.1618,
+        "detailRaw": 0.2399,
+        "detailAdded": 0.1563,
+        "bands": 0.64
+      },
+      "verdict": "drift",
+      "inkBox": {
+        "comp": {
+          "x": 35,
+          "y": 17,
+          "w": 1412,
+          "h": 85
+        },
+        "build": {
+          "x": 17,
+          "y": 0,
+          "w": 1474,
+          "h": 102
+        }
+      }
+    },
+    {
+      "id": "hero-photo",
+      "x": 0,
+      "y": 0.1,
+      "w": 0.6,
+      "h": 0.7,
+      "kind": "image",
+      "score": {
+        "overall": 0.2907,
+        "structure": 0.211,
+        "color": 0.389,
+        "colorIntersection": 0.1308,
+        "paletteMatch": 0.528,
+        "detail": 0.2257,
+        "detailRaw": 0.2257,
+        "detailAdded": 0,
+        "bands": 0.9455
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 922,
+          "h": 717
+        },
+        "build": {
+          "x": 0,
+          "y": 0,
+          "w": 922,
+          "h": 717
+        }
+      }
+    },
+    {
+      "id": "hero-headline",
+      "x": 0.0625,
+      "y": 0.1523,
+      "w": 0.3125,
+      "h": 0.1475,
+      "kind": "text",
+      "score": {
+        "overall": 0.3232,
+        "structure": 0.0991,
+        "color": 0.5559,
+        "colorIntersection": 0.1668,
+        "paletteMatch": 0.7654,
+        "detail": 0.3355,
+        "detailRaw": 0.3876,
+        "detailAdded": 0.1042,
+        "bands": 0.8439
+      },
+      "verdict": "contradicted",
+      "inkBox": {
+        "comp": {
+          "x": 8,
+          "y": 8,
+          "w": 464,
+          "h": 143
+        },
+        "build": {
+          "x": 2,
+          "y": 3,
+          "w": 363,
+          "h": 148
+        }
+      }
+    },
+    {
+      "id": "hero-intro",
+      "x": 0.0625,
+      "y": 0.2998,
+      "w": 0.2773,
+      "h": 0.0703,
+      "kind": "text",
+      "score": {
+        "overall": 0.2757,
+        "structure": 0.1457,
+        "color": 0.5896,
+        "colorIntersection": 0.1215,
+        "paletteMatch": 0.8417,
+        "detail": 0.0382,
+        "detailRaw": 0.132,
+        "detailAdded": 0.1875,
+        "bands": 0.4971
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 6,
+          "y": 0,
+          "w": 417,
+          "h": 72
+        },
+        "build": {
+          "x": 0,
+          "y": 0,
+          "w": 221,
+          "h": 60
+        }
+      }
+    },
+    {
+      "id": "featured-product-surface",
+      "x": 0.6,
+      "y": 0.1,
+      "w": 0.4,
+      "h": 0.7,
+      "kind": "chrome",
+      "score": {
+        "overall": 0.404,
+        "structure": 0.4916,
+        "color": 0.4916,
+        "colorIntersection": 0.1612,
+        "paletteMatch": 0.6696,
+        "detail": 0.0976,
+        "detailRaw": 0.1393,
+        "detailAdded": 0.0833,
+        "bands": 0.5639
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 11,
+          "y": 17,
+          "w": 555,
+          "h": 639
+        },
+        "build": {
+          "x": 39,
+          "y": 323,
+          "w": 523,
+          "h": 316
+        }
+      }
+    },
+    {
+      "id": "featured-product-photo",
+      "x": 0.6,
+      "y": 0.1,
+      "w": 0.4,
+      "h": 0.4,
+      "kind": "image",
+      "score": {
+        "overall": 0.162,
+        "structure": 0.3858,
+        "color": 0.3277,
+        "colorIntersection": 0.0727,
+        "paletteMatch": 0.465,
+        "detail": 0,
+        "detailRaw": 0.0238,
+        "detailAdded": 0.0625,
+        "bands": 0
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 614,
+          "h": 410
+        },
+        "build": {
+          "x": 39,
+          "y": 323,
+          "w": 522,
+          "h": 75
+        }
+      }
+    },
+    {
+      "id": "featured-title",
+      "x": 0.6999,
+      "y": 0.4004,
+      "w": 0.2227,
+      "h": 0.0703,
+      "kind": "text",
+      "score": {
+        "overall": 0.2824,
+        "structure": 0.5065,
+        "color": 0.1105,
+        "colorIntersection": 0.0031,
+        "paletteMatch": 0.1683,
+        "detail": 0.0105,
+        "detailRaw": 0.0522,
+        "detailAdded": 0.0833,
+        "bands": 0
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 342,
+          "h": 72
+        },
+        "build": {
+          "x": 270,
+          "y": 27,
+          "w": 72,
+          "h": 24
+        }
+      }
+    },
+    {
+      "id": "featured-price-meta",
+      "x": 0.6999,
+      "y": 0.5,
+      "w": 0.1719,
+      "h": 0.0645,
+      "kind": "text",
+      "score": {
+        "overall": 0.3615,
+        "structure": 0.3977,
+        "color": 0.4904,
+        "colorIntersection": 0.1919,
+        "paletteMatch": 0.6512,
+        "detail": 0,
+        "detailRaw": 0,
+        "detailAdded": 0,
+        "bands": 0.4
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 2,
+          "y": 0,
+          "w": 251,
+          "h": 59
+        },
+        "build": null
+      }
+    },
+    {
+      "id": "delivery-date",
+      "x": 0.612,
+      "y": 0.5762,
+      "w": 0.3555,
+      "h": 0.123,
+      "kind": "text",
+      "score": {
+        "overall": 0.3963,
+        "structure": 0.4217,
+        "color": 0.4994,
+        "colorIntersection": 0.0708,
+        "paletteMatch": 0.7301,
+        "detail": 0,
+        "detailRaw": 0.1337,
+        "detailAdded": 0.3021,
+        "bands": 0.6061
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 546,
+          "h": 126
+        },
+        "build": {
+          "x": 22,
+          "y": 9,
+          "w": 522,
+          "h": 95
+        }
+      }
+    },
+    {
+      "id": "add-to-cart",
+      "x": 0.612,
+      "y": 0.5996,
+      "w": 0.3555,
+      "h": 0.0996,
+      "kind": "control",
+      "score": {
+        "overall": 0.5267,
+        "structure": 0.7514,
+        "color": 0.5054,
+        "colorIntersection": 0.0682,
+        "paletteMatch": 0.7408,
+        "detail": 0.0583,
+        "detailRaw": 0.1937,
+        "detailAdded": 0.2708,
+        "bands": 0.28
+      },
+      "verdict": "drift",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 546,
+          "h": 102
+        },
+        "build": {
+          "x": 0,
+          "y": 0,
+          "w": 546,
+          "h": 102
+        }
+      }
+    },
+    {
+      "id": "all-products-link",
+      "x": 0.7038,
+      "y": 0.7119,
+      "w": 0.1758,
+      "h": 0.0352,
+      "kind": "control",
+      "score": {
+        "overall": 0.3944,
+        "structure": 0.4321,
+        "color": 0.5715,
+        "colorIntersection": 0.179,
+        "paletteMatch": 0.7828,
+        "detail": 0,
+        "detailRaw": 0.0671,
+        "detailAdded": 0.3229,
+        "bands": 0.2333
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 5,
+          "y": 14,
+          "w": 255,
+          "h": 21
+        },
+        "build": {
+          "x": 4,
+          "y": 0,
+          "w": 266,
+          "h": 18
+        }
+      }
+    },
+    {
+      "id": "articles-heading",
+      "x": 0.0352,
+      "y": 0.8115,
+      "w": 0.2734,
+      "h": 0.0469,
+      "kind": "text",
+      "score": {
+        "overall": 0.4735,
+        "structure": 0.5174,
+        "color": 0.6992,
+        "colorIntersection": 0.6804,
+        "paletteMatch": 0.7094,
+        "detail": 0,
+        "detailRaw": 0,
+        "detailAdded": 0,
+        "bands": 0.4
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 8,
+          "y": 9,
+          "w": 404,
+          "h": 31
+        },
+        "build": null
+      }
+    },
+    {
+      "id": "all-articles-link",
+      "x": 0.6999,
+      "y": 0.8701,
+      "w": 0.2656,
+      "h": 0.0293,
+      "kind": "control",
+      "score": {
+        "overall": 0.5224,
+        "structure": 0.7317,
+        "color": 0.4742,
+        "colorIntersection": 0.3225,
+        "paletteMatch": 0.5559,
+        "detail": 0.136,
+        "detailRaw": 0.1672,
+        "detailAdded": 0.0625,
+        "bands": 0
+      },
+      "verdict": "contradicted",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 408,
+          "h": 48
+        },
+        "build": {
+          "x": 0,
+          "y": 31,
+          "w": 408,
+          "h": 17
+        }
+      }
+    },
+    {
+      "id": "article-image-one",
+      "x": 0,
+      "y": 0.9,
+      "w": 0.4,
+      "h": 0.1,
+      "kind": "image",
+      "score": {
+        "overall": 0.147,
+        "structure": 0.249,
+        "color": 0.2611,
+        "colorIntersection": 0.1381,
+        "paletteMatch": 0.3274,
+        "detail": 0.0651,
+        "detailRaw": 0.0911,
+        "detailAdded": 0.0521,
+        "bands": 0
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 614,
+          "h": 102
+        },
+        "build": {
+          "x": 25,
+          "y": 0,
+          "w": 589,
+          "h": 42
+        }
+      }
+    },
+    {
+      "id": "article-image-two",
+      "x": 0.3,
+      "y": 0.9,
+      "w": 0.4,
+      "h": 0.1,
+      "kind": "image",
+      "score": {
+        "overall": 0.1999,
+        "structure": 0.2045,
+        "color": 0.2127,
+        "colorIntersection": 0.0752,
+        "paletteMatch": 0.2868,
+        "detail": 0.1525,
+        "detailRaw": 0.1525,
+        "detailAdded": 0,
+        "bands": 0.6
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 614,
+          "h": 102
+        },
+        "build": {
+          "x": 0,
+          "y": 0,
+          "w": 614,
+          "h": 42
+        }
+      }
+    },
+    {
+      "id": "article-image-three",
+      "x": 0.6,
+      "y": 0.9,
+      "w": 0.4,
+      "h": 0.1,
+      "kind": "image",
+      "score": {
+        "overall": 0.2175,
+        "structure": 0.2322,
+        "color": 0.337,
+        "colorIntersection": 0.1376,
+        "paletteMatch": 0.4444,
+        "detail": 0.1241,
+        "detailRaw": 0.145,
+        "detailAdded": 0.0417,
+        "bands": 0.6
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 614,
+          "h": 102
+        },
+        "build": {
+          "x": 0,
+          "y": 0,
+          "w": 589,
+          "h": 42
+        }
+      }
+    }
+  ],
+  "files": {
+    "sideBySide": "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/side-by-side.png",
+    "heatmap": "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/heatmap.png",
+    "regionFiles": [
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/site-header.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/hero-photo.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/hero-headline.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/hero-intro.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/featured-product-surface.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/featured-product-photo.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/featured-title.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/featured-price-meta.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/delivery-date.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/add-to-cart.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/all-products-link.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/articles-heading.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/all-articles-link.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/article-image-one.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/article-image-two.png",
+      "/Users/karo/payloadcms-ecommerce-template/.impeccable/review/diff/desktop/regions/article-image-three.png"
+    ]
+  }
+}

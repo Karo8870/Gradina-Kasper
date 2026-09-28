@@ -1,4 +1,6 @@
 import React from 'react';
+import { Lexend } from 'next/font/google';
+
 import { CookieConsent } from '@/components/cookie-consent';
 import { EcommerceProvider } from '@/components/commerce/ecommerce-provider';
 import { StoreFooter } from '@/components/layout/store-footer';
@@ -8,6 +10,10 @@ import { getCMS } from '@/lib/cms';
 import type { Media } from '@/payload-types';
 
 import './globals.css';
+
+const lexend = Lexend({
+  subsets: ['latin']
+});
 
 export const metadata = {
   description: 'A blank template using Payload in a Next.js app.',
@@ -39,8 +45,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     : [{ label: 'Produse', url: '/products' }];
 
   return (
-    <html lang='en'>
-      <body className='dark flex min-h-screen flex-col'>
+    <html lang='ro'>
+      <body className={`${lexend.className} flex min-h-screen flex-col`}>
         <CookieConsent>
           <EcommerceProvider>
             <StoreNavbar

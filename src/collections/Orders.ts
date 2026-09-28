@@ -6,10 +6,8 @@ import type {
 import type { CollectionOverride } from '@payloadcms/plugin-ecommerce/types';
 
 import { orderStatuses } from '@/commerce/order-activity';
-import {
-  orderStatusEmailHTML,
-  orderStatusEmailSubject
-} from '@/emails/orders/status-change';
+import { sendOrderTemplateEmail } from '@/emails/orders/templates';
+import { getOrCreateInvoice } from '@/lib/invoices';
 import type { Order, OrderStatus } from '@/payload-types';
 
 type ActivitySource = 'admin' | 'customer' | 'system';
@@ -99,44 +97,21 @@ export const emailOrderStatusChange: CollectionAfterChangeHook<Order> = async ({
   previousDoc,
   req
 }) => {
-  if (
-    operation !== 'update' ||
-    !doc.status ||
-    doc.status === previousDoc.status
-  ) {
+  if (operation === 'update' && doc.status === previousDoc.status) {
     return doc;
   }
 
   try {
-    const customerID =
-      doc.customer && typeof doc.customer === 'object'
-        ? doc.customer.id
-        : doc.customer;
-    const customer = customerID
-      ? await req.payload.findByID({
-          collection: 'users',
-          depth: 0,
-          id: customerID,
-          overrideAccess: true,
-          req,
-          select: { email: true }
-        })
-      : null;
-    const recipient = customer?.email ?? doc.customerEmail;
-    if (!recipient) return doc;
-
-    await req.payload.sendEmail({
-      html: orderStatusEmailHTML({ orderID: doc.id, status: doc.status }),
-      subject: orderStatusEmailSubject({
-        orderID: doc.id,
-        status: doc.status
-      }),
-      to: recipient
+    if (operation === 'create') await getOrCreateInvoice({ order: doc, req });
+    await sendOrderTemplateEmail({
+      order: doc,
+      placed: operation === 'create',
+      req
     });
   } catch (error) {
     req.payload.logger.error({
       err: error,
-      msg: `Failed to send status email for order ${doc.id}.`
+      msg: `Failed to issue invoice or send email for order ${doc.id}.`
     });
   }
 

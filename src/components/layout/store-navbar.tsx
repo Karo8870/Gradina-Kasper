@@ -56,12 +56,29 @@ export function StoreNavbar({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setMobileOpen(false), [pathname]);
+  useEffect(() => {
+    const updateScrollState = () => setScrolled(window.scrollY > 72);
+
+    updateScrollState();
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+
+    return () => window.removeEventListener('scroll', updateScrollState);
+  }, []);
+
+  const overHomeHero = pathname === '/' && !scrolled && !mobileOpen;
 
   return (
-    <header className='bg-background/95 sticky top-0 z-40 border-b backdrop-blur'>
-      <div className='mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6'>
+    <header
+      className={`${pathname === '/' ? 'fixed' : 'sticky'} top-0 z-40 w-full transition-[background-color,box-shadow,backdrop-filter] duration-300 ${
+        overHomeHero
+          ? 'bg-transparent text-white'
+          : 'bg-background/96 text-primary-950 shadow-[0_1px_0_rgb(226_228_223_/_0.8)] backdrop-blur-md'
+      }`}
+    >
+      <div className='mx-auto flex h-20 w-full max-w-[95rem] items-center gap-4 px-4 sm:px-8'>
         <Link
           className='flex shrink-0 items-center text-lg font-semibold'
           href='/'
@@ -69,7 +86,7 @@ export function StoreNavbar({
           {content.image ? (
             <RenderMedia
               alt={content.image.alt || 'Grădina Kasper'}
-              className='h-10 w-auto object-contain'
+              className='h-11 w-auto object-contain'
               src={content.image}
             />
           ) : (
@@ -78,10 +95,21 @@ export function StoreNavbar({
         </Link>
         <nav
           aria-label='Navigare principală'
-          className='ml-4 hidden items-center md:flex'
+          className='ml-8 hidden items-center gap-1 md:flex'
         >
           {content.links.map((link) => (
             <Button
+              className={
+                pathname === link.url
+                  ? `relative after:absolute after:right-4 after:bottom-1 after:left-4 after:h-0.5 after:rounded-full ${
+                      overHomeHero
+                        ? 'text-white after:bg-white'
+                        : 'text-primary after:bg-primary'
+                    }`
+                  : overHomeHero
+                    ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                    : 'text-primary-950/75 hover:text-primary-900'
+              }
               key={`${link.label}-${link.url}`}
               nativeButton={false}
               render={<Link href={link.url} />}
@@ -91,8 +119,14 @@ export function StoreNavbar({
             </Button>
           ))}
         </nav>
-        <div className='ml-auto flex items-center gap-1'>
-          <CartDrawer />
+        <div className='ml-auto flex items-center gap-2'>
+          <CartDrawer
+            triggerClassName={
+              overHomeHero
+                ? 'text-white hover:bg-white/10 hover:text-white'
+                : 'text-primary-950'
+            }
+          />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -142,6 +176,11 @@ export function StoreNavbar({
           ) : (
             <div className='hidden items-center gap-2 md:flex'>
               <Button
+                className={
+                  overHomeHero
+                    ? 'bg-white/80 text-primary-950 hover:bg-white'
+                    : undefined
+                }
                 nativeButton={false}
                 render={<Link href='/login' />}
                 variant='ghost'
@@ -162,7 +201,11 @@ export function StoreNavbar({
               render={
                 <Button
                   aria-label='Deschide navigarea'
-                  className='md:hidden'
+                  className={`md:hidden ${
+                    overHomeHero
+                      ? 'text-white hover:bg-white/10 hover:text-white'
+                      : ''
+                  }`}
                   size='icon-lg'
                   variant='ghost'
                 />

@@ -3,8 +3,13 @@ import { slugField } from 'payload';
 import type { CollectionOverride } from '@payloadcms/plugin-ecommerce/types';
 
 import { commerceCurrencies, storeCurrency } from '@/commerce/currencies';
+import { createCollectionRevalidationHooks } from '@/hooks/revalidate-content';
 
 const priceFieldName = `priceIn${storeCurrency.code.toUpperCase()}`;
+const productRevalidationHooks = createCollectionRevalidationHooks({
+  publishedOnly: true,
+  resolvePaths: () => ['/products']
+});
 
 function validatePrice(value: unknown) {
   if (value === null || typeof value === 'undefined') return true;
@@ -58,17 +63,17 @@ export const productsCollectionOverride: CollectionOverride = ({
   },
   fields: [
     {
-      name: 'name',
-      type: 'text',
-      label: 'Name',
-      required: true
-    },
-    {
       type: 'tabs',
       tabs: [
         {
           label: 'Content',
           fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Name',
+              required: true
+            },
             {
               name: 'description',
               type: 'richText',
@@ -101,6 +106,47 @@ export const productsCollectionOverride: CollectionOverride = ({
           label: 'Commerce',
           fields: [
             priceField,
+            {
+              name: 'hasDiscount',
+              type: 'checkbox',
+              label: 'Discount',
+              defaultValue: false
+            },
+            {
+              name: 'originalPriceInRON',
+              type: 'number',
+              label: 'Original price (RON, VAT included)',
+              min: 1,
+              validate: (
+                value: unknown,
+                { siblingData }: { siblingData: Record<string, unknown> }
+              ) => {
+                if (!siblingData?.hasDiscount) return true;
+                if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
+                  return 'Enter the original price.';
+                }
+                const discountedPrice = siblingData[priceFieldName];
+                return typeof discountedPrice === 'number' &&
+                  value > discountedPrice
+                  ? true
+                  : 'Original price must be higher than the discounted price.';
+              },
+              admin: {
+                condition: (_, siblingData) =>
+                  Boolean(siblingData?.hasDiscount),
+                description:
+                  'Enter the price before the discount, with up to two decimal places.',
+                components: {
+                  Field: {
+                    clientProps: {
+                      currenciesConfig: commerceCurrencies,
+                      currency: storeCurrency
+                    },
+                    path: '@payloadcms/plugin-ecommerce/rsc#PriceInput'
+                  }
+                }
+              }
+            },
             {
               name: 'inventory',
               type: 'number',
@@ -181,5 +227,16 @@ export const productsCollectionOverride: CollectionOverride = ({
       position: 'sidebar',
       useAsSlug: 'name'
     })
-  ]
+  ],
+  hooks: {
+    ...defaultCollection.hooks,
+    afterChange: [
+      ...(defaultCollection.hooks?.afterChange ?? []),
+      ...productRevalidationHooks.afterChange
+    ],
+    afterDelete: [
+      ...(defaultCollection.hooks?.afterDelete ?? []),
+      ...productRevalidationHooks.afterDelete
+    ]
+  }
 });

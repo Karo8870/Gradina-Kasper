@@ -1,17 +1,30 @@
+import { CarIcon, RotateCcw, ShoppingBasket } from 'lucide-react';
+
 import { isProductExpired } from '@/commerce/products';
 import { CmsRichText } from '@/components/content/cms-rich-text';
 import { ProductCard } from '@/components/products/product-card';
 import { RenderMedia } from '@/components/render-media';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
 import { getCMS } from '@/lib/cms';
 import { generateGlobalMetadata } from '@/lib/generate-metadata';
 import type { Media } from '@/payload-types';
+
+const howItWorksCardStyles = [
+  {
+    icon: ShoppingBasket,
+    textClass: 'text-secondary-700',
+    baseClass: 'bg-secondary-50'
+  },
+  {
+    icon: CarIcon,
+    textClass: 'text-[#3F6A2B]',
+    baseClass: 'bg-[#DDF7D1]'
+  },
+  {
+    icon: RotateCcw,
+    textClass: 'text-primary-700',
+    baseClass: 'bg-primary-100'
+  }
+] as const;
 
 export default async function ProductsPage() {
   const payload = await getCMS();
@@ -42,29 +55,90 @@ export default async function ProductsPage() {
   const visibleProducts = products.filter(
     (product) => !isProductExpired(product)
   );
-  const steps = [
-    productsPage.step1,
-    productsPage.step2,
-    productsPage.step3
-  ].filter((step) => step?.title || step?.description);
+  const productByID = new Map(
+    visibleProducts.map((product) => [product.id, product])
+  );
+  const featuredProducts = (productsPage.featuredProducts ?? []).flatMap(
+    (featuredProduct) => {
+      const id =
+        typeof featuredProduct === 'object'
+          ? featuredProduct.id
+          : featuredProduct;
+      const product = productByID.get(id);
+
+      return product ? [product] : [];
+    }
+  );
+  const featuredProductIDs = new Set(
+    featuredProducts.map((product) => product.id)
+  );
+  const gridProducts = visibleProducts.filter(
+    (product) => !featuredProductIDs.has(product.id)
+  );
+  const steps = [productsPage.step1, productsPage.step2, productsPage.step3];
 
   return (
-    <div className='mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 py-10 sm:px-6'>
-      <section className='space-y-8'>
-        <header className='max-w-2xl'>
-          <h1 className='text-3xl font-semibold tracking-tight sm:text-4xl'>
+    <div className='mx-auto flex w-full max-w-[86rem] flex-col gap-20 px-5 py-16 sm:px-8 lg:px-12'>
+      <section className='space-y-10'>
+        <header className='max-w-3xl'>
+          <h1 className='text-primary-950 text-[clamp(2.75rem,5vw,4.5rem)] leading-[1.02] font-bold tracking-[-0.03em] text-balance'>
             {productsPage.boxesSectionTitle || 'Produse'}
           </h1>
-          <CmsRichText data={productsPage.boxesSectionContent} />
+          <CmsRichText
+            className='text-muted-foreground mt-5 max-w-[65ch] leading-relaxed'
+            data={productsPage.boxesSectionContent}
+          />
         </header>
         {visibleProducts.length ? (
-          <div className='flex flex-col gap-6'>
-            {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className='space-y-14'>
+            {featuredProducts.length ? (
+              <section
+                aria-labelledby='featured-boxes-heading'
+                className='space-y-6'
+              >
+                <h2
+                  className='text-primary-950 text-2xl font-bold tracking-[-0.02em] sm:text-3xl'
+                  id='featured-boxes-heading'
+                >
+                  În prim-plan
+                </h2>
+                <div className='flex flex-col gap-6'>
+                  {featuredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {gridProducts.length ? (
+              <section
+                aria-labelledby={
+                  featuredProducts.length ? 'all-boxes-heading' : undefined
+                }
+                className='space-y-6'
+              >
+                {featuredProducts.length ? (
+                  <h2
+                    className='text-primary-950 text-2xl font-bold tracking-[-0.02em] sm:text-3xl'
+                    id='all-boxes-heading'
+                  >
+                    Toate boxurile
+                  </h2>
+                ) : null}
+                <div className='grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3'>
+                  {gridProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      variant='grid'
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         ) : (
-          <div className='bg-muted/40 rounded-2xl border border-dashed p-10 text-center'>
+          <div className='bg-muted rounded-2xl border border-dashed border-neutral-300 p-10 text-center'>
             <p className='font-medium'>
               Nu există produse disponibile momentan.
             </p>
@@ -72,25 +146,48 @@ export default async function ProductsPage() {
         )}
       </section>
 
-      {steps.length ? (
-        <section className='space-y-6'>
-          <div className='max-w-2xl'>
-            <h2 className='text-3xl font-semibold tracking-tight'>
+      {steps.some((step) => step?.title || step?.description) ? (
+        <section className='space-y-8'>
+          <div>
+            <h2 className='text-primary-900 text-3xl font-bold md:text-4xl'>
               {productsPage.howItWorksTitle || 'Cum funcționează'}
             </h2>
-            <CmsRichText data={productsPage.howItWorksContent} />
+            <CmsRichText
+              className='mt-2 text-neutral-700'
+              data={productsPage.howItWorksContent}
+            />
           </div>
-          <div className='grid gap-4 md:grid-cols-3'>
-            {steps.map((step, index) => (
-              <Card key={`${step.title}-${index}`}>
-                <CardHeader>
-                  <CardTitle>{step.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{step.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
+          <div className='grid gap-4 lg:grid-cols-3'>
+            {howItWorksCardStyles.map((style, index) => {
+              const content = steps[index];
+              if (!content?.title && !content?.description) return null;
+
+              const Icon = style.icon;
+
+              return (
+                <article
+                  className={`flex items-center gap-6 rounded-[3.75rem] px-8 py-6 md:h-56 md:px-10 ${style.baseClass}`}
+                  key={`${content.title}-${index}`}
+                >
+                  <div className='flex size-[4.5rem] shrink-0 items-center justify-center rounded-full bg-white p-5'>
+                    <Icon
+                      className={`size-8 ${style.textClass}`}
+                      aria-hidden='true'
+                    />
+                  </div>
+                  <div className='flex min-w-0 flex-col'>
+                    <h3 className={`text-xl font-bold ${style.textClass}`}>
+                      {content.title}
+                    </h3>
+                    <p
+                      className={`mt-2 text-sm leading-relaxed ${style.textClass}`}
+                    >
+                      {content.description}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       ) : null}
@@ -98,7 +195,7 @@ export default async function ProductsPage() {
       {vegetables.length ? (
         <section className='space-y-6'>
           <div className='max-w-2xl'>
-            <h2 className='text-3xl font-semibold tracking-tight'>
+            <h2 className='text-primary-950 text-3xl font-bold tracking-[-0.02em]'>
               {productsPage.whatsInYourBoxTitle ||
                 'Ce poate ajunge în boxul tău?'}
             </h2>
@@ -113,7 +210,7 @@ export default async function ProductsPage() {
 
               return (
                 <li className='space-y-2 text-center' key={vegetable.id}>
-                  <div className='bg-muted aspect-square overflow-hidden rounded-xl border'>
+                  <div className='bg-muted aspect-square overflow-hidden rounded-xl border border-neutral-200'>
                     <RenderMedia
                       alt={image?.alt || vegetable.name}
                       className='size-full object-cover'

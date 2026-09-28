@@ -1,16 +1,15 @@
 import type { GlobalConfig } from 'payload';
 
 import { adminOnly } from '@/access/users';
+import {
+  WEEKDAY_FIELDS,
+  normalizeWeekOverrides
+} from '@/commerce/fulfillment-admin';
 
-const weekdayOptions = [
-  { label: 'Monday', value: '1' },
-  { label: 'Tuesday', value: '2' },
-  { label: 'Wednesday', value: '3' },
-  { label: 'Thursday', value: '4' },
-  { label: 'Friday', value: '5' },
-  { label: 'Saturday', value: '6' },
-  { label: 'Sunday', value: '7' }
-];
+const weekdayOptions = WEEKDAY_FIELDS.map(({ label, value }) => ({
+  label,
+  value: String(value)
+}));
 
 export const FulfillmentSchedule: GlobalConfig = {
   slug: 'fulfillment-schedule',
@@ -22,6 +21,35 @@ export const FulfillmentSchedule: GlobalConfig = {
   admin: {
     group: 'Commerce'
   },
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        if (!WEEKDAY_FIELDS.some(({ key }) => typeof doc[key] === 'boolean')) {
+          const legacyWeekdays = (doc.allowedWeekdays ?? ['2', '5']).map(
+            Number
+          );
+          for (const { key, value } of WEEKDAY_FIELDS) {
+            doc[key] = legacyWeekdays.includes(value);
+          }
+        }
+        if (!doc.weeklyOverrides?.length && doc.weekOverrides?.length) {
+          doc.weeklyOverrides = doc.weekOverrides.map(
+            (item: { allowedWeekdays?: string[]; weekStart: string }) => ({
+              allowedWeekdays: (item.allowedWeekdays ?? []).map(Number),
+              weekStart: item.weekStart.slice(0, 10)
+            })
+          );
+        }
+        return doc;
+      }
+    ],
+    beforeChange: [
+      ({ data }) => {
+        if (Array.isArray(data.weeklyOverrides)) data.weekOverrides = [];
+        return data;
+      }
+    ]
+  },
   fields: [
     {
       type: 'tabs',
@@ -30,13 +58,21 @@ export const FulfillmentSchedule: GlobalConfig = {
           label: 'Default Schedule',
           fields: [
             {
+              type: 'row',
+              fields: WEEKDAY_FIELDS.map(({ key, label }) => ({
+                name: key,
+                label,
+                type: 'checkbox' as const
+              }))
+            },
+            {
               name: 'allowedWeekdays',
               type: 'select',
-              label: 'Allowed weekdays',
+              label: 'Legacy allowed weekdays',
               defaultValue: ['2', '5'],
               hasMany: true,
               options: weekdayOptions,
-              required: true
+              admin: { hidden: true }
             }
           ]
         },
@@ -44,38 +80,52 @@ export const FulfillmentSchedule: GlobalConfig = {
           label: 'Week Overrides',
           fields: [
             {
+              name: 'weeklyOverrides',
+              type: 'json',
+              label: 'Modified weeks',
+              defaultValue: [],
+              validate: (value) => {
+                if (value == null) return true;
+                if (!Array.isArray(value))
+                  return 'Expected a list of modified weeks.';
+                return (
+                  value.every(
+                    (item) =>
+                      typeof item?.weekStart === 'string' &&
+                      /^\d{4}-\d{2}-\d{2}$/.test(item.weekStart) &&
+                      new Date(
+                        `${item.weekStart}T12:00:00.000Z`
+                      ).getUTCDay() === 1 &&
+                      Array.isArray(item.allowedWeekdays) &&
+                      normalizeWeekOverrides([item])[0]?.allowedWeekdays
+                        .length === item.allowedWeekdays.length
+                  ) || 'Each modified week needs a Monday and valid weekdays.'
+                );
+              },
+              admin: {
+                components: {
+                  Field:
+                    '@/components/admin/fulfillment-week-overrides-field#FulfillmentWeekOverridesField'
+                },
+                description:
+                  'Choose a week, then toggle its delivery or pickup days. An empty week disables fulfillment for that week.'
+              }
+            },
+            {
               name: 'weekOverrides',
               type: 'array',
-              label: 'Week overrides',
-              admin: {
-                description:
-                  'The week starts on Monday. Leave allowed weekdays empty to disable fulfillment for that week.'
-              },
+              label: 'Legacy week overrides',
+              admin: { hidden: true },
               fields: [
                 {
                   name: 'weekStart',
                   type: 'date',
-                  label: 'Week starting',
                   required: true,
-                  validate: (value) => {
-                    if (!value) return true;
-
-                    const date = new Date(value);
-                    return Number.isFinite(date.getTime()) &&
-                      date.getUTCDay() === 1
-                      ? true
-                      : 'Select a Monday as the start of the week.';
-                  },
-                  admin: {
-                    date: {
-                      pickerAppearance: 'dayOnly'
-                    }
-                  }
+                  admin: { date: { pickerAppearance: 'dayOnly' } }
                 },
                 {
                   name: 'allowedWeekdays',
                   type: 'select',
-                  label: 'Allowed weekdays',
                   hasMany: true,
                   options: weekdayOptions
                 }

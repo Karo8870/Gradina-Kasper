@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
-import { storeCurrency } from '@/commerce/currencies';
 import { getProductAvailability, isProductExpired } from '@/commerce/products';
 import { ProductCartControls } from '@/components/products/product-cart-controls';
+import { ProductPrice } from '@/components/products/product-price';
 import { ProductGallery } from '@/components/products/product-gallery';
 import { ProductVegetables } from '@/components/products/product-vegetables';
 import { Button } from '@/components/ui/button';
@@ -75,13 +75,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const images = (product.gallery ?? [])
     .map(({ image }) => (typeof image === 'object' ? image : null))
     .filter((image): image is Media => Boolean(image));
-  const price = new Intl.NumberFormat('ro-RO', {
-    currency: storeCurrency.code,
-    maximumFractionDigits: storeCurrency.decimals,
-    minimumFractionDigits: storeCurrency.decimals,
-    style: 'currency'
-  }).format((product.priceInRON ?? 0) / 10 ** storeCurrency.decimals);
-
   return (
     <div className='mx-auto w-full max-w-7xl px-4 py-8 sm:px-6'>
       <Button
@@ -101,7 +94,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <h1 className='text-3xl font-semibold tracking-tight'>
               {product.name}
             </h1>
-            <p className='shrink-0 text-xl font-semibold'>{price}</p>
+            <p className='shrink-0 text-xl font-semibold'>
+              <ProductPrice product={product} />
+            </p>
           </div>
 
           <p className='text-muted-foreground text-sm'>

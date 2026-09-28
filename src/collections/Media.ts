@@ -13,16 +13,15 @@ export const Media: CollectionConfig = {
     }
   ],
   upload: {
-    formatOptions: {
-      format: 'webp',
-      options: {
-        quality: 80,
-        effort: 5
-      }
-    },
-    crop: true,
-    focalPoint: true,
-    adminThumbnail: 'thumbnail',
-    withMetadata: false
+    // formatOptions: {
+    //   format: 'webp',
+    //   options: {
+    //     quality: 80,
+    //     effort: 5
+    //   }
+    // },
+    // crop: true,
+    // focalPoint: true,
+    // adminThumbnail: 'thumbnail'
   }
 };
