@@ -332,6 +332,7 @@ export interface Article {
  */
 export interface Vegetable {
   id: number;
+  _order?: string | null;
   name: string;
   image: number | Media;
   updatedAt: string;
@@ -414,6 +415,7 @@ export interface Order {
  */
 export interface Product {
   id: number;
+  _order?: string | null;
   name: string;
   description?: {
     root: {
@@ -1120,6 +1122,7 @@ export interface ArticlesSelect<T extends boolean = true> {
  * via the `definition` "vegetables_select".
  */
 export interface VegetablesSelect<T extends boolean = true> {
+  _order?: T;
   name?: T;
   image?: T;
   updatedAt?: T;
@@ -1216,6 +1219,7 @@ export interface AddressesSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  _order?: T;
   name?: T;
   description?: T;
   gallery?:

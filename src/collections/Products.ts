@@ -61,6 +61,7 @@ export const productsCollectionOverride: CollectionOverride = ({
     ],
     useAsTitle: 'name'
   },
+  orderable: true,
   fields: [
     {
       type: 'tabs',

@@ -15,6 +15,7 @@ export const Vegetables: CollectionConfig = {
     group: 'Content',
     useAsTitle: 'name'
   },
+  orderable: true,
   fields: [
     {
       name: 'name',

@@ -130,7 +130,7 @@ export function buildInvoiceData({
     globalNoVAT: formatCents(netTotal),
     globalTotal: formatCents(grossTotal),
     globalVAT: formatCents(vatTotal),
-    invoiceID: invoice.id,
+    invoiceID: `OSK-${String(invoice.id).padStart(4, '0')}`,
     orderID: String(order.id),
     products
   };

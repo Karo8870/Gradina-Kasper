@@ -35,16 +35,14 @@ export default async function ProductsPage() {
         depth: 2,
         limit: 100,
         overrideAccess: false,
-        pagination: false,
-        sort: 'name'
+        pagination: false
       }),
       payload.find({
         collection: 'vegetables',
         depth: 1,
         limit: 1000,
         overrideAccess: false,
-        pagination: false,
-        sort: 'name'
+        pagination: false
       }),
       payload.findGlobal({
         slug: 'products-page',
@@ -76,6 +74,8 @@ export default async function ProductsPage() {
     (product) => !featuredProductIDs.has(product.id)
   );
   const steps = [productsPage.step1, productsPage.step2, productsPage.step3];
+
+  console.log(products);
 
   return (
     <div className='mx-auto flex w-full max-w-[86rem] flex-col gap-20 px-5 py-16 sm:px-8 lg:px-12'>
