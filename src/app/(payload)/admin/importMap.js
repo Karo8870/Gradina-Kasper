@@ -32,6 +32,7 @@ import { PriceInput as PriceInput_b91672ccd6e8b071c11142ab941fedfb } from '@payl
 import { FulfillmentWeekOverridesField as FulfillmentWeekOverridesField_cfed837065badc8726bb846251497636 } from '@/components/admin/fulfillment-week-overrides-field'
 import { LogoutButton as LogoutButton_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { OrderDashboardNavLink as OrderDashboardNavLink_5946e05f2cae5889775e1ec07d8bad8c } from '../../../components/admin/order-dashboard-nav-link'
+import { OrderDashboardButton as OrderDashboardButton_45d19f6db26836f64bc11bf6f77a1b09 } from '../../../components/admin/order-dashboard-button'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { AdminLoginRedirect as AdminLoginRedirect_bc0b2372013662245d0b431a5538e9a4 } from '../../../components/admin/admin-login-redirect'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -72,6 +73,7 @@ export const importMap = {
   "@/components/admin/fulfillment-week-overrides-field#FulfillmentWeekOverridesField": FulfillmentWeekOverridesField_cfed837065badc8726bb846251497636,
   "@delmaredigital/payload-better-auth/components#LogoutButton": LogoutButton_aa8e4427b70b37c7820895ace344eb78,
   "/components/admin/order-dashboard-nav-link#OrderDashboardNavLink": OrderDashboardNavLink_5946e05f2cae5889775e1ec07d8bad8c,
+  "/components/admin/order-dashboard-button#OrderDashboardButton": OrderDashboardButton_45d19f6db26836f64bc11bf6f77a1b09,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "/components/admin/admin-login-redirect#AdminLoginRedirect": AdminLoginRedirect_bc0b2372013662245d0b431a5538e9a4,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

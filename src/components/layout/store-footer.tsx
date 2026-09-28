@@ -1,6 +1,7 @@
 import { SiFacebook, SiInstagram } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
 
+import { CookieSettingsLink } from '@/components/cookie-consent';
 import { RenderMedia } from '@/components/render-media';
 import type { Footer, Media } from '@/payload-types';
 
@@ -61,15 +62,22 @@ export function StoreFooter({ footer }: { footer: Footer }) {
           >
             <h2 className='text-base font-bold md:text-xl'>{column.title}</h2>
             <div className='flex flex-col gap-2'>
-              {(column.links ?? []).map((link) => (
-                <Link
-                  className='text-center text-sm text-white/90 md:text-base'
-                  href={link.url}
-                  key={link.id || `${column.title}-${link.url}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {(column.links ?? []).map((link) =>
+                link.url === 'cookie-settings' ? (
+                  <CookieSettingsLink
+                    key={link.id || `${column.title}-${link.url}`}
+                    label={link.label}
+                  />
+                ) : (
+                  <Link
+                    className='text-center text-sm text-white/90 md:text-base'
+                    href={link.url}
+                    key={link.id || `${column.title}-${link.url}`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
             </div>
           </div>
         ))}

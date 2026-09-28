@@ -82,6 +82,9 @@ export default buildConfig({
       afterNavLinks: [
         '/components/admin/order-dashboard-nav-link#OrderDashboardNavLink'
       ],
+      beforeDashboard: [
+        '/components/admin/order-dashboard-button#OrderDashboardButton'
+      ],
       views: {
         login: {
           Component:
