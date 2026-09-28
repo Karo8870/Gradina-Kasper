@@ -5,7 +5,7 @@ import {
   useCurrency,
   usePayments
 } from '@payloadcms/plugin-ecommerce/client/react';
-import { AlertCircle, CreditCard, ShoppingCart } from 'lucide-react';
+import { AlertCircle, CreditCard, LoaderCircle, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -98,6 +98,7 @@ export function CheckoutPage({
   const [sameAddress, setSameAddress] = useState(true);
   const [fulfillmentMethod, setFulfillmentMethod] =
     useState<FulfillmentMethod>('delivery');
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const items = cart?.items ?? [];
   const productSubtotal = cart?.subtotal ?? 0;
@@ -158,6 +159,7 @@ export function CheckoutPage({
     !invalidItems.length &&
     paymentMethod
   );
+  const isPaymentPending = isSubmittingPayment || paymentIsLoading;
 
   function addAddress(address: AddressDTO) {
     setAddresses((current) => [
@@ -167,9 +169,10 @@ export function CheckoutPage({
   }
 
   async function proceedToPayment() {
-    if (!canPay || !paymentMethod || !billingAddress) return;
+    if (!canPay || !paymentMethod || !billingAddress || isPaymentPending) return;
 
     setStatus(null);
+    setIsSubmittingPayment(true);
 
     try {
       const response = (await initiatePayment(paymentMethod.name, {
@@ -221,13 +224,14 @@ export function CheckoutPage({
 
       if (response.action?.message) {
         setStatus(response.action.message);
-        return;
+      } else {
+        setStatus('Plata nu a putut fi inițiată. Încearcă din nou.');
       }
-
-      setStatus('Plata nu a putut fi inițiată. Încearcă din nou.');
     } catch (error) {
       setStatus(paymentErrorMessage(error));
     }
+
+    setIsSubmittingPayment(false);
   }
 
   if (!cart) {
@@ -427,12 +431,22 @@ export function CheckoutPage({
 
         <div>
           <Button
-            disabled={!canPay || paymentIsLoading}
+            aria-busy={isPaymentPending}
+            disabled={!canPay || isPaymentPending}
             onClick={() => void proceedToPayment()}
             size='lg'
           >
-            <CreditCard data-icon='inline-start' />
-            {paymentIsLoading ? 'Se procesează…' : 'Plătește cu cardul'}
+            {isPaymentPending ? (
+              <LoaderCircle
+                className='motion-safe:animate-spin'
+                data-icon='inline-start'
+              />
+            ) : (
+              <CreditCard data-icon='inline-start' />
+            )}
+            <span aria-live='polite'>
+              {isPaymentPending ? 'Se procesează…' : 'Plătește cu cardul'}
+            </span>
           </Button>
           {!paymentMethod ? (
             <p className='text-muted-foreground mt-2 text-sm'>
